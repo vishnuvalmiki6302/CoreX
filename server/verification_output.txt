@@ -1,0 +1,54 @@
+﻿Connecting to DB...
+Connected.
+
+--- Checking Users with Plans ---
+
+User: VVv (vishnu@gmail.com)
+- Role: user
+- MemberID: undefined
+- Membership Type: none
+- Status: active
+- Expiry: undefined
+- Plan Start: undefined
+- Diet Plans: 0
+
+User: Vicky (v@gmail.com)
+- Role: user
+- MemberID: undefined
+- Membership Type: none
+- Status: active
+- Expiry: undefined
+- Plan Start: undefined
+- Diet Plans: 0
+
+User: Vishnu Valmiki (vishnuvalmiki17@gmail.com)
+- Role: admin
+- MemberID: undefined
+- Membership Type: Pro Athlete
+- Status: active
+- Expiry: undefined
+- Plan Start: undefined
+- Diet Plans: 0
+
+User: vishnu17 (vishnuvardhan0317@gmail.com)
+- Role: user
+- MemberID: undefined
+- Membership Type: pro
+- Status: active
+- Expiry: undefined
+- Plan Start: undefined
+- Diet Plans: 0
+
+User: VISHNU (varh6302@gmail.com)
+- Role: user
+- MemberID: MEM307640039
+- Membership Type: Elite
+- Status: active
+- Expiry: undefined
+- Plan Start: undefined
+- Diet Plans: 0
+
+--- Checking Plans ---
+- Starter (custom, duration: 1)
+- Pro Athlete (custom, duration: 1)
+- Elite (custom, duration: 1)
