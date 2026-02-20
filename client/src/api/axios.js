@@ -1,8 +1,14 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL;
+
+if (!baseURL) {
+    console.error('CRITICAL ERROR: VITE_API_URL is not defined! API requests will fail.');
+}
+
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL}/api`,
-    withCredentials: true, 
+    baseURL: `${baseURL}/api`,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
     },

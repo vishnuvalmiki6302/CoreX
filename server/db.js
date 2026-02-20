@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 let isConnected = false;
 
 const connectDB = async () => {

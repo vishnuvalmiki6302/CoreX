@@ -3,16 +3,29 @@ import { motion } from 'framer-motion';
 import { Check, Zap, Crown, Dumbbell } from 'lucide-react';
 import { getPlans } from '../api/content';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import PaymentModal from './PaymentModal';
+import { AnimatePresence } from 'framer-motion';
 
 const Plans = () => {
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const [selectedPlan, setSelectedPlan] = useState(null);
 
     useEffect(() => {
         const fetchPlans = async () => {
             try {
                 const data = await getPlans();
-                setPlans(data);
+                if (Array.isArray(data)) {
+                    setPlans(data);
+                } else {
+                    console.error("Invalid plans data received:", data);
+                    setPlans([]); // Fallback to empty array to prevent crash
+                    toast.error("Failed to load plans: Invalid data format");
+                }
             } catch (error) {
                 console.error(error);
                 toast.error('Failed to load plans');
@@ -32,8 +45,33 @@ const Plans = () => {
         }
     };
 
+    const handleSelectPlan = (plan) => {
+        if (!user) {
+            toast.error("Please login to purchase a plan");
+            navigate('/login');
+            return;
+        }
+        setSelectedPlan(plan);
+    };
+
     return (
-        <section className="py-20 bg-gym-dark relative overflow-hidden">
+        <section className="py-20 bg-gym-dark relative overflow-hidden" id="plans">
+            <AnimatePresence>
+                {selectedPlan && (
+                    <PaymentModal
+                        key="payment-modal"
+                        plan={selectedPlan}
+                        onClose={() => setSelectedPlan(null)}
+                        onSuccess={() => {
+                            // Start strict mode force reload of user profile if needed, 
+                            // though PaymentModal or Profile page fetch might handle it.
+                            // Ideally we could refetch user profile here.
+                        }}
+                    />
+                )}
+            </AnimatePresence>
+            {selectedPlan && <div className="fixed inset-0 bg-black/50 z-40" />}
+
             <div className="container mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -86,7 +124,10 @@ const Plans = () => {
                                     ))}
                                 </ul>
 
-                                <button className={`w-full py-3 rounded-xl font-bold transition-all duration-300 ${plan.highlight ? 'bg-gym-accent text-white hover:bg-gym-accent/90 shadow-lg shadow-gym-accent/25' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+                                <button
+                                    onClick={() => handleSelectPlan(plan)}
+                                    className={`w-full py-3 rounded-xl font-bold transition-all duration-300 ${plan.highlight ? 'bg-gym-accent text-white hover:bg-gym-accent/90 shadow-lg shadow-gym-accent/25' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                >
                                     Select Plan
                                 </button>
                             </motion.div>

@@ -26,6 +26,18 @@ exports.createDietPlan = async (req, res, next) => {
     }
 };
 
+// @desc    Get all diet plans
+// @route   GET /api/diets
+// @access  Public
+exports.getAllDietPlans = async (req, res, next) => {
+    try {
+        const plans = await DietPlan.find().sort({ createdAt: -1 });
+        res.json(plans);
+    } catch (error) {
+        next(error);
+    }
+};
+
 // @desc    Get all diet plans for a user
 // @route   GET /api/diets/my-plans
 // @access  Private

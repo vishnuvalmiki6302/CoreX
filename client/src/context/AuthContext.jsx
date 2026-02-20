@@ -15,14 +15,31 @@ export const AuthProvider = ({ children }) => {
             try {
                 const storedUser = localStorage.getItem('user');
                 if (storedUser) {
+                    // Optimistically set user from local storage
                     setUser(JSON.parse(storedUser));
+
+
+                    try {
+                        // Verify with backend
+                        const { data } = await import('../api/axios').then(module => module.default.get('/users/profile'));
+                        // Update user with fresh data from server
+                        setUser(data);
+                        localStorage.setItem('user', JSON.stringify(data));
+                    } catch (error) {
+                        console.error("Session verification failed", error);
+                        // if 401, clear user
+                        if (error.response?.status === 401) {
+                            localStorage.removeItem('user');
+                            setUser(null);
+                            toast.error("Session expired. Please login again.");
+                        }
+                    }
                 }
             } catch (error) {
-                console.error("Failed to parse user from local storage", error);
-                localStorage.removeItem('user'); // Clear corrupted data
-            } finally {
-                setLoading(false);
+                console.warn("LocalStorage access failed or data corrupted:", error);
+                // Fail silently or clear user if needed, but don't crash app
             }
+            setLoading(false);
         };
         checkUser();
     }, []);

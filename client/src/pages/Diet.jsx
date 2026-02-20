@@ -61,40 +61,29 @@ const Diet = () => {
                                 <div className="p-8 pb-6 border-b border-white/5 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-gym-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gym-gold/10 transition-colors duration-700"></div>
                                     <div className="flex items-start justify-between mb-4">
-                                        <div className="bg-zinc-950 border border-white/10 px-3 py-1 text-xs font-bold tracking-wider uppercase text-gym-gold rounded-sm">
-                                            {diet.goal}
+                                        <div className="bg-zinc-950 border border-white/10 px-3 py-1 text-xs font-bold tracking-wider uppercase text-gym-gold rounded-sm truncate max-w-[60%]">
+                                            {diet.isCustom ? 'Custom' : 'Standard'}
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-2xl font-serif text-white">{diet.calories}</div>
+                                            <div className="text-2xl font-serif text-white">{diet.totalCalories}</div>
                                             <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Kcal / Day</div>
                                         </div>
                                     </div>
-                                    <h3 className="text-3xl font-serif text-white mb-2 group-hover:text-gym-gold transition-colors duration-300">{diet.title}</h3>
+                                    <h3 className="text-3xl font-serif text-white mb-2 group-hover:text-gym-gold transition-colors duration-300">{diet.name}</h3>
+                                    <p className="text-zinc-400 text-sm line-clamp-2">{diet.description}</p>
                                 </div>
 
-                                {/* Macros Section */}
+                                {/* Meals List */}
                                 <div className="p-8 py-6 flex-grow space-y-6">
-                                    {diet.macros && (
-                                        <div className="grid grid-cols-3 gap-2 mb-6">
-                                            {Object.entries(diet.macros).map(([key, value]) => (
-                                                <div key={key} className="text-center">
-                                                    <div className="text-lg font-bold text-white font-serif">{value}</div>
-                                                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest">{key}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Meals List */}
                                     <div className="space-y-4">
-                                        {Object.entries(diet.meals).slice(0, 3).map(([mealType, items]) => (
-                                            <div key={mealType} className="border-l-2 border-white/10 pl-4 py-1 group-hover:border-gym-gold/50 transition-colors">
-                                                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">{mealType}</h4>
+                                        {diet.dailyMeals && diet.dailyMeals.slice(0, 3).map((meal, mIndex) => (
+                                            <div key={mIndex} className="border-l-2 border-white/10 pl-4 py-1 group-hover:border-gym-gold/50 transition-colors">
+                                                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">{meal.type} <span className="text-zinc-600 ml-1">{meal.time}</span></h4>
                                                 <ul className="space-y-1">
-                                                    {items.slice(0, 2).map((item, i) => (
+                                                    {meal.items && meal.items.slice(0, 2).map((item, i) => (
                                                         <li key={i} className="text-sm text-zinc-300 font-light flex items-center gap-2">
                                                             <span className="w-1 h-1 bg-gym-gold rounded-full"></span>
-                                                            {item}
+                                                            {item.name} <span className="text-zinc-500 text-xs">({item.portion})</span>
                                                         </li>
                                                     ))}
                                                 </ul>

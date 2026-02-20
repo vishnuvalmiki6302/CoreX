@@ -61,10 +61,14 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/content', require('./routes/content'));
+app.use('/api/test-db', require('./routes/test-db'));
 
-// Start Scheduler
-const runScheduler = require('./utils/scheduler');
-runScheduler();
+// Start Scheduler only in local dev or dedicated worker
+// Vercel serverless functions cannot support long-running processes
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SCHEDULER === 'true') {
+  const runScheduler = require('./utils/scheduler');
+  runScheduler();
+}
 
 app.use(notFound);
 app.use(errorHandler);

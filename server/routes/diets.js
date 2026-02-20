@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     createDietPlan,
+    getAllDietPlans,
     getMyDietPlans,
     getTrainerDietPlans,
     getDietPlan,
@@ -11,6 +12,7 @@ const {
 const { protect, trainer } = require('../middleware/authMiddleware');
 
 router.route('/')
+    .get(getAllDietPlans)
     .post(protect, trainer, createDietPlan);
 
 router.route('/my-plans').get(protect, getMyDietPlans);
