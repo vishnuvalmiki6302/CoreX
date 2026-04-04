@@ -37,7 +37,7 @@ app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
 app.get('/', (req, res) => {
-  res.send('Gym Genix API is running');
+  res.send('Gym Genix API is running Sucessfully');
 });
 
 // Define Routes
