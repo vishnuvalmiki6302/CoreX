@@ -15,15 +15,13 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
         setStep('processing');
 
         try {
-            // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Call API to record payment
             await api.post('/payments', {
                 userId: user._id,
                 planId: plan._id,
                 amount: plan.price,
-                method: 'mock_card',
+                method: 'card',
                 status: 'completed',
                 notes: 'Mock payment for demonstration'
             });
@@ -31,8 +29,10 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
             setStep('success');
             toast.success(`Successfully subscribed to ${plan.name}!`);
 
+            // Refresh user data to update membership status across the app
+            if (onSuccess) onSuccess();
+
             setTimeout(() => {
-                onSuccess();
                 onClose();
             }, 2000);
 
@@ -80,7 +80,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                             <div className="bg-black/40 rounded-xl p-4 mb-6 border border-white/5">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">Plan Price</span>
-                                    <span className="text-white font-bold">${plan.price}</span>
+                                    <span className="text-white font-bold">₹{plan.price}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">Duration</span>
@@ -89,7 +89,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                                 <div className="h-px bg-white/10 my-3"></div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-white font-bold text-lg">Total</span>
-                                    <span className="text-gym-accent font-black text-2xl">${plan.price}</span>
+                                    <span className="text-gym-accent font-black text-2xl">₹{plan.price}</span>
                                 </div>
                             </div>
 

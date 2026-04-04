@@ -11,7 +11,7 @@ import { AnimatePresence } from 'framer-motion';
 const Plans = () => {
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -63,9 +63,7 @@ const Plans = () => {
                         plan={selectedPlan}
                         onClose={() => setSelectedPlan(null)}
                         onSuccess={() => {
-                            // Start strict mode force reload of user profile if needed, 
-                            // though PaymentModal or Profile page fetch might handle it.
-                            // Ideally we could refetch user profile here.
+                            refreshUser();
                         }}
                     />
                 )}
@@ -111,7 +109,7 @@ const Plans = () => {
 
                                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                                 <div className="flex items-end gap-1 mb-6">
-                                    <span className="text-4xl font-black text-white">{plan.price}</span>
+                                    <span className="text-4xl font-black text-white">₹{plan.price}</span>
                                     <span className="text-gym-text-secondary mb-1">/month</span>
                                 </div>
 

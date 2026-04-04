@@ -9,35 +9,34 @@ dotenv.config({ override: true });
 const plans = [
     {
         name: "Starter",
-        price: "₹599",
+        price: 599,
         features: ["Access to Gym Floor", "Locker Room Access", "1 Free Trainer Session", "Water Fountain Access"],
         highlight: false,
-        iconType: "Dumbbell"
+        iconType: "Dumbbell",
+        type: "starter",
+        durationMonths: 1
     },
     {
         name: "Pro Athlete",
-        price: "₹999",
+        price: 999,
         features: ["All Starter Features", "Group Classes Included", "Sauna & Steam Room", "Nutritional Guide"],
         highlight: true,
-        iconType: "Zap"
+        iconType: "Zap",
+        type: "pro",
+        durationMonths: 1
     },
     {
         name: "Elite",
-        price: "₹1999",
+        price: 1999,
         features: ["All Pro Features", "Unlimited Personal Training", "Massage Therapy", "Private Locker"],
         highlight: false,
-        iconType: "Crown"
+        iconType: "Crown",
+        type: "elite",
+        durationMonths: 1
     }
 ];
 
-// Data from Trainers.jsx (Note: Images are imported in frontend, here we use placeholders or consistent paths if we had them)
-// For now, I'll use placeholders that the frontend will need to handle or map back to imports if they are local files.
-// Ideally, images should be served from 'uploads' or a CDN. Since they were local imports, I will store a string identifier so frontend can map it, 
-// OR I will just use the same image logic. 
-// UPDATE: The user has images like "NGB.jpg". I will assume for now we store the filename and frontend handles it, 
-// OR simpler: I will skip seeding images for a second and check if I can just use the filenames and serve them statically?
-// Actually, to make it fully dynamic, images should be URLs.
-// Let's use the filenames used in imports for now.
+// Data from Trainers.jsx
 const trainers = [
     {
         name: "Naveen Golden Boy",
@@ -70,30 +69,22 @@ const seedData = async () => {
         await mongoose.connect(process.env.MONGO_URI);
         console.log('MongoDB Connected');
 
-        // Clear existing data? Maybe check if empty first?
-        // Let's check count first to avoid overwriting edits
-        const planCount = await Plan.countDocuments();
-        const trainerCount = await Trainer.countDocuments();
+        // Overwrite existing data to fix bugs
+        console.log('Clearing existing plans and trainers...');
+        await Plan.deleteMany();
+        await Trainer.deleteMany();
 
-        if (planCount === 0) {
-            await Plan.insertMany(plans);
-            console.log('Plans seeded');
-        } else {
-            console.log('Plans already exist, skipping');
-        }
+        await Plan.insertMany(plans);
+        console.log('Plans seeded successfully');
 
-        if (trainerCount === 0) {
-            await Trainer.insertMany(trainers);
-            console.log('Trainers seeded');
-        } else {
-            console.log('Trainers already exist, skipping');
-        }
+        await Trainer.insertMany(trainers);
+        console.log('Trainers seeded successfully');
 
         console.log('Seeding complete');
         process.exit();
 
     } catch (error) {
-        console.error(error);
+        console.error('Seeding error:', error);
         process.exit(1);
     }
 };

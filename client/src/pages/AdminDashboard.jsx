@@ -233,7 +233,7 @@ const AdminDashboard = () => {
             setShowProductModal(false);
             setEditingProduct(null);
             setProductForm({ name: '', price: '', category: '', description: '', image: '', stock: '' });
-        } catch (error) { toast.error("Failed to save product"); }
+        } catch (error) { toast.error(error.response?.data?.message || "Failed to save product"); }
     };
 
     const handleEditProduct = (product) => {
@@ -309,6 +309,27 @@ const AdminDashboard = () => {
         } catch (error) { toast.error("Failed to delete plan"); }
     };
 
+    // Payment Actions
+    const fetchPayments = async () => {
+        try {
+            const { data } = await api.get('/payments');
+            setPayments(data);
+        } catch (error) { console.error(error); }
+    };
+
+    const handleCreatePayment = async (e) => {
+        e.preventDefault();
+        try {
+            const { data } = await api.post('/payments', paymentForm);
+            setPayments([data, ...payments]);
+            toast.success('Payment recorded');
+            setShowPaymentModal(false);
+            setPaymentForm({ userId: '', planId: '', amount: '', method: 'cash', status: 'completed', notes: '' });
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to record payment');
+        }
+    };
+
     // Attendance Actions
     const fetchActiveCheckIns = async () => {
         try {
@@ -380,20 +401,22 @@ const AdminDashboard = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 h-96">
+                        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
                             <h3 className="text-xl font-bold text-white mb-6">Weekly Sales</h3>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={[
-                                    { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
-                                    { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 }
-                                ]}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                    <XAxis dataKey="name" stroke="#666" />
-                                    <YAxis stroke="#666" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #333' }} />
-                                    <Bar dataKey="sales" fill="#ea580c" />
-                                </BarChart>
-                            </ResponsiveContainer>
+                            <div style={{ width: '100%', height: 300 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={[
+                                        { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
+                                        { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 }
+                                    ]}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                                        <XAxis dataKey="name" stroke="#666" />
+                                        <YAxis stroke="#666" />
+                                        <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #333' }} />
+                                        <Bar dataKey="sales" fill="#ea580c" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -927,9 +950,16 @@ const AdminDashboard = () => {
                                     <input placeholder="Price" type="number" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} required />
                                     <input placeholder="Stock" type="number" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: e.target.value })} required />
                                 </div>
-                                <input placeholder="Category" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} required />
+                                <select className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-gym-accent outline-none" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} required>
+                                    <option value="">Select Category</option>
+                                    <option value="Supplements">Supplements</option>
+                                    <option value="Gear">Gear</option>
+                                    <option value="Apparel">Apparel</option>
+                                    <option value="Equipment">Equipment</option>
+                                    <option value="Other">Other</option>
+                                </select>
                                 <input placeholder="Image URL" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} required />
-                                <textarea placeholder="Description" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white h-24" value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} />
+                                <textarea placeholder="Description" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white h-24" value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} required />
                                 <div className="flex gap-4 pt-4">
                                     <button type="button" onClick={() => setShowProductModal(false)} className="flex-1 py-3 rounded-xl font-bold text-gray-400 hover:bg-white/5">Cancel</button>
                                     <button type="submit" className="flex-1 bg-gym-accent text-white py-3 rounded-xl font-bold shadow-lg shadow-gym-accent/20">Save</button>

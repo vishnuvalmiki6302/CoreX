@@ -11,6 +11,7 @@ import Diet from './pages/Diet';
 import Products from './pages/Products';
 import Classes from './pages/Classes';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
 import TrainerDashboard from './pages/TrainerDashboard';
 import Profile from './pages/Profile';
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/diets" element={<Diet />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="/classes" element={<Classes />} />
                 <Route
                   path="/admin"

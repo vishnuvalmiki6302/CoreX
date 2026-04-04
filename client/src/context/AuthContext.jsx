@@ -96,8 +96,18 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const refreshUser = async () => {
+        try {
+            const { data } = await import('../api/axios').then(module => module.default.get('/users/profile'));
+            setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
+        } catch (error) {
+            console.error("Failed to refresh user", error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, googleLogin, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, googleLogin, refreshUser, loading }}>
             {loading ? <div className="flex justify-center items-center h-screen text-gym-primary text-xl">Loading...</div> : children}
         </AuthContext.Provider>
     );

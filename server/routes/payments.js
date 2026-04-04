@@ -5,7 +5,7 @@ const { protect, admin } = require('../middleware/authMiddleware');
 
 router.route('/')
     .get(protect, admin, getPayments)
-    .post(protect, admin, createPayment);
+    .post(protect, createPayment);
 
 router.route('/my-history').get(protect, getMyPayments);
 router.route('/user/:id').get(protect, getUserPayments);

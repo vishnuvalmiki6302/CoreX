@@ -1,19 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Activity, Flame, ArrowRight, Play, Zap } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Activity, Flame, ArrowRight, Play, Zap, X } from "lucide-react";
 
 // Import video assets
-// import video1 from "../assets/39475-422765136_medium.mp4";
-import video2 from "../assets/148208-793717949_medium.mp4";
-import video3 from "../assets/148201-793717934_medium.mp4";
 import video1 from "../assets/v1.mp4";
+import video2 from "../assets/148208-793717949_medium.mp4";
+import video3 from "../assets/video3.mp4";
+import video4 from "../assets/video4.mp4";
+import demoVideo from "../assets/demo.mp4";
 
 
 
 
 
-const videos = [video1, video2, video3];
+const videos = [video1, video2, video3, video4];
 
 const Hero = () => {
     const { scrollY } = useScroll();
@@ -21,6 +22,7 @@ const Hero = () => {
 
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [isVideoReady, setIsVideoReady] = useState(false);
+    const [showDemo, setShowDemo] = useState(false);
     const videoRefs = useRef([]);
 
     useEffect(() => {
@@ -186,13 +188,50 @@ const Hero = () => {
                             </span>
                         </Link>
 
-                        <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-black/40 border border-white/10 backdrop-blur-md cursor-pointer hover:bg-black/60 transition-colors">
+                        <div
+                            onClick={() => setShowDemo(true)}
+                            className="flex items-center gap-4 px-6 py-4 rounded-xl bg-black/40 border border-white/10 backdrop-blur-md cursor-pointer hover:bg-black/60 transition-colors"
+                        >
                             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                                 <Play size={20} className="text-white ml-1" />
                             </div>
                             <span className="text-white font-medium">Watch Demo</span>
                         </div>
                     </div>
+
+                    {/* Demo Modal */}
+                    <AnimatePresence>
+                        {showDemo && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
+                                onClick={() => setShowDemo(false)}
+                            >
+                                <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    className="relative max-w-5xl w-full aspect-video bg-zinc-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <button
+                                        onClick={() => setShowDemo(false)}
+                                        className="absolute top-6 right-6 z-50 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white/50 hover:text-white transition-all border border-white/10"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                    <video
+                                        src={demoVideo}
+                                        controls
+                                        autoPlay
+                                        className="w-full h-full object-contain"
+                                    />
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Stats & Social Proof */}
                     <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-white/10 mt-8 w-full">

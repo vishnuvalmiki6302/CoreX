@@ -67,10 +67,10 @@ const Trainers = () => {
                                 className="group relative overflow-hidden rounded-2xl aspect-[3/4]"
                             >
                                 <img
-                                    src={imageMap[trainer.imageUrl] || trainer.imageUrl} // Fallback to URL if not in map
+                                    src={imageMap[trainer.imageUrl] || trainer.imageUrl}
                                     alt={trainer.name}
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
-                                    onError={(e) => { e.target.src = "https://via.placeholder.com/300x400?text=Trainer"; }} // Fallback
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    onError={(e) => { e.target.src = "https://via.placeholder.com/300x400?text=Trainer"; }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
 

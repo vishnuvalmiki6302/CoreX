@@ -109,10 +109,10 @@ const Cart = () => {
                                 <span className="text-2xl font-black text-gym-accent">${(totalPrice * 1.08).toFixed(2)}</span>
                             </div>
 
-                            <button className="w-full bg-gym-accent text-white font-bold py-4 rounded-xl hover:bg-gym-accent/90 transition-all shadow-lg shadow-gym-accent/25 flex items-center justify-center gap-2 group">
+                            <Link to="/checkout" className="w-full bg-gym-accent text-white font-bold py-4 rounded-xl hover:bg-gym-accent/90 transition-all shadow-lg shadow-gym-accent/25 flex items-center justify-center gap-2 group">
                                 Proceed to Checkout
                                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            </Link>
 
                             <button
                                 onClick={clearCart}
