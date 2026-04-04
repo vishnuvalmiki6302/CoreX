@@ -3,103 +3,47 @@ import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Activity, Flame, ArrowRight, Play, Zap, X } from "lucide-react";
 
-// Import video assets
-import video1 from "../assets/v1.mp4";
-import video2 from "../assets/148208-793717949_medium.mp4";
-import video3 from "../assets/video3.mp4";
-import video4 from "../assets/video4.mp4";
-import demoVideo from "../assets/demo.mp4";
+import bgImage1 from "../assets/hero_gym_1_1775339501333.png";
+import bgImage2 from "../assets/hero_gym_2_1775339514190.png";
+import bgImage3 from "../assets/hero_gym_3_1775339528699.png";
 
-
-
-
-
-const videos = [video1, video2, video3, video4];
+const backgrounds = [bgImage1, bgImage2, bgImage3];
 
 const Hero = () => {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 300], [0, 100]);
 
-    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-    const [isVideoReady, setIsVideoReady] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [showDemo, setShowDemo] = useState(false);
-    const videoRefs = useRef([]);
 
     useEffect(() => {
-        const video = videoRefs.current[currentVideoIndex];
-        if (!video) return;
-
-        // Reset ready state when index changes
-        setIsVideoReady(false);
-
-        // Try to play immediately (browser might cache)
-        const playVideo = async () => {
-            try {
-                // If it's already ready, play
-                if (video.readyState >= 3) {
-                    await video.play();
-                    setIsVideoReady(true);
-                } else {
-                    // Wait for it
-                    video.load(); // Force load
-                }
-            } catch (err) {
-                console.warn("Play interrupted", err);
-            }
-        };
-
-        playVideo();
-
-        // Pause others
-        videos.forEach((_, idx) => {
-            if (idx !== currentVideoIndex && videoRefs.current[idx]) {
-                try {
-                    videoRefs.current[idx].pause();
-                    videoRefs.current[idx].currentTime = 0;
-                } catch (e) { /* ignore */ }
-            }
-        });
-
-    }, [currentVideoIndex]);
-
-    const handleVideoEnded = () => {
-        setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
-    };
-
-    const handleCanPlay = (index) => {
-        if (index === currentVideoIndex) {
-            setIsVideoReady(true);
-            videoRefs.current[index]?.play().catch(e => console.log("Auto-play blocked", e));
-        }
-    };
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % backgrounds.length);
+        }, 5000); // Change image every 5 seconds
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="relative overflow-hidden min-h-screen flex items-center bg-zinc-900">
 
-            {/* Video Background */}
-            <div className="absolute inset-0 z-0">
-                {videos.map((src, index) => (
-                    <video
-                        key={index}
-                        ref={(el) => (videoRefs.current[index] = el)}
-                        src={src}
-                        muted
-                        playsInline
-                        preload="auto"
-                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${index === currentVideoIndex && isVideoReady ? "opacity-100 z-10" : "opacity-0 z-0"
-                            }`}
-                        onCanPlay={() => handleCanPlay(index)}
-                        onEnded={() => {
-                            if (index === currentVideoIndex) {
-                                handleVideoEnded();
-                            }
-                        }}
-                        onError={(e) => console.error(`Video ${index} Error:`, e)}
-                    />
-                ))}
-
-                {/* Fallback Image/Gradient while loading */}
-                <div className={`absolute inset-0 bg-gym-dark transition-opacity duration-500 ${isVideoReady ? 'opacity-0' : 'opacity-100'} z-0`} />
+            {/* Image Background Wrapper */}
+            <div className="absolute inset-0 z-0 bg-black">
+                <AnimatePresence>
+                    <motion.div
+                        key={currentIndex}
+                        initial={{ opacity: 0, scale: 1 }}
+                        animate={{ opacity: 0.65, scale: 1.05 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="absolute inset-0 w-full h-full"
+                    >
+                        <img 
+                            src={backgrounds[currentIndex]} 
+                            alt="Gym background" 
+                            className="w-full h-full object-cover"
+                        />
+                    </motion.div>
+                </AnimatePresence>
 
                 {/* Dark Overlay for Readability */}
                 <div className="absolute inset-0 bg-black/40 z-20"></div>
@@ -222,12 +166,16 @@ const Hero = () => {
                                     >
                                         <X size={24} />
                                     </button>
-                                    <video
-                                        src={demoVideo}
-                                        controls
-                                        autoPlay
-                                        className="w-full h-full object-contain"
-                                    />
+                                    <iframe 
+                                        width="100%" 
+                                        height="100%" 
+                                        src="https://www.youtube.com/embed/Vb1sMrtG1U4?autoplay=1&mute=1&loop=1" 
+                                        title="Gym Motivation" 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full border-none"
+                                    ></iframe>
                                 </motion.div>
                             </motion.div>
                         )}

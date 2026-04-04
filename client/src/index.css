@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-    --color-gym-dark: #0d0d0d;
-    --color-gym-gray: #1a1a1a;
-    --color-gym-accent: #f97316;
-    --color-gym-gold: #f59e0b;
-    --color-gym-text: #e5e5e5;
-    --color-gym-text-secondary: #a3a3a3;
+    --color-gym-dark: #09090b; /* Richer obsidian black */
+    --color-gym-gray: #18181b; /* Sleeker zinc-900 gray */
+    --color-gym-accent: #f97316; /* Keeping vibrant orange */
+    --color-gym-gold: #eab308; /* Slightly more premium gold */
+    --color-gym-text: #fafafa;
+    --color-gym-text-secondary: #a1a1aa;
 
     --font-sans: "Inter", sans-serif;
 }
