@@ -1,85 +1,151 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Register = () => {
-    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
-    const [isLoading, setIsLoading] = useState(false);
-    const { register } = useAuth();
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', phone: '' });
+    const { register, googleLogin } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        const res = await register(formData.username, formData.email, formData.password);
-        setIsLoading(false);
-        if (res.success) {
+    useEffect(() => {
+        /* global google */
+        if (window.google) {
+            google.accounts.id.initialize({
+                client_id: "554720621201-d8brfn201od31ugsv2ngujtdfeg2uthr.apps.googleusercontent.com",
+                callback: handleCredentialResponse,
+            });
+            google.accounts.id.renderButton(
+                document.getElementById('signUpDiv'),
+                { theme: 'outline', size: 'large', width: '100%', text: 'signup_with' }
+            );
+        }
+    }, []);
+
+    const handleCredentialResponse = async (response) => {
+        const result = await googleLogin(response.credential);
+        if (result?.success) {
             navigate('/');
         }
     };
 
-    return (
-        <div className="max-w-md mx-auto mt-20">
-            <div className="bg-gym-gray border border-zinc-800 rounded-2xl p-8 shadow-2xl">
-                <h2 className="text-3xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Create Account</h2>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await register(formData.username, formData.email, formData.password);
+            toast.success('Registration successful!');
+            navigate('/');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Registration failed');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="block text-sm font-medium text-gym-text-secondary mb-2">Username</label>
-                        <input
-                            type="text"
-                            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3.5 text-white focus:outline-none focus:border-gym-accent focus:ring-1 focus:ring-gym-accent/50 transition-all duration-300"
-                            placeholder="FitMaster"
-                            value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            required
-                        />
+    return (
+        <div className="min-h-[85vh] flex items-center justify-center p-4">
+            <div className="w-full max-w-[750px] flex flex-col md:flex-row-reverse bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                
+                {/* Right Side: Clean Visual */}
+                <div className="md:w-[45%] relative hidden md:block border-l border-white/10">
+                    <img
+                        src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop"
+                        alt="Gym Equipment"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 grayscale"
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                        <div className="w-8 h-8 flex items-center justify-center">
+                            <img src="/logo.png" alt="TitanEdge Logo" className="w-full h-full object-contain" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-semibold text-white mb-1.5">Join TitanEdge</h2>
+                            <p className="text-zinc-300 text-xs leading-relaxed mb-2">
+                                Create an account to access premium classes, diet plans, and our exclusive gear store.
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gym-text-secondary mb-2">Email Address</label>
-                        <input
-                            type="email"
-                            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3.5 text-white focus:outline-none focus:border-gym-accent focus:ring-1 focus:ring-gym-accent/50 transition-all duration-300"
-                            placeholder="you@example.com"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            required
-                        />
+                </div>
+
+                {/* Left Side: Clean Form */}
+                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-[#18181b]">
+                    <div className="mb-6">
+                        <h1 className="text-xl font-semibold text-white mb-1">Create Account</h1>
+                        <p className="text-xs text-zinc-400">Join our community and transform your life.</p>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gym-text-secondary mb-2">Password</label>
-                        <input
-                            type="password"
-                            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl p-3.5 text-white focus:outline-none focus:border-gym-accent focus:ring-1 focus:ring-gym-accent/50 transition-all duration-300"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            required
-                        />
+
+                    <form onSubmit={handleSubmit} className="space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-300 mb-1">Username</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    placeholder="JohnDoe"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-300 mb-1">Phone <span className="text-zinc-500">(Optional)</span></label>
+                                <input
+                                    type="tel"
+                                    className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    placeholder="+1 234 567"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-medium text-zinc-300 mb-1">Email</label>
+                            <input
+                                type="email"
+                                required
+                                className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                placeholder="john@example.com"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-medium text-zinc-300 mb-1">Password</label>
+                            <input
+                                type="password"
+                                required
+                                className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        
+                        <button type="submit" disabled={loading} className="w-full py-1.5 mt-2 bg-white text-black rounded-md font-medium text-sm hover:bg-zinc-200 transition-colors">
+                            {loading ? 'Creating...' : 'Sign Up'}
+                        </button>
+                    </form>
+
+                    <div className="mt-6">
+                        <div className="relative flex py-2 items-center mb-5">
+                            <div className="flex-grow border-t border-white/10"></div>
+                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs">Or join with</span>
+                            <div className="flex-grow border-t border-white/10"></div>
+                        </div>
+                        
+                        <div className="flex justify-center w-full">
+                            <div id="signUpDiv" className="w-full flex justify-center overflow-hidden rounded-md"></div>
+                        </div>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-gym-accent to-orange-600 hover:from-orange-600 hover:to-gym-accent text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gym-accent/20"
-                    >
-                        {isLoading ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Creating Account...
-                            </span>
-                        ) : 'Get Started'}
-                    </button>
-                </form>
-                <p className="mt-8 text-center text-gym-text-secondary text-sm">
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-gym-accent hover:text-orange-400 font-medium transition-colors">
-                        Sign in
-                    </Link>
-                </p>
-                <div id="signInDiv"></div>
+
+                    <div className="mt-6 text-center text-xs text-zinc-400">
+                        Already have an account? <Link to="/login" className="text-white font-medium hover:underline">Sign in</Link>
+                    </div>
+                </div>
             </div>
         </div>
     );

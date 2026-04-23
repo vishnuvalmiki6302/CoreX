@@ -1,23 +1,20 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Flame, Utensils, Award, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
 const Diet = () => {
     const [diets, setDiets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selected, setSelected] = useState(null);
 
-    useEffect(() => {
-        fetchDiets();
-    }, []);
+    useEffect(() => { fetchDiets(); }, []);
 
     const fetchDiets = async () => {
         try {
             const res = await api.get('/diets');
             setDiets(res.data);
-        } catch (error) {
-            console.error('Error fetching diets:', error);
+        } catch {
             toast.error('Failed to load diet plans');
         } finally {
             setLoading(false);
@@ -25,84 +22,110 @@ const Diet = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 pt-24 pb-16 font-sans">
-            <div className="container mx-auto px-4 md:px-8">
-                {/* Hero Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-center mb-20"
-                >
-                    <span className="text-gym-gold text-sm font-bold tracking-[0.2em] uppercase mb-4 block">Nutrition Strategies</span>
-                    <h1 className="text-5xl md:text-7xl font-serif text-white mb-6">
-                        Fuel Your <span className="text-gym-gold italic">Legacy</span>
-                    </h1>
-                    <p className="text-zinc-400 max-w-2xl mx-auto text-lg font-light leading-relaxed">
-                        Curated nutrition plans designed for the dedicated. Whether you seek to sculpt, build, or sustain, our protocols are your blueprint to excellence.
-                    </p>
-                </motion.div>
-
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-gold"></div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                        {diets.map((diet, index) => (
-                            <motion.div
-                                key={diet._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.15, duration: 0.6 }}
-                                className="bg-zinc-900/50 border border-white/5 rounded-none p-0 group hover:border-gym-gold/30 transition-all duration-500 flex flex-col h-full"
-                            >
-                                {/* Card Header */}
-                                <div className="p-8 pb-6 border-b border-white/5 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-24 h-24 bg-gym-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gym-gold/10 transition-colors duration-700"></div>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="bg-zinc-950 border border-white/10 px-3 py-1 text-xs font-bold tracking-wider uppercase text-gym-gold rounded-sm truncate max-w-[60%]">
-                                            {diet.isCustom ? 'Custom' : 'Standard'}
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-2xl font-serif text-white">{diet.totalCalories}</div>
-                                            <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Kcal / Day</div>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-3xl font-serif text-white mb-2 group-hover:text-gym-gold transition-colors duration-300">{diet.name}</h3>
-                                    <p className="text-zinc-400 text-sm line-clamp-2">{diet.description}</p>
-                                </div>
-
-                                {/* Meals List */}
-                                <div className="p-8 py-6 flex-grow space-y-6">
-                                    <div className="space-y-4">
-                                        {diet.dailyMeals && diet.dailyMeals.slice(0, 3).map((meal, mIndex) => (
-                                            <div key={mIndex} className="border-l-2 border-white/10 pl-4 py-1 group-hover:border-gym-gold/50 transition-colors">
-                                                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">{meal.type} <span className="text-zinc-600 ml-1">{meal.time}</span></h4>
-                                                <ul className="space-y-1">
-                                                    {meal.items && meal.items.slice(0, 2).map((item, i) => (
-                                                        <li key={i} className="text-sm text-zinc-300 font-light flex items-center gap-2">
-                                                            <span className="w-1 h-1 bg-gym-gold rounded-full"></span>
-                                                            {item.name} <span className="text-zinc-500 text-xs">({item.portion})</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Card Footer */}
-                                <div className="p-8 pt-0 mt-auto">
-                                    <button className="w-full py-4 border border-white/10 hover:bg-gym-gold hover:text-black hover:border-gym-gold text-white text-sm font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 group-hover:gap-4">
-                                        View Full Plan <ChevronRight size={16} />
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
+        <div className="page-container">
+            <div className="section-header">
+                <h1 className="section-title">Nutrition Plans</h1>
+                <p className="section-subtitle">Goal-oriented meal protocols.</p>
             </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="spinner" />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {diets.map((diet) => (
+                        <div key={diet._id} className="clean-card p-5 flex flex-col">
+                            <div className="flex justify-between items-start mb-3">
+                                <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-gym-accent/10 text-gym-accent">
+                                    {diet.goal || 'Standard'}
+                                </span>
+                                <span className="text-sm font-bold text-white">
+                                    {diet.calories || diet.totalCalories} <span className="text-[10px] text-zinc-500 font-normal">kcal</span>
+                                </span>
+                            </div>
+
+                            <h3 className="text-base font-semibold text-white mb-1">{diet.title || diet.name}</h3>
+                            <p className="text-xs text-zinc-400 mb-4 line-clamp-2">{diet.description}</p>
+
+                            {diet.macros && (
+                                <div className="grid grid-cols-3 gap-2 mb-4">
+                                    {Object.entries(diet.macros).map(([key, val]) => (
+                                        <div key={key} className="bg-white/5 rounded p-2 text-center">
+                                            <div className="text-xs font-semibold text-white">{val}</div>
+                                            <div className="text-[9px] text-zinc-500 uppercase">{key}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => setSelected(diet)}
+                                className="mt-auto btn-outline w-full py-2 text-xs"
+                            >
+                                View Details
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Diet Modal */}
+            {selected && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelected(null)}>
+                    <div className="clean-card w-full max-w-xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-gym-gray border-b border-white/5 p-4 flex justify-between items-center z-10">
+                            <div>
+                                <span className="text-[10px] text-gym-accent uppercase font-bold">{selected.goal}</span>
+                                <h2 className="text-lg font-bold text-white leading-tight">{selected.title || selected.name}</h2>
+                            </div>
+                            <button onClick={() => setSelected(null)} className="text-zinc-400 hover:text-white p-1">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-4 md:p-6 space-y-6">
+                            <p className="text-sm text-zinc-400">{selected.description}</p>
+                            
+                            {selected.macros && (
+                                <div className="grid grid-cols-3 gap-3">
+                                    {Object.entries(selected.macros).map(([key, val]) => (
+                                        <div key={key} className="bg-white/5 rounded-lg p-3 text-center border border-white/5">
+                                            <div className="text-sm font-bold text-white">{val}</div>
+                                            <div className="text-[10px] text-zinc-500 uppercase">{key}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div>
+                                <h3 className="text-sm font-semibold text-white mb-3 border-b border-white/5 pb-2">Meals</h3>
+                                <div className="space-y-3">
+                                    {selected.dailyMeals?.map((meal, i) => (
+                                        <div key={i} className="bg-white/5 rounded-lg p-3">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h4 className="text-xs font-bold text-white uppercase">{meal.type}</h4>
+                                                {meal.time && <span className="text-[10px] text-zinc-500">{meal.time}</span>}
+                                            </div>
+                                            <div className="space-y-1.5 border-t border-white/5 pt-2 mt-1">
+                                                {meal.items?.map((item, j) => (
+                                                    <div key={j} className="flex justify-between items-center text-xs">
+                                                        <span className="text-zinc-300">{item.name}</span>
+                                                        <div className="flex gap-2 text-zinc-500 text-[10px]">
+                                                            <span>{item.portion}</span>
+                                                            {item.calories && <span className="text-gym-accent">{item.calories} cal</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

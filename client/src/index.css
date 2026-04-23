@@ -1,13 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-    --color-gym-dark: #09090b; /* Richer obsidian black */
-    --color-gym-gray: #18181b; /* Sleeker zinc-900 gray */
-    --color-gym-accent: #f97316; /* Keeping vibrant orange */
-    --color-gym-gold: #eab308; /* Slightly more premium gold */
+    --color-gym-dark: #09090b;
+    --color-gym-gray: #18181b;
+    --color-gym-accent: #f97316;
+    --color-gym-gold: #eab308;
     --color-gym-text: #fafafa;
     --color-gym-text-secondary: #a1a1aa;
-
     --font-sans: "Inter", sans-serif;
 }
 
@@ -15,34 +14,111 @@
     body {
         background-color: var(--color-gym-dark);
         color: var(--color-gym-text);
-        @apply antialiased;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        @apply font-bold text-white;
+        @apply antialiased font-sans;
     }
 }
 
-/* Scrollbar Customization */
-::-webkit-scrollbar {
-    width: 8px;
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background-color: var(--color-gym-dark); }
+::-webkit-scrollbar-thumb { background-color: #27272a; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background-color: #f97316; }
+
+/* Clean UI Utilities */
+.glass {
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-::-webkit-scrollbar-track {
-    background-color: var(--color-gym-dark);
+.clean-card {
+    background-color: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
 }
 
-::-webkit-scrollbar-thumb {
-    background-color: var(--color-gym-gray);
-    border-radius: 9999px;
+.clean-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background-color: #f97316;
-    /* gym-accent approximate */
+.btn-primary {
+    background-color: var(--color-gym-accent);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+.btn-primary:hover { background-color: #ea580c; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+.btn-outline:hover { background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); }
+
+.input-clean {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: white;
+    width: 100%;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+    outline: none;
+}
+.input-clean:focus {
+    border-color: var(--color-gym-accent);
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(249, 115, 22, 0.2);
+    border-top-color: #f97316;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 1rem 3rem 1rem;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    color: #a1a1aa;
 }

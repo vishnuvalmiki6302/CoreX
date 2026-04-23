@@ -1,210 +1,58 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Activity, Flame, ArrowRight, Play, Zap, X } from "lucide-react";
-
-import bgImage1 from "../assets/hero_gym_1_1775339501333.png";
-import bgImage2 from "../assets/hero_gym_2_1775339514190.png";
-import bgImage3 from "../assets/hero_gym_3_1775339528699.png";
-
-const backgrounds = [bgImage1, bgImage2, bgImage3];
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const Hero = () => {
-    const { scrollY } = useScroll();
-    const y1 = useTransform(scrollY, [0, 300], [0, 100]);
-
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [showDemo, setShowDemo] = useState(false);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % backgrounds.length);
-        }, 5000); // Change image every 5 seconds
-        return () => clearInterval(interval);
-    }, []);
-
     return (
-        <div className="relative overflow-hidden min-h-screen flex items-center bg-zinc-900">
-
-            {/* Image Background Wrapper */}
-            <div className="absolute inset-0 z-0 bg-black">
-                <AnimatePresence>
-                    <motion.div
-                        key={currentIndex}
-                        initial={{ opacity: 0, scale: 1 }}
-                        animate={{ opacity: 0.65, scale: 1.05 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
-                        className="absolute inset-0 w-full h-full"
-                    >
-                        <img 
-                            src={backgrounds[currentIndex]} 
-                            alt="Gym background" 
-                            className="w-full h-full object-cover"
-                        />
-                    </motion.div>
-                </AnimatePresence>
-
-                {/* Dark Overlay for Readability */}
-                <div className="absolute inset-0 bg-black/40 z-20"></div>
-                {/* Noise Texture */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay z-20"></div>
+        <div className="relative min-h-[85vh] flex items-center justify-center bg-gym-dark pt-16 border-b border-white/5">
+            {/* Subtle background image */}
+            <div className="absolute inset-0 z-0">
+                <img
+                    src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
+                    alt="Gym Background"
+                    className="w-full h-full object-cover opacity-10 object-center grayscale"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-gym-dark to-transparent" />
             </div>
 
+            <div className="container mx-auto px-4 z-10 relative">
+                <div className="max-w-3xl mx-auto text-center">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-300 mb-6">
+                        <span className="w-2 h-2 rounded-full bg-gym-accent mr-2"></span>
+                        Next Generation Fitness Platform
+                    </div>
 
-            <motion.div
-                animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute top-0 right-0 w-[500px] h-[500px] bg-gym-accent/10 rounded-full blur-[80px] z-0"
-            />
-
-            <motion.div
-                animate={{ scale: [1, 1.3, 1], x: [0, 100, 0] }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gym-gold/5 rounded-full blur-[60px] z-0"
-            />
-
-            {/* Content Container */}
-            <div className="container ml-30 mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full pt-20">
-
-                {/* Left Side Spacer (Hidden on Mobile) */}
-                <div className="hidden lg:block relative mr-80 mb-20">
-                    {/* Floating Widget: Calories Burned */}
-                    <motion.div
-                        animate={{ y: [0, -15, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute bottom-20 right-10 hidden lg:flex items-center gap-3 bg-zinc-900/80 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl"
-                    >
-                        <div className="bg-orange-500/20 p-3 rounded-full">
-                            <Flame className="text-orange-500 fill-orange-500" size={24} />
-                        </div>
-                        <div>
-                            <p className="text-white font-bold text-lg">520 kcal</p>
-                            <p className="text-xs text-gray-400">Burned today</p>
-                        </div>
-                    </motion.div>
-                </div>
-
-
-                <div className="lg:col-start-2 flex flex-col justify-center items-start mb-20">
-
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="mb-6 inline-flex items-center gap-3 p-1 pr-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
-                    >
-                        <span className="bg-gym-accent/20 text-gym-accent p-1.5 rounded-full ">
-                            <Zap size={14} fill="currentColor" />
-                        </span>
-                        <span className="text-gym-text-secondary text-sm font-medium tracking-wide">
-                            #1 Fitness App 2026
-                        </span>
-                    </motion.div>
-
-                    {/* Heading */}
-                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[1.1] drop-shadow-lg">
-                        SCULPT <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-gym-accent via-blue-400 to-indigo-500 animate-gradient-x">
-                            YOUR
-                        </span>{" "}
-                        <br />
-                        LEGACY
+                    <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
+                        Forge Your Legacy with <br />
+                        <span className="text-gym-accent">Data & Discipline</span>
                     </h1>
 
-                    {/* Description */}
-                    <p className="text-xl text-gym-text-secondary max-w-xl border-l-4 border-gym-gold pl-6 mt-6 drop-shadow-md bg-black/20 backdrop-blur-sm rounded-r-lg py-2">
-                        Unlock elite potential with AI-driven workout plans and precision
-                        nutrition. This isn’t just a gym app; it’s your{" "}
-                        <span className="text-white font-bold">digital forge</span>.
+                    <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-2xl mx-auto leading-relaxed">
+                        Elevate your performance with TitanEdge. Combine elite physical training with AI-driven insights to push beyond your limits.
                     </p>
 
-                    {/* Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-8 w-full sm:w-auto">
-                        <Link
-                            to="/register"
-                            className="group relative px-8 py-4 bg-gym-accent rounded-xl overflow-hidden shadow-2xl shadow-gym-accent/30 font-bold text-lg text-white text-center"
-                        >
-                            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                            <span className="flex items-center justify-center gap-2">
-                                Start Free Trial <ArrowRight size={20} />
-                            </span>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <Link to="/register" className="btn-primary w-full sm:w-auto px-8 py-3 text-base">
+                            Start Free Trial <ArrowRight size={18} />
                         </Link>
-
-                        <div
-                            onClick={() => setShowDemo(true)}
-                            className="flex items-center gap-4 px-6 py-4 rounded-xl bg-black/40 border border-white/10 backdrop-blur-md cursor-pointer hover:bg-black/60 transition-colors"
-                        >
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                <Play size={20} className="text-white ml-1" />
-                            </div>
-                            <span className="text-white font-medium">Watch Demo</span>
-                        </div>
+                        <Link to="/classes" className="btn-outline w-full sm:w-auto px-8 py-3 text-base">
+                            View Schedule
+                        </Link>
                     </div>
+                </div>
 
-                    {/* Demo Modal */}
-                    <AnimatePresence>
-                        {showDemo && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
-                                onClick={() => setShowDemo(false)}
-                            >
-                                <motion.div
-                                    initial={{ scale: 0.9, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.9, opacity: 0 }}
-                                    className="relative max-w-5xl w-full aspect-video bg-zinc-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
-                                    onClick={e => e.stopPropagation()}
-                                >
-                                    <button
-                                        onClick={() => setShowDemo(false)}
-                                        className="absolute top-6 right-6 z-50 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white/50 hover:text-white transition-all border border-white/10"
-                                    >
-                                        <X size={24} />
-                                    </button>
-                                    <iframe 
-                                        width="100%" 
-                                        height="100%" 
-                                        src="https://www.youtube.com/embed/Vb1sMrtG1U4?autoplay=1&mute=1&loop=1" 
-                                        title="Gym Motivation" 
-                                        frameBorder="0" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowFullScreen
-                                        className="w-full h-full border-none"
-                                    ></iframe>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Stats & Social Proof */}
-                    <div className="flex flex-wrap items-center gap-8 pt-8 border-t border-white/10 mt-8 w-full">
-                        <div>
-                            <p className="text-3xl font-bold text-white drop-shadow-md">50K+</p>
-                            <p className="text-sm text-gym-text-secondary drop-shadow-md">Active Users</p>
+                {/* Clean Stats */}
+                <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-t border-white/5 pt-8">
+                    {[
+                        { label: 'Active Members', value: '2.4k' },
+                        { label: 'Elite Programs', value: '50+' },
+                        { label: 'Success Rate', value: '98%' },
+                        { label: 'Expert Trainers', value: '25+' },
+                    ].map((stat, i) => (
+                        <div key={i} className="text-center">
+                            <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                            <div className="text-xs text-zinc-500 uppercase tracking-wider">{stat.label}</div>
                         </div>
-                        <div className="w-px h-10 bg-white/20 hidden sm:block"></div>
-                        <div>
-                            <p className="text-3xl font-bold text-white drop-shadow-md">100+</p>
-                            <p className="text-sm text-gym-text-secondary drop-shadow-md">Pro Trainers</p>
-                        </div>
-
-                        {/* NEW: Avatars Section */}
-                        <div className="flex items-center -space-x-3 ml-auto sm:ml-0">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="w-10 h-10 rounded-full border-2 border-black bg-zinc-800 overflow-hidden">
-                                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" className="w-full h-full object-cover opacity-80" />
-                                </div>
-                            ))}
-                            <div className="w-10 h-10 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center text-xs text-white font-bold">
-                                +2k
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

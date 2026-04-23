@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Users, ShoppingBag, DollarSign, Activity, Plus, Edit, Trash2, X, Search } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Users, ShoppingBag, DollarSign, Activity, Plus, Edit, Trash2, X, Search, LayoutDashboard, Package, Calendar, FileText, CheckSquare, CreditCard } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api/axios';
 
 const AdminDashboard = () => {
@@ -361,61 +361,99 @@ const AdminDashboard = () => {
 
     if (loading && activeTab === 'overview') return <div className="text-white text-center mt-20">Loading...</div>;
 
+    const navItems = [
+        { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
+        { id: 'users', label: 'Users', icon: <Users size={18} /> },
+        { id: 'products', label: 'Products', icon: <Package size={18} /> },
+        { id: 'classes', label: 'Classes', icon: <Calendar size={18} /> },
+        { id: 'plans', label: 'Plans', icon: <FileText size={18} /> },
+        { id: 'attendance', label: 'Attendance', icon: <CheckSquare size={18} /> },
+        { id: 'payments', label: 'Payments', icon: <CreditCard size={18} /> },
+    ];
+
     return (
-        <div className="min-h-screen bg-gym-dark pt-24 pb-12 px-4 md:px-8">
-            <div className="max-w-7xl mx-auto">
-                <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
-                        <p className="text-gray-400">Manage your gym empire.</p>
+        <div className="min-h-screen bg-[#09090b] pt-24 pb-12 px-4 md:px-8">
+            <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-6 md:gap-8">
+                
+                {/* SIDEBAR */}
+                <aside className="w-full md:w-64 flex-shrink-0">
+                    <div className="bg-[#18181b] border border-white/10 rounded-xl p-4 sticky top-24">
+                        <div className="mb-6 px-2">
+                            <h1 className="text-xl font-semibold text-white mb-1">Admin Panel</h1>
+                            <p className="text-xs text-zinc-400">Manage your gym empire</p>
+                        </div>
+                        <nav className="space-y-1">
+                            {navItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 ${activeTab === item.id ? 'bg-white text-black shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+                                >
+                                    {item.icon}
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
                     </div>
-                    <div className="flex gap-2 bg-zinc-900 p-1 rounded-xl">
-                        {['overview', 'users', 'products', 'classes', 'plans', 'attendance', 'payments'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 rounded-lg font-bold capitalize transition-all ${activeTab === tab ? 'bg-gym-accent text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                </aside>
+
+                {/* MAIN CONTENT */}
+                <main className="flex-1 min-w-0">
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-white capitalize">{activeTab}</h2>
                     </div>
-                </header>
 
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             {[
-                                { title: 'Members', value: stats.userCount, icon: <Users />, color: 'text-blue-500 bg-blue-500/10' },
-                                { title: 'Revenue', value: `$${stats.totalRevenue}`, icon: <DollarSign />, color: 'text-green-500 bg-green-500/10' },
-                                { title: 'Orders', value: stats.orderCount, icon: <ShoppingBag />, color: 'text-purple-500 bg-purple-500/10' },
-                                { title: 'Products', value: stats.productCount, icon: <Activity />, color: 'text-orange-500 bg-orange-500/10' },
+                                { title: 'Total Members', value: stats.userCount, icon: <Users size={20} /> },
+                                { title: 'Monthly Revenue', value: `$${stats.totalRevenue}`, icon: <DollarSign size={20} /> },
+                                { title: 'Active Orders', value: stats.orderCount, icon: <ShoppingBag size={20} /> },
+                                { title: 'Products in Store', value: stats.productCount, icon: <Activity size={20} /> },
                             ].map((stat, i) => (
-                                <div key={i} className="bg-zinc-900 border border-white/5 rounded-xl p-6">
-                                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${stat.color}`}>
-                                        {stat.icon}
+                                <div key={i} className="bg-[#18181b] border border-white/10 rounded-xl p-6 flex flex-col justify-between h-32">
+                                    <div className="flex justify-between items-start">
+                                        <div className="text-sm font-medium text-zinc-400">{stat.title}</div>
+                                        <div className="text-zinc-500">{stat.icon}</div>
                                     </div>
-                                    <div className="text-3xl font-bold text-white">{stat.value}</div>
-                                    <div className="text-gray-400 text-sm">{stat.title}</div>
+                                    <div className="text-3xl font-semibold text-white">{stat.value}</div>
                                 </div>
                             ))}
                         </div>
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
-                            <h3 className="text-xl font-bold text-white mb-6">Weekly Sales</h3>
-                            <div style={{ width: '100%', height: 300 }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={[
-                                        { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
-                                        { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 }
-                                    ]}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                        <XAxis dataKey="name" stroke="#666" />
-                                        <YAxis stroke="#666" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #333' }} />
-                                        <Bar dataKey="sales" fill="#ea580c" />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-[#18181b] border border-white/10 rounded-xl p-6">
+                                <h3 className="text-sm font-medium text-zinc-400 mb-6">Weekly Revenue</h3>
+                                <div style={{ width: '100%', height: 250, minWidth: 0, minHeight: 0 }}>
+                                    <ResponsiveContainer width="99%" height="100%">
+                                        <BarChart data={[
+                                            { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
+                                            { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 }
+                                        ]}>
+                                            <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={false} />
+                                            <Tooltip cursor={{fill: '#27272a'}} contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
+                                            <Bar dataKey="sales" fill="#fff" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-[#18181b] border border-white/10 rounded-xl p-6">
+                                <h3 className="text-sm font-medium text-zinc-400 mb-6">Active Members Growth</h3>
+                                <div style={{ width: '100%', height: 250, minWidth: 0, minHeight: 0 }}>
+                                    <ResponsiveContainer width="99%" height="100%">
+                                        <LineChart data={[
+                                            { name: 'Week 1', members: 120 }, { name: 'Week 2', members: 132 }, { name: 'Week 3', members: 145 },
+                                            { name: 'Week 4', members: 160 }
+                                        ]}>
+                                            <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={false} />
+                                            <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
+                                            <Line type="monotone" dataKey="members" stroke="#fff" strokeWidth={2} dot={{ r: 4, fill: '#18181b', stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -432,20 +470,20 @@ const AdminDashboard = () => {
                                     placeholder="Search by name, email or ID..."
                                     value={userSearch}
                                     onChange={(e) => setUserSearch(e.target.value)}
-                                    className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-gym-accent"
+                                    className="w-full bg-[#18181b] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white transition-colors"
                                 />
                             </div>
                             <button
                                 onClick={() => openUserModal()}
-                                className="bg-gym-accent text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-gym-accent/90 shadow-lg shadow-gym-accent/20"
+                                className="bg-white text-black px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-200 transition-colors"
                             >
-                                <Plus size={20} /> Add Member
+                                <Plus size={18} /> Add Member
                             </button>
                         </div>
 
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden">
+                        <div className="bg-[#18181b] border border-white/10 rounded-xl overflow-hidden">
                             <table className="w-full text-left">
-                                <thead className="bg-zinc-800 text-gray-400 uppercase text-xs">
+                                <thead className="border-b border-white/10 text-zinc-400 text-xs font-medium">
                                     <tr>
                                         <th className="px-6 py-4">ID</th>
                                         <th className="px-6 py-4">Member</th>
@@ -501,27 +539,27 @@ const AdminDashboard = () => {
                 {/* PRODUCTS TAB */}
                 {activeTab === 'products' && (
                     <div>
-                        <div className="flex justify-end mb-6">
+                        <div className="flex justify-end mb-4">
                             <button
                                 onClick={() => { setEditingProduct(null); setProductForm({ name: '', price: '', category: '', description: '', image: '', stock: '' }); setShowProductModal(true); }}
-                                className="bg-gym-accent text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gym-accent/90"
+                                className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-200 transition-colors"
                             >
                                 <Plus size={18} /> Add Product
                             </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {products.map(product => (
-                                <div key={product._id} className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden group">
-                                    <div className="h-48 bg-white/5 relative">
-                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                <div key={product._id} className="bg-[#18181b] border border-white/10 rounded-xl overflow-hidden group">
+                                    <div className="h-48 bg-black/20 relative">
+                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
                                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleEditProduct(product)} className="p-2 bg-blue-500 text-white rounded-lg"><Edit size={16} /></button>
-                                            <button onClick={() => handleDeleteProduct(product._id)} className="p-2 bg-red-500 text-white rounded-lg"><Trash2 size={16} /></button>
+                                            <button onClick={() => handleEditProduct(product)} className="p-1.5 bg-white text-black rounded-md hover:bg-zinc-200"><Edit size={14} /></button>
+                                            <button onClick={() => handleDeleteProduct(product._id)} className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600"><Trash2 size={14} /></button>
                                         </div>
                                     </div>
-                                    <div className="p-4">
-                                        <h3 className="font-bold text-white">{product.name}</h3>
-                                        <p className="text-gym-accent">${product.price}</p>
+                                    <div className="p-4 flex justify-between items-center">
+                                        <h3 className="font-medium text-white text-sm">{product.name}</h3>
+                                        <p className="text-zinc-400 text-sm">${product.price}</p>
                                     </div>
                                 </div>
                             ))}
@@ -532,25 +570,25 @@ const AdminDashboard = () => {
                 {/* CLASSES TAB */}
                 {activeTab === 'classes' && (
                     <div>
-                        <div className="flex justify-end mb-6">
+                        <div className="flex justify-end mb-4">
                             <button
                                 onClick={() => setShowClassModal(true)}
-                                className="bg-gym-accent text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gym-accent/90"
+                                className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-200 transition-colors"
                             >
                                 <Plus size={18} /> Schedule Class
                             </button>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {classes.map(c => (
-                                <div key={c._id} className="bg-zinc-900 border border-white/5 rounded-xl p-6 flex justify-between items-center">
+                                <div key={c._id} className="bg-[#18181b] border border-white/10 rounded-xl p-5 flex justify-between items-center">
                                     <div>
-                                        <h3 className="font-bold text-white text-xl">{c.name}</h3>
-                                        <p className="text-gray-400">{new Date(c.startTime).toLocaleString()} • {c.durationMinutes} min</p>
-                                        <p className="text-sm text-gray-500">Trainer: {c.trainer?.username}</p>
+                                        <h3 className="font-medium text-white text-base">{c.name}</h3>
+                                        <p className="text-zinc-400 text-sm">{new Date(c.startTime).toLocaleString()} • {c.durationMinutes} min</p>
+                                        <p className="text-xs text-zinc-500 mt-1">Trainer: {c.trainer?.username}</p>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-gym-accent font-bold">{c.enrolledUsers.length} / {c.capacity}</span>
-                                        <p className="text-xs text-gray-500 uppercase">Enrolled</p>
+                                        <span className="text-white font-medium text-sm">{c.enrolledUsers.length} / {c.capacity}</span>
+                                        <p className="text-xs text-zinc-500">Enrolled</p>
                                     </div>
                                 </div>
                             ))}
@@ -685,33 +723,35 @@ const AdminDashboard = () => {
                 {/* PLANS TAB */}
                 {activeTab === 'plans' && (
                     <div>
-                        <div className="flex justify-end mb-6">
+                        <div className="flex justify-end mb-4">
                             <button
                                 onClick={() => { setEditingPlan(null); setPlanForm({ name: '', price: '', durationMonths: 1, type: 'custom', features: '', description: '', highlight: false, isActive: true }); setShowPlanModal(true); }}
-                                className="bg-gym-accent text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gym-accent/90"
+                                className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-200 transition-colors"
                             >
                                 <Plus size={18} /> Create Plan
                             </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {plans.map(plan => (
-                                <div key={plan._id} className={`bg-zinc-900 border ${plan.isActive ? 'border-white/5' : 'border-red-500/30'} rounded-xl p-6 relative group`}>
+                                <div key={plan._id} className={`bg-[#18181b] border ${plan.isActive ? 'border-white/10' : 'border-red-500/30'} rounded-xl p-6 relative group`}>
                                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleEditPlan(plan)} className="p-2 bg-blue-500 text-white rounded-lg"><Edit size={16} /></button>
-                                        <button onClick={() => handleDeletePlan(plan._id)} className="p-2 bg-red-500 text-white rounded-lg"><Trash2 size={16} /></button>
+                                        <button onClick={() => handleEditPlan(plan)} className="p-1.5 bg-white text-black rounded-md hover:bg-zinc-200"><Edit size={14} /></button>
+                                        <button onClick={() => handleDeletePlan(plan._id)} className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600"><Trash2 size={14} /></button>
                                     </div>
-                                    <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                                    <div className="text-3xl font-bold text-gym-accent mb-4">${plan.price} <span className="text-sm text-gray-400 font-normal">/ {plan.durationMonths} mo</span></div>
-                                    <ul className="space-y-2 mb-4">
+                                    <h3 className="text-lg font-medium text-white mb-1">{plan.name}</h3>
+                                    <div className="text-2xl font-semibold text-white mb-4">${plan.price} <span className="text-xs text-zinc-500 font-normal">/ {plan.durationMonths} mo</span></div>
+                                    <ul className="space-y-1.5 mb-4">
                                         {plan.features.map((f, i) => (
-                                            <li key={i} className="text-gray-400 text-sm">• {f}</li>
+                                            <li key={i} className="text-zinc-400 text-sm flex items-center gap-2">
+                                                <div className="w-1 h-1 bg-white rounded-full"></div> {f}
+                                            </li>
                                         ))}
                                     </ul>
-                                    <div className="flex gap-2 mt-4">
-                                        <span className={`px-2 py-1 rounded text-xs uppercase font-bold ${plan.isActive ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                    <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${plan.isActive ? 'bg-white text-black' : 'bg-red-500/10 text-red-500'}`}>
                                             {plan.isActive ? 'Active' : 'Inactive'}
                                         </span>
-                                        <span className="bg-white/10 px-2 py-1 rounded text-xs uppercase text-gray-300">{plan.type}</span>
+                                        <span className="border border-white/10 px-2 py-0.5 rounded text-xs text-zinc-400">{plan.type}</span>
                                     </div>
                                 </div>
                             ))}
@@ -993,6 +1033,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 )}
+                </main>
             </div>
         </div>
     );
