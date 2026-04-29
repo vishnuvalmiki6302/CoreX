@@ -22,7 +22,7 @@ const Home = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-3">Members Only Features</h2>
                         <p className="text-sm text-zinc-300 mb-6 max-w-2xl mx-auto">
-                            Join TitanEdge today to unlock our full suite of tools! Gym members get exclusive access to our 
+                            Join CoreX today to unlock our full suite of tools! Gym members get exclusive access to our 
                             <span className="text-gym-accent font-semibold"> Exercise Library</span>, 
                             <span className="text-gym-accent font-semibold"> Custom Diet Plans</span>, 
                             <span className="text-gym-accent font-semibold"> Live Class Booking</span>, and our 

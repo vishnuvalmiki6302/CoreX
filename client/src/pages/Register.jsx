@@ -11,14 +11,14 @@ const Register = () => {
 
     useEffect(() => {
         /* global google */
-        if (window.google) {
+        if (window.google && !document.getElementById('signUpDiv').hasChildNodes()) {
             google.accounts.id.initialize({
                 client_id: "554720621201-d8brfn201od31ugsv2ngujtdfeg2uthr.apps.googleusercontent.com",
                 callback: handleCredentialResponse,
             });
             google.accounts.id.renderButton(
                 document.getElementById('signUpDiv'),
-                { theme: 'outline', size: 'large', width: '100%', text: 'signup_with' }
+                { theme: 'outline', size: 'large', width: '100%' }
             );
         }
     }, []);
@@ -61,7 +61,7 @@ const Register = () => {
                             <img src="/logo.png" alt="TitanEdge Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-white mb-1.5">Join TitanEdge</h2>
+                            <h2 className="text-xl font-semibold text-white mb-1.5">Join CoreX</h2>
                             <p className="text-zinc-300 text-xs leading-relaxed mb-2">
                                 Create an account to access premium classes, diet plans, and our exclusive gear store.
                             </p>

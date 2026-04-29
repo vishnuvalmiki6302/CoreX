@@ -27,7 +27,7 @@ const Hero = () => {
                     </h1>
 
                     <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Elevate your performance with TitanEdge. Combine elite physical training with AI-driven insights to push beyond your limits.
+                        Elevate your performance with CoreX. Combine elite physical training with AI-driven insights to push beyond your limits.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

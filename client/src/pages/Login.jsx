@@ -11,7 +11,7 @@ const Login = () => {
 
     useEffect(() => {
         /* global google */
-        if (window.google) {
+        if (window.google && !document.getElementById('signInDiv').hasChildNodes()) {
             google.accounts.id.initialize({
                 client_id: "554720621201-d8brfn201od31ugsv2ngujtdfeg2uthr.apps.googleusercontent.com",
                 callback: handleCredentialResponse,
@@ -58,7 +58,7 @@ const Login = () => {
                     <div className="absolute inset-0 bg-black/40" />
                     <div className="absolute inset-0 p-6 flex flex-col justify-between">
                         <div className="w-8 h-8 flex items-center justify-center">
-                            <img src="/logo.png" alt="TitanEdge Logo" className="w-full h-full object-contain" />
+                            <img src="/logo.png" alt="CoreX Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h2 className="text-xl font-semibold text-white mb-1.5">Welcome back</h2>

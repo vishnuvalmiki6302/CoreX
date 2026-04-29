@@ -9,8 +9,8 @@ const Footer = () => {
                     {/* Brand */}
                     <div className="md:col-span-1 space-y-4">
                         <Link to="/" className="flex items-center gap-2">
-                            <img src="/logo.png" alt="TitanEdge" className="w-5 h-5 object-contain" />
-                            <span className="text-base font-bold text-white tracking-tight">TitanEdge</span>
+                            <img src="/logo.png" alt="CoreX" className="w-5 h-5 object-contain" />
+                            <span className="text-base font-bold text-white tracking-tight">CoreX</span>
                         </Link>
                         <p className="text-xs text-zinc-400 leading-relaxed">
                             A clean, modern platform for fitness intelligence and management.
@@ -41,7 +41,7 @@ const Footer = () => {
                         <ul className="space-y-2 text-xs text-zinc-400">
                             <li className="flex items-center gap-2"><MapPin size={12} /> 123 Iron St, CA</li>
                             <li className="flex items-center gap-2"><Phone size={12} /> +1 (555) 123-4567</li>
-                            <li className="flex items-center gap-2"><Mail size={12} /> support@titanedge.fitness</li>
+                            <li className="flex items-center gap-2"><Mail size={12} /> support@corex.fitness</li>
                         </ul>
                     </div>
 
@@ -57,7 +57,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-zinc-500">
-                    <p>&copy; {new Date().getFullYear()} TitanEdge Fitness. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} CoreX Fitness. All rights reserved.</p>
                     <div className="flex gap-4">
                         <a href="#" className="hover:text-white">Privacy</a>
                         <a href="#" className="hover:text-white">Terms</a>

@@ -43,9 +43,9 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-2 group">
-                    <img src="/logo.png" alt="TitanEdge" className="w-8 h-8 object-contain transform group-hover:scale-105 transition-transform" />
+                    <img src="/logo.png" alt="CoreX" className="w-8 h-8 object-contain transform group-hover:scale-105 transition-transform" />
                     <span className="text-xl font-bold tracking-tight text-white uppercase">
-                        TitanEdge
+                        CoreX
                     </span>
                 </Link>
 
@@ -79,24 +79,48 @@ const Navbar = () => {
                     </Link>
 
                     {user ? (
-                        <div className="flex items-center gap-4 pl-5 border-l border-white/10">
+                        <div className="flex items-center gap-3 pl-5 border-l border-white/10">
                             <Link
-                                to={getDashboardLink()}
-                                className="flex items-center gap-1.5 text-sm font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-colors"
+                                to="/profile"
+                                className="flex items-center gap-2.5 p-1 pr-3 rounded-xl bg-white/5 border border-white/5 hover:border-gym-accent/30 hover:bg-white/10 transition-all group"
                             >
-                                {user.role === 'admin' || user.role === 'trainer' ? (
-                                    <LayoutDashboard size={14} className="text-gym-accent" />
-                                ) : (
-                                    <User size={14} className="text-gym-accent" />
-                                )}
-                                <span className="max-w-[100px] truncate">{user.username}</span>
+                                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
+                                    {user.profilePhoto ? (
+                                        <img 
+                                            src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profilePhoto}`} 
+                                            alt="Profile" 
+                                            className="w-full h-full object-cover" 
+                                        />
+                                    ) : (
+                                        <User size={16} className="text-gym-accent" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-black text-white leading-none uppercase tracking-tighter">
+                                        {user.username}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-gym-accent leading-none uppercase tracking-widest mt-0.5">
+                                        {user.role}
+                                    </span>
+                                </div>
                             </Link>
+
+                            {(user.role === 'admin' || user.role === 'trainer') && (
+                                <Link
+                                    to={user.role === 'admin' ? "/admin" : "/trainer"}
+                                    className="p-2 bg-white/5 hover:bg-gym-accent/10 text-zinc-400 hover:text-gym-accent rounded-xl transition-all border border-white/5"
+                                    title="Dashboard"
+                                >
+                                    <LayoutDashboard size={18} />
+                                </Link>
+                            )}
+
                             <button
                                 onClick={logout}
-                                className="text-zinc-400 hover:text-red-400 transition-colors p-1"
+                                className="p-2 bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-500 rounded-xl transition-all border border-white/5"
                                 title="Logout"
                             >
-                                <LogOut size={16} />
+                                <LogOut size={18} />
                             </button>
                         </div>
                     ) : (
