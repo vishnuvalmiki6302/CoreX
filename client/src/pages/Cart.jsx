@@ -22,6 +22,11 @@ const Cart = () => {
 
     return (
         <div className="page-container">
+            {/* hero section */}
+            {/* <div className="hero"> */}
+            {/* <h1>Shopping Cart</h1>
+                <p>Review your selected items before checkout.</p> */}
+            {/* </div> */}
             <div className="section-header">
                 <h1 className="section-title">Shopping Cart</h1>
                 <p className="section-subtitle">Review your selected items before checkout.</p>
