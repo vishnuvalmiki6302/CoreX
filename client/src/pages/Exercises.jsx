@@ -36,10 +36,10 @@ const Exercises = () => {
         <div className="page-container relative">
             <div className="section-header flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="section-title">Exercise Library</h1>
+                    <h1 className="section-title">Exercise Library !</h1>
                     <p className="section-subtitle">Master your form with our detailed guides.</p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -56,7 +56,7 @@ const Exercises = () => {
                             </button>
                         )}
                     </div>
-                    <select 
+                    <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                         className="input-clean w-full sm:w-32 bg-gym-dark appearance-none"
