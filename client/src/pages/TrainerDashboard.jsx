@@ -116,7 +116,7 @@ const TrainerDashboard = () => {
                 <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 mb-8">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <Users className="text-gym-accent" /> My Clients
+                            <Users className="text-gym-accent" /> My Clients !
                         </h2>
                         <div className="relative w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
