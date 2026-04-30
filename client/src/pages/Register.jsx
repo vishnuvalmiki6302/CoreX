@@ -47,7 +47,7 @@ const Register = () => {
     return (
         <div className="min-h-[85vh] flex items-center justify-center p-4">
             <div className="w-full max-w-[750px] flex flex-col md:flex-row-reverse bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                
+
                 {/* Right Side: Clean Visual */}
                 <div className="md:w-[45%] relative hidden md:block border-l border-white/10">
                     <img
@@ -61,7 +61,7 @@ const Register = () => {
                             <img src="/logo.png" alt="TitanEdge Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-white mb-1.5">Join CoreX</h2>
+                            <h2 className="text-xl font-semibold text-white mb-1.5">Join CoreX !</h2>
                             <p className="text-zinc-300 text-xs leading-relaxed mb-2">
                                 Create an account to access premium classes, diet plans, and our exclusive gear store.
                             </p>
@@ -124,7 +124,7 @@ const Register = () => {
                                 placeholder="••••••••"
                             />
                         </div>
-                        
+
                         <button type="submit" disabled={loading} className="w-full py-1.5 mt-2 bg-white text-black rounded-md font-medium text-sm hover:bg-zinc-200 transition-colors">
                             {loading ? 'Creating...' : 'Sign Up'}
                         </button>
@@ -136,7 +136,7 @@ const Register = () => {
                             <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs">Or join with</span>
                             <div className="flex-grow border-t border-white/10"></div>
                         </div>
-                        
+
                         <div className="flex justify-center w-full">
                             <div id="signUpDiv" className="w-full flex justify-center overflow-hidden rounded-md"></div>
                         </div>
