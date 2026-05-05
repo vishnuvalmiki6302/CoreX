@@ -5,14 +5,15 @@ import toast from 'react-hot-toast';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
-    const { login, googleLogin } = useAuth();
+    const { login, googleLogin, user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
 
     useEffect(() => {
-        if (user) navigate('/');
-    }, [user, navigate]);
+        if (user) {
+            navigate('/');
+            return;
+        }
         /* global google */
         if (window.google && !document.getElementById('signInDiv').hasChildNodes()) {
             google.accounts.id.initialize({
@@ -24,7 +25,7 @@ const Login = () => {
                 { theme: 'outline', size: 'large', width: '100%' }
             );
         }
-    }, []);
+    }, [user, navigate]);
 
     const handleCredentialResponse = async (response) => {
         const result = await googleLogin(response.credential);
