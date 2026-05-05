@@ -7,8 +7,9 @@ const generateToken = (res, userId) => {
 
     res.cookie('jwt', token, {
         httpOnly: true,
-        secure: true, // Required for HTTPS environments like Vercel
-        sameSite: 'lax', // Better for proxied requests
+        // Only use secure cookies if NOT explicitly disabled (needed for AWS HTTP)
+        secure: process.env.DISABLE_SECURE_COOKIES === 'true' ? false : true,
+        sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 };

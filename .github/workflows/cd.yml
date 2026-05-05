@@ -43,6 +43,7 @@ jobs:
             echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "NODE_ENV=production" >> .env
+            echo "DISABLE_SECURE_COOKIES=true" >> .env
             echo "CLIENT_URL=http://${{ secrets.AWS_PUBLIC_IP }}" >> .env
             echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
 
