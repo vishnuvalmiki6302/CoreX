@@ -6,15 +6,13 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - .env # Ensure you create an .env file on your EC2 instance containing your backend environment variables
+      - .env  # Server env vars (MONGO_URI, JWT_SECRET, etc.) must exist on EC2 at /home/ubuntu/gym-app/.env
     restart: always
 
   client:
     image: ${DOCKER_HUB_USERNAME}/gym-client:latest
     ports:
-      - "80:5173" # Mapping port 80 (HTTP) to the client app container
-    env_file:
-      - .env # Ensure you create an .env file on your EC2 instance containing your frontend environment variables
+      - "80:3000"  # Vite preview runs on port 3000 (changed from dev server 5173)
     depends_on:
       - server
     restart: always

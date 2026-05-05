@@ -15,10 +15,10 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy deployment files to EC2
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.AWS_PUBLIC_IP }}
           username: ubuntu
@@ -27,19 +27,19 @@ jobs:
           target: "/home/ubuntu/gym-app"
 
       - name: Deploy to AWS EC2
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AWS_PUBLIC_IP }}
           username: ubuntu
           key: ${{ secrets.AWS_EC2_KEY }}
           script: |
             cd /home/ubuntu/gym-app
-            
+
             # Export Docker Hub username so docker-compose can use it
             export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
 
             # Pull the latest images from Docker Hub
             docker compose -f docker-compose.prod.yml pull
 
-            # Stop/Restart containers
-            docker compose -f docker-compose.prod.yml up -d
+            # Stop and recreate containers (force fresh start)
+            docker compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans
