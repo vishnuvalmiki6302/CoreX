@@ -37,9 +37,9 @@ jobs:
             
             # Export Docker Hub username so docker-compose can use it
             export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-            
+
             # Pull the latest images from Docker Hub
-            docker-compose -f docker-compose.prod.yml pull
-            
-            # Start/Restart containers
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml pull
+
+            # Stop/Restart containers
+            docker compose -f docker-compose.prod.yml up -d
