@@ -56,8 +56,13 @@ const AdminDashboard = () => {
     const [attendanceData, setAttendanceData] = useState([]);
 
     useEffect(() => {
-        if (user && user.role !== 'admin') {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (user.role !== 'admin') {
             navigate('/');
+            return;
         }
 
         // Initial Fetch for Overview
@@ -523,7 +528,7 @@ const AdminDashboard = () => {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <button onClick={() => openUserModal(u)} className="p-2 hover:bg-blue-500/20 text-blue-500 rounded-lg transition-colors"><Edit size={16} /></button>
-                                                    {u._id !== user._id && (
+                                                    {u._id !== user?._id && (
                                                         <button onClick={() => handleDeleteUser(u._id)} className="p-2 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors"><Trash2 size={16} /></button>
                                                     )}
                                                 </div>

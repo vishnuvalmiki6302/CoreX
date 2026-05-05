@@ -41,10 +41,12 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
-        if (user) {
-            fetchUserProfile();
-            fetchInitialData();
+        if (!user) {
+            navigate('/login');
+            return;
         }
+        fetchUserProfile();
+        fetchInitialData();
     }, [user]);
 
     const fetchInitialData = async () => {
@@ -178,7 +180,7 @@ const Profile = () => {
                                 {previewImage ? (
                                     <img src={previewImage} alt="Profile" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                                 ) : (
-                                    profileData.username?.charAt(0) || 'U'
+                                    profileData?.username?.charAt(0) || user?.username?.charAt(0) || 'U'
                                 )}
                             </div>
                             <label className="absolute bottom-2 right-2 p-2 bg-gym-accent text-white rounded-xl shadow-lg cursor-pointer hover:scale-110 transition-transform border border-white/20">
@@ -190,7 +192,7 @@ const Profile = () => {
                         <div className="mb-4 md:mb-2">
                             <div className="flex items-center gap-3 mb-1">
                                 <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
-                                    {profileData.username || user?.username}
+                                    {profileData?.username || user?.username}
                                 </h1>
                                 <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${profileData.status === 'active' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                                     {profileData.status || 'Active'}
@@ -260,9 +262,9 @@ const Profile = () => {
                                         {/* Quick Stats Grid */}
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                             {[
-                                                { label: 'Weight', value: profileData.profile?.weight ? `${profileData.profile.weight} kg` : '-', icon: <Weight className="text-blue-400" /> },
-                                                { label: 'Height', value: profileData.profile?.height ? `${profileData.profile.height} cm` : '-', icon: <Ruler className="text-purple-400" /> },
-                                                { label: 'Age', value: profileData.profile?.age || '-', icon: <TrendingUp className="text-green-400" /> },
+                                                { label: 'Weight', value: profileData?.profile?.weight ? `${profileData.profile.weight} kg` : '-', icon: <Weight className="text-blue-400" /> },
+                                                { label: 'Height', value: profileData?.profile?.height ? `${profileData.profile.height} cm` : '-', icon: <Ruler className="text-purple-400" /> },
+                                                { label: 'Age', value: profileData?.profile?.age || '-', icon: <TrendingUp className="text-green-400" /> },
                                                 { label: 'Workouts', value: workoutPlans.length, icon: <Dumbbell className="text-gym-accent" /> },
                                             ].map((stat, i) => (
                                                 <div key={i} className="bg-[#18181b] border border-white/5 rounded-2xl p-5 flex flex-col gap-2 hover:border-white/10 transition-colors shadow-lg">
@@ -287,11 +289,11 @@ const Profile = () => {
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between items-end border-b border-white/5 pb-3">
                                                         <span className="text-zinc-500 text-sm font-medium">Plan Type</span>
-                                                        <span className="text-white font-black text-xl italic uppercase text-gym-accent">{profileData.membershipType || 'PREMIUM'}</span>
+                                                        <span className="text-white font-black text-xl italic uppercase text-gym-accent">{profileData?.membershipType || 'PREMIUM'}</span>
                                                     </div>
                                                     <div className="flex justify-between items-end border-b border-white/5 pb-3">
                                                         <span className="text-zinc-500 text-sm font-medium">Expiry Date</span>
-                                                        <span className="text-white font-bold">{profileData.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString() : 'N/A'}</span>
+                                                        <span className="text-white font-bold">{profileData?.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString() : 'N/A'}</span>
                                                     </div>
                                                     <div className="pt-2">
                                                         <div className="flex justify-between items-center mb-2">
@@ -508,10 +510,10 @@ const Profile = () => {
                                                                 <Activity size={14} /> Health & Goals
                                                             </h4>
                                                             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-4">
-                                                                <div>
+                                                                 <div>
                                                                     <p className="text-zinc-500 text-[10px] font-black uppercase mb-2">Fitness Goals</p>
                                                                     <div className="flex flex-wrap gap-2">
-                                                                        {profileData.profile?.goals?.length > 0 ? profileData.profile.goals.map((g, i) => (
+                                                                        {profileData?.profile?.goals?.length > 0 ? profileData.profile.goals.map((g, i) => (
                                                                             <span key={i} className="px-3 py-1 bg-gym-accent/10 border border-gym-accent/30 text-gym-accent text-[10px] font-black rounded-lg uppercase tracking-wider">{g}</span>
                                                                         )) : <span className="text-zinc-600 text-xs italic">No goals defined</span>}
                                                                     </div>
@@ -528,8 +530,8 @@ const Profile = () => {
                                                             <h4 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                                                                 <AlertCircle size={14} /> Emergency Support
                                                             </h4>
-                                                            <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
-                                                                {profileData.emergencyContact?.name ? (
+                                                             <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
+                                                                {profileData?.emergencyContact?.name ? (
                                                                     <div className="flex items-center justify-between">
                                                                         <div>
                                                                             <p className="text-white font-bold text-sm">{profileData.emergencyContact.name}</p>

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Hero = () => {
+    const { user } = useAuth();
     return (
         <div className="relative min-h-[85vh] flex items-center justify-center bg-gym-dark pt-16 border-b border-white/5">
             {/* Subtle background image */}
@@ -31,8 +33,11 @@ const Hero = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link to="/register" className="btn-primary w-full sm:w-auto px-8 py-3 text-base">
-                            Start Free Trial <ArrowRight size={18} />
+                        <Link 
+                            to={user ? (user.role === 'admin' ? '/admin' : user.role === 'trainer' ? '/trainer' : '/profile') : '/register'} 
+                            className="btn-primary w-full sm:w-auto px-8 py-3 text-base"
+                        >
+                            {user ? 'Go to Dashboard' : 'Start Free Trial'} <ArrowRight size={18} />
                         </Link>
                         <Link to="/classes" className="btn-outline w-full sm:w-auto px-8 py-3 text-base">
                             View Schedule

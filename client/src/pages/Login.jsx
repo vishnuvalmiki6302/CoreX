@@ -8,8 +8,11 @@ const Login = () => {
     const { login, googleLogin } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
 
     useEffect(() => {
+        if (user) navigate('/');
+    }, [user, navigate]);
         /* global google */
         if (window.google && !document.getElementById('signInDiv').hasChildNodes()) {
             google.accounts.id.initialize({

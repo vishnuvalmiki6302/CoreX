@@ -29,8 +29,13 @@ const TrainerDashboard = () => {
     });
 
     useEffect(() => {
-        if (user && user.role !== 'trainer') {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        if (user.role !== 'trainer') {
             navigate('/');
+            return;
         }
         fetchAssignedMembers();
     }, [user, navigate]);
