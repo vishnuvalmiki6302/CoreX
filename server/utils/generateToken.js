@@ -7,8 +7,8 @@ const generateToken = (res, userId) => {
 
     res.cookie('jwt', token, {
         httpOnly: true,
-        secure: false, // Set to true only if using HTTPS (required for IP-based deployments without SSL)
-        sameSite: 'strict', // Prevent CSRF attacks
+        secure: true, // Required for HTTPS environments like Vercel
+        sameSite: 'lax', // Better for proxied requests
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 };
