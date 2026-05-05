@@ -1,18 +1,27 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - client
+      - server
+    restart: always
+
   server:
     image: ${DOCKER_HUB_USERNAME}/gym-server:latest
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     env_file:
-      - .env  # Server env vars (MONGO_URI, JWT_SECRET, etc.) must exist on EC2 at /home/ubuntu/gym-app/.env
+      - .env
     restart: always
 
   client:
     image: ${DOCKER_HUB_USERNAME}/gym-client:latest
-    ports:
-      - "80:3000"  # Vite preview runs on port 3000 (changed from dev server 5173)
-    depends_on:
-      - server
+    expose:
+      - "3000"
     restart: always

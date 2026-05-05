@@ -87,7 +87,7 @@ const Navbar = () => {
                                 <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
                                     {user.profilePhoto ? (
                                         <img 
-                                            src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profilePhoto}`} 
+                                            src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL || ''}${user.profilePhoto}`} 
                                             alt="Profile" 
                                             className="w-full h-full object-cover" 
                                         />

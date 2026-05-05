@@ -82,7 +82,7 @@ const Profile = () => {
             });
 
             if (data.profilePhoto) {
-                const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const serverUrl = import.meta.env.VITE_API_URL || '';
                 const photoUrl = data.profilePhoto.startsWith('http') ? data.profilePhoto : `${serverUrl}${data.profilePhoto}`;
                 setPreviewImage(photoUrl);
             }

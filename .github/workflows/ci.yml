@@ -36,4 +36,4 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/gym-client:latest
           build-args: |
-            VITE_API_URL=http://${{ secrets.AWS_PUBLIC_IP }}:5000
+            VITE_API_URL=
