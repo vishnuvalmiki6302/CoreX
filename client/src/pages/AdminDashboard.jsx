@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Users, ShoppingBag, DollarSign, Activity, Plus, Edit, Trash2, X, Search, LayoutDashboard, Package, Calendar, FileText, CheckSquare, CreditCard } from 'lucide-react';
+import { Users, ShoppingBag, DollarSign, Activity, Plus, Edit, Trash2, X, Search, LayoutDashboard, Package, Calendar, FileText, CheckSquare, CreditCard, IndianRupee, Dumbbell, Utensils, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api/axios';
 
@@ -55,6 +55,18 @@ const AdminDashboard = () => {
     const [revenueData, setRevenueData] = useState([]);
     const [attendanceData, setAttendanceData] = useState([]);
 
+    // Plan Programs State
+    const [planPrograms, setPlanPrograms] = useState({});
+    const [activeProgramType, setActiveProgramType] = useState('starter');
+    const [activeProgramDay, setActiveProgramDay] = useState('Monday');
+    const [programSaving, setProgramSaving] = useState(false);
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const PLAN_TYPES = ['starter','pro','elite'];
+    const emptyDay = (day) => ({ day, focus: '', isRestDay: false, exercises: [], meals: [] });
+    const emptyExercise = () => ({ name: '', sets: 3, reps: '10-12', rest: '60s', notes: '' });
+    const emptyMeal = () => ({ type: 'Breakfast', time: '08:00', notes: '', items: [] });
+    const emptyMealItem = () => ({ name: '', portion: '', calories: '' });
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -66,13 +78,14 @@ const AdminDashboard = () => {
         }
 
         // Initial Fetch for Overview
-        if (activeTab === 'overview') { fetchStats(); fetchCharts(); }
+        if (activeTab === 'overview') { fetchStats(); fetchCharts(); fetchUsers(); fetchProducts(); }
         if (activeTab === 'users') { fetchUsers(); fetchPlans(); fetchTrainers(); }
         if (activeTab === 'products') fetchProducts();
         if (activeTab === 'classes') fetchClasses();
         if (activeTab === 'plans') fetchPlans();
         if (activeTab === 'attendance') { fetchActiveCheckIns(); fetchUsers(); }
         if (activeTab === 'payments') { fetchPayments(); fetchUsers(); fetchPlans(); }
+        if (activeTab === 'programs') fetchAllPlanPrograms();
 
     }, [user, navigate, activeTab]);
 
@@ -131,6 +144,152 @@ const AdminDashboard = () => {
             const { data } = await api.get('/classes');
             setClasses(data);
         } catch (error) { toast.error("Failed to load classes"); }
+    };
+
+    const fetchAllPlanPrograms = async () => {
+        const result = {};
+        for (const type of ['starter','pro','elite']) {
+            try {
+                const { data } = await api.get(`/plan-programs/${type}`);
+                result[type] = data;
+            } catch {
+                result[type] = { planType: type, weeklySchedule: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d => ({ day: d, focus: '', isRestDay: false, exercises: [], meals: [] })) };
+            }
+        }
+        setPlanPrograms(result);
+    };
+
+    const handleSavePlanProgram = async () => {
+        setProgramSaving(true);
+        try {
+            const program = planPrograms[activeProgramType];
+            await api.post('/plan-programs', { planType: activeProgramType, weeklySchedule: program.weeklySchedule });
+            toast.success(`${activeProgramType} program saved!`);
+        } catch (error) {
+            toast.error('Failed to save program');
+        } finally { setProgramSaving(false); }
+    };
+
+    const updateDayField = (day, field, value) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day === day ? { ...d, [field]: value } : d)
+            }
+        }));
+    };
+
+    const updateExercise = (day, exIdx, field, value) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, exercises: d.exercises.map((ex, i) => i === exIdx ? { ...ex, [field]: value } : ex)
+                })
+            }
+        }));
+    };
+
+    const addExercise = (day) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, exercises: [...d.exercises, { name: '', sets: 3, reps: '10-12', rest: '60s', notes: '' }]
+                })
+            }
+        }));
+    };
+
+    const removeExercise = (day, exIdx) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, exercises: d.exercises.filter((_, i) => i !== exIdx)
+                })
+            }
+        }));
+    };
+
+    const updateMeal = (day, mIdx, field, value) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: d.meals.map((m, i) => i === mIdx ? { ...m, [field]: value } : m)
+                })
+            }
+        }));
+    };
+
+    const addMeal = (day) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: [...d.meals, { type: 'Breakfast', time: '', notes: '', items: [] }]
+                })
+            }
+        }));
+    };
+
+    const removeMeal = (day, mIdx) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: d.meals.filter((_, i) => i !== mIdx)
+                })
+            }
+        }));
+    };
+
+    const addMealItem = (day, mIdx) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: d.meals.map((m, i) => i !== mIdx ? m : { ...m, items: [...m.items, { name: '', portion: '', calories: '' }] })
+                })
+            }
+        }));
+    };
+
+    const updateMealItem = (day, mIdx, iIdx, field, value) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: d.meals.map((m, mi) => mi !== mIdx ? m : {
+                        ...m, items: m.items.map((item, ii) => ii !== iIdx ? item : { ...item, [field]: value })
+                    })
+                })
+            }
+        }));
+    };
+
+    const removeMealItem = (day, mIdx, iIdx) => {
+        setPlanPrograms(prev => ({
+            ...prev,
+            [activeProgramType]: {
+                ...prev[activeProgramType],
+                weeklySchedule: prev[activeProgramType].weeklySchedule.map(d => d.day !== day ? d : {
+                    ...d, meals: d.meals.map((m, mi) => mi !== mIdx ? m : {
+                        ...m, items: m.items.filter((_, ii) => ii !== iIdx)
+                    })
+                })
+            }
+        }));
     };
 
     // User Actions
@@ -372,6 +531,7 @@ const AdminDashboard = () => {
         { id: 'products', label: 'Products', icon: <Package size={18} /> },
         { id: 'classes', label: 'Classes', icon: <Calendar size={18} /> },
         { id: 'plans', label: 'Plans', icon: <FileText size={18} /> },
+        { id: 'programs', label: 'Programs', icon: <Dumbbell size={18} /> },
         { id: 'attendance', label: 'Attendance', icon: <CheckSquare size={18} /> },
         { id: 'payments', label: 'Payments', icon: <CreditCard size={18} /> },
     ];
@@ -413,24 +573,26 @@ const AdminDashboard = () => {
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             {[
-                                { title: 'Total Members', value: stats.userCount, icon: <Users size={20} /> },
-                                { title: 'Monthly Revenue', value: `$${stats.totalRevenue}`, icon: <DollarSign size={20} /> },
-                                { title: 'Active Orders', value: stats.orderCount, icon: <ShoppingBag size={20} /> },
-                                { title: 'Products in Store', value: stats.productCount, icon: <Activity size={20} /> },
+                                { title: 'Total Members', value: users.length || stats.userCount || stats.totalUsers || 0, icon: <Users size={18} />, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+                                { title: 'Monthly Revenue', value: `₹${stats.totalRevenue || 0}`, icon: <IndianRupee size={18} />, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                                { title: 'Active Orders', value: stats.orderCount || 0, icon: <ShoppingBag size={18} />, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                                { title: 'Products in Store', value: products.length || stats.productCount || stats.totalProducts || 0, icon: <Activity size={18} />, color: 'text-purple-500', bg: 'bg-purple-500/10' },
                             ].map((stat, i) => (
-                                <div key={i} className="bg-[#18181b] border border-white/10 rounded-xl p-6 flex flex-col justify-between h-32">
+                                <div key={i} className="bg-zinc-900 border border-zinc-800/50 rounded-xl p-5 flex flex-col justify-between h-28">
                                     <div className="flex justify-between items-start">
                                         <div className="text-sm font-medium text-zinc-400">{stat.title}</div>
-                                        <div className="text-zinc-500">{stat.icon}</div>
+                                        <div className={`w-8 h-8 ${stat.bg} ${stat.color} rounded-lg flex items-center justify-center`}>
+                                            {stat.icon}
+                                        </div>
                                     </div>
-                                    <div className="text-3xl font-semibold text-white">{stat.value}</div>
+                                    <div className="text-2xl font-bold text-white mt-1">{stat.value}</div>
                                 </div>
                             ))}
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-[#18181b] border border-white/10 rounded-xl p-6">
-                                <h3 className="text-sm font-medium text-zinc-400 mb-6">Weekly Revenue</h3>
+                            <div className="bg-zinc-900 border border-zinc-800/50 rounded-xl p-5">
+                                <h3 className="text-sm font-medium text-zinc-300 mb-6">Weekly Revenue Matrix</h3>
                                 <div style={{ width: '100%', height: 250, minWidth: 0, minHeight: 0 }}>
                                     <ResponsiveContainer width="99%" height="100%">
                                         <BarChart data={[
@@ -438,15 +600,15 @@ const AdminDashboard = () => {
                                             { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 }
                                         ]}>
                                             <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={false} />
-                                            <Tooltip cursor={{fill: '#27272a'}} contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
-                                            <Bar dataKey="sales" fill="#fff" radius={[4, 4, 0, 0]} />
+                                            <Tooltip cursor={{fill: '#27272a'}} contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+                                            <Bar dataKey="sales" fill="#f97316" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
                             </div>
                             
-                            <div className="bg-[#18181b] border border-white/10 rounded-xl p-6">
-                                <h3 className="text-sm font-medium text-zinc-400 mb-6">Active Members Growth</h3>
+                            <div className="bg-zinc-900 border border-zinc-800/50 rounded-xl p-5">
+                                <h3 className="text-sm font-medium text-zinc-300 mb-6">Active Members Growth</h3>
                                 <div style={{ width: '100%', height: 250, minWidth: 0, minHeight: 0 }}>
                                     <ResponsiveContainer width="99%" height="100%">
                                         <LineChart data={[
@@ -454,8 +616,8 @@ const AdminDashboard = () => {
                                             { name: 'Week 4', members: 160 }
                                         ]}>
                                             <XAxis dataKey="name" stroke="#52525b" fontSize={12} tickLine={false} axisLine={false} />
-                                            <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
-                                            <Line type="monotone" dataKey="members" stroke="#fff" strokeWidth={2} dot={{ r: 4, fill: '#18181b', stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                            <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+                                            <Line type="monotone" dataKey="members" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4, fill: '#18181b', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#3b82f6' }} />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -564,7 +726,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="p-4 flex justify-between items-center">
                                         <h3 className="font-medium text-white text-sm">{product.name}</h3>
-                                        <p className="text-zinc-400 text-sm">${product.price}</p>
+                                        <p className="text-zinc-400 text-sm">₹{product.price}</p>
                                     </div>
                                 </div>
                             ))}
@@ -744,7 +906,7 @@ const AdminDashboard = () => {
                                         <button onClick={() => handleDeletePlan(plan._id)} className="p-1.5 bg-red-500 text-white rounded-md hover:bg-red-600"><Trash2 size={14} /></button>
                                     </div>
                                     <h3 className="text-lg font-medium text-white mb-1">{plan.name}</h3>
-                                    <div className="text-2xl font-semibold text-white mb-4">${plan.price} <span className="text-xs text-zinc-500 font-normal">/ {plan.durationMonths} mo</span></div>
+                                    <div className="text-2xl font-semibold text-white mb-4">₹{plan.price} <span className="text-xs text-zinc-500 font-normal">/ {plan.durationMonths} mo</span></div>
                                     <ul className="space-y-1.5 mb-4">
                                         {plan.features.map((f, i) => (
                                             <li key={i} className="text-zinc-400 text-sm flex items-center gap-2">
@@ -764,73 +926,230 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
+
+                {/* PROGRAMS TAB */}
+                {activeTab === 'programs' && (() => {
+                    const prog = planPrograms[activeProgramType];
+                    const dayData = prog?.weeklySchedule?.find(d => d.day === activeProgramDay);
+                    return (
+                        <div className="space-y-4">
+                            {/* Header */}
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-base font-semibold text-white">Plan Programs</h2>
+                                    <p className="text-xs text-zinc-500 mt-0.5">Set weekly workout & diet for each membership plan</p>
+                                </div>
+                                <button onClick={handleSavePlanProgram} disabled={programSaving}
+                                    className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50">
+                                    {programSaving ? 'Saving...' : 'Save Program'}
+                                </button>
+                            </div>
+
+                            {/* Plan type selector */}
+                            <div className="flex gap-2">
+                                {['starter','pro','elite'].map(t => (
+                                    <button key={t} onClick={() => setActiveProgramType(t)}
+                                        className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all ${activeProgramType === t ? 'bg-white text-black' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'}`}>
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Day selector */}
+                            <div className="flex gap-2 overflow-x-auto pb-1">
+                                {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(day => (
+                                    <button key={day} onClick={() => setActiveProgramDay(day)}
+                                        className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-bold transition-all ${activeProgramDay === day ? 'bg-orange-500 text-white' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'}`}>
+                                        {day.slice(0,3)}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {prog && dayData && (
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {/* WORKOUTS */}
+                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                        <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Dumbbell size={15} className="text-orange-500" />
+                                                <span className="text-sm font-semibold text-white">Workouts — {activeProgramDay}</span>
+                                            </div>
+                                            <label className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
+                                                <input type="checkbox" checked={dayData.isRestDay || false} onChange={e => updateDayField(activeProgramDay, 'isRestDay', e.target.checked)} className="accent-orange-500" />
+                                                Rest Day
+                                            </label>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            <input placeholder="Focus (e.g. Chest & Triceps)" value={dayData.focus || ''} onChange={e => updateDayField(activeProgramDay, 'focus', e.target.value)}
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-orange-500" />
+                                            {!dayData.isRestDay && (
+                                                <>
+                                                    {dayData.exercises?.map((ex, i) => (
+                                                        <div key={i} className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 space-y-2">
+                                                            <div className="flex gap-2">
+                                                                <input placeholder="Exercise name" value={ex.name} onChange={e => updateExercise(activeProgramDay, i, 'name', e.target.value)}
+                                                                    className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                                <button onClick={() => removeExercise(activeProgramDay, i)} className="p-1.5 text-red-500 hover:bg-red-500/10 rounded"><X size={14} /></button>
+                                                            </div>
+                                                            <div className="grid grid-cols-3 gap-2">
+                                                                <input placeholder="Sets" type="number" value={ex.sets} onChange={e => updateExercise(activeProgramDay, i, 'sets', e.target.value)}
+                                                                    className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                                <input placeholder="Reps e.g 10-12" value={ex.reps} onChange={e => updateExercise(activeProgramDay, i, 'reps', e.target.value)}
+                                                                    className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                                <input placeholder="Rest e.g 60s" value={ex.rest} onChange={e => updateExercise(activeProgramDay, i, 'rest', e.target.value)}
+                                                                    className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                            </div>
+                                                            <input placeholder="Notes (optional)" value={ex.notes || ''} onChange={e => updateExercise(activeProgramDay, i, 'notes', e.target.value)}
+                                                                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => addExercise(activeProgramDay)}
+                                                        className="w-full py-2 border border-dashed border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1">
+                                                        <Plus size={14} /> Add Exercise
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* DIET */}
+                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                        <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
+                                            <Utensils size={15} className="text-emerald-500" />
+                                            <span className="text-sm font-semibold text-white">Diet — {activeProgramDay}</span>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            {dayData.meals?.map((meal, mi) => (
+                                                <div key={mi} className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 space-y-2">
+                                                    <div className="flex gap-2 items-center">
+                                                        <select value={meal.type} onChange={e => updateMeal(activeProgramDay, mi, 'type', e.target.value)}
+                                                            className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white outline-none">
+                                                            {['Breakfast','Pre-Workout','Lunch','Post-Workout','Dinner','Snack'].map(t => <option key={t}>{t}</option>)}
+                                                        </select>
+                                                        <input placeholder="Time e.g 08:00" value={meal.time || ''} onChange={e => updateMeal(activeProgramDay, mi, 'time', e.target.value)}
+                                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none" />
+                                                        <button onClick={() => removeMeal(activeProgramDay, mi)} className="ml-auto p-1.5 text-red-500 hover:bg-red-500/10 rounded"><X size={14} /></button>
+                                                    </div>
+                                                    {meal.items?.map((item, ii) => (
+                                                        <div key={ii} className="flex gap-2 items-center">
+                                                            <input placeholder="Food item" value={item.name} onChange={e => updateMealItem(activeProgramDay, mi, ii, 'name', e.target.value)}
+                                                                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-600 outline-none" />
+                                                            <input placeholder="Portion" value={item.portion || ''} onChange={e => updateMealItem(activeProgramDay, mi, ii, 'portion', e.target.value)}
+                                                                className="w-20 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-600 outline-none" />
+                                                            <input placeholder="kcal" type="number" value={item.calories || ''} onChange={e => updateMealItem(activeProgramDay, mi, ii, 'calories', e.target.value)}
+                                                                className="w-16 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-600 outline-none" />
+                                                            <button onClick={() => removeMealItem(activeProgramDay, mi, ii)} className="p-1 text-red-500 hover:bg-red-500/10 rounded"><X size={12} /></button>
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => addMealItem(activeProgramDay, mi)}
+                                                        className="text-xs text-zinc-600 hover:text-zinc-400 flex items-center gap-1 transition-colors">
+                                                        <Plus size={12} /> Add food item
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button onClick={() => addMeal(activeProgramDay)}
+                                                className="w-full py-2 border border-dashed border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1">
+                                                <Plus size={14} /> Add Meal
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
+
                 {/* ATTENDANCE TAB */}
                 {activeTab === 'attendance' && (
-                    <div>
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 mb-6">
-                            <h2 className="text-xl font-bold text-white mb-4">Daily Check-in</h2>
-                            <div className="flex gap-4 items-end">
-                                <div className="flex-1">
-                                    <label className="text-gray-400 text-sm mb-1 block">Member ID or Email</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Search member..."
-                                        className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-gym-accent outline-none"
-                                        value={userSearch}
-                                        onChange={e => setUserSearch(e.target.value)}
-                                    />
+
+                    <div className="space-y-6">
+                        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                            <h2 className="text-lg font-bold text-white mb-5 uppercase tracking-wider flex items-center gap-2">
+                                <Activity size={20} className="text-orange-500" /> Facility Access Protocol
+                            </h2>
+                            <div className="flex flex-col md:flex-row gap-4 items-end">
+                                <div className="flex-1 w-full">
+                                    <label className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2 block">Member Identity Search</label>
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                                        <input
+                                            type="text"
+                                            placeholder="Scan ID, Name, or Email..."
+                                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 outline-none transition-all"
+                                            value={userSearch}
+                                            onChange={e => setUserSearch(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <button className="bg-gym-accent text-white px-6 py-3 rounded-lg font-bold hover:bg-gym-accent/90 mb-[1px]">
-                                    Check In
-                                </button>
                             </div>
 
                             {/* User Search Results for Check-in */}
                             {userSearch && (
-                                <div className="mt-4 space-y-2">
-                                    {users.filter(u => u.username.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())).slice(0, 5).map(u => (
-                                        <div key={u._id} className="bg-black/30 p-3 rounded-lg flex justify-between items-center border border-white/5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gym-accent/20 flex items-center justify-center text-gym-accent font-bold text-xs">{u.username.charAt(0)}</div>
+                                <div className="mt-4 space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                    {users.filter(u => 
+                                        u.username.toLowerCase().includes(userSearch.toLowerCase()) || 
+                                        u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+                                        (u.memberId && u.memberId.toLowerCase().includes(userSearch.toLowerCase()))
+                                    ).slice(0, 5).map(u => (
+                                        <div key={u._id} className="bg-zinc-900/80 p-4 rounded-xl flex justify-between items-center border border-zinc-800 hover:border-zinc-700 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 font-black text-sm">
+                                                    {u.username.charAt(0).toUpperCase()}
+                                                </div>
                                                 <div>
-                                                    <div className="text-white font-bold">{u.username}</div>
-                                                    <div className="text-xs text-gray-400">{u.email}</div>
+                                                    <div className="text-white font-bold text-sm flex items-center gap-2">
+                                                        {u.username}
+                                                        {u.memberId && <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-mono">#{u.memberId}</span>}
+                                                    </div>
+                                                    <div className="text-xs text-zinc-500 font-medium">{u.email}</div>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleCheckIn(u._id)} className="bg-green-600/20 text-green-500 px-3 py-1 rounded-lg text-sm font-bold hover:bg-green-600/30">Check In</button>
-                                                <button onClick={() => handleCheckOut(u._id)} className="bg-red-600/20 text-red-500 px-3 py-1 rounded-lg text-sm font-bold hover:bg-red-600/30">Check Out</button>
+                                                <button onClick={() => handleCheckIn(u._id)} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-500/20 uppercase tracking-wider transition-colors">Authorize Entry</button>
+                                                <button onClick={() => handleCheckOut(u._id)} className="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500/20 uppercase tracking-wider transition-colors">Log Exit</button>
                                             </div>
                                         </div>
                                     ))}
+                                    {users.filter(u => u.username.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()) || (u.memberId && u.memberId.toLowerCase().includes(userSearch.toLowerCase()))).length === 0 && (
+                                        <div className="text-center py-4 text-zinc-500 text-sm font-medium">No members found matching query.</div>
+                                    )}
                                 </div>
                             )}
                         </div>
 
-                        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
-                            <h2 className="text-xl font-bold text-white mb-4">Active Check-ins</h2>
+                        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                            <h2 className="text-sm font-bold text-zinc-400 mb-6 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Active Deployments ({activeCheckIns.length})
+                            </h2>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="border-b border-white/10 text-gray-400 text-xs uppercase">
-                                            <th className="pb-3">Member</th>
-                                            <th className="pb-3">Check-in Time</th>
-                                            <th className="pb-3">Status</th>
-                                            <th className="pb-3 text-right">Action</th>
+                                        <tr className="border-b border-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                                            <th className="pb-4 px-2">Personnel</th>
+                                            <th className="pb-4 px-2">Entry Time</th>
+                                            <th className="pb-4 px-2">Status</th>
+                                            <th className="pb-4 px-2 text-right">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="text-white text-sm divide-y divide-white/5">
+                                    <tbody className="text-white text-sm divide-y divide-zinc-800/50">
                                         {activeCheckIns && activeCheckIns.length > 0 ? activeCheckIns.map(a => (
-                                            <tr key={a._id} className="group hover:bg-white/5">
-                                                <td className="py-3">{a.user?.username || 'Unknown'}</td>
-                                                <td className="py-3">{new Date(a.checkIn).toLocaleTimeString()}</td>
-                                                <td className="py-3"><span className="text-green-500 bg-green-500/10 px-2 py-1 rounded text-xs font-bold">Present</span></td>
-                                                <td className="py-3 text-right">
-                                                    <button onClick={() => handleCheckOut(a.user?._id)} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase">Check Out</button>
+                                            <tr key={a._id} className="group hover:bg-zinc-800/30 transition-colors">
+                                                <td className="py-4 px-2">
+                                                    <div className="font-bold text-sm text-zinc-100">{a.user?.username || 'Unknown'}</div>
+                                                    {a.user?.memberId && <div className="text-[10px] font-mono text-zinc-500 mt-0.5">ID: {a.user.memberId}</div>}
+                                                </td>
+                                                <td className="py-4 px-2 font-mono text-zinc-400 text-xs">
+                                                    {new Date(a.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </td>
+                                                <td className="py-4 px-2">
+                                                    <span className="text-emerald-400 border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">Operational</span>
+                                                </td>
+                                                <td className="py-4 px-2 text-right">
+                                                    <button onClick={() => handleCheckOut(a.user?._id)} className="text-zinc-500 hover:text-red-400 text-[10px] font-black uppercase tracking-wider transition-colors border border-transparent hover:border-red-500/20 hover:bg-red-500/10 px-3 py-1.5 rounded-md">Log Exit</button>
                                                 </td>
                                             </tr>
                                         )) : (
-                                            <tr><td colSpan="4" className="py-4 text-center text-gray-500">No active check-ins</td></tr>
+                                            <tr><td colSpan="4" className="py-8 text-center text-zinc-600 text-sm font-bold">Facility is currently empty</td></tr>
                                         )}
                                     </tbody>
                                 </table>
@@ -871,7 +1190,7 @@ const AdminDashboard = () => {
                                             <td className="p-4 font-mono text-xs text-gray-400">{payment.invoiceNumber}</td>
                                             <td className="p-4 font-bold">{payment.user?.username || 'Unknown'}</td>
                                             <td className="p-4">{payment.plan?.name || 'Manual'}</td>
-                                            <td className="p-4 text-gym-accent font-bold">${payment.amount}</td>
+                                            <td className="p-4 text-gym-accent font-bold">₹{payment.amount}</td>
                                             <td className="p-4">{new Date(payment.date).toLocaleDateString()}</td>
                                             <td className="p-4 capitalize">{payment.method}</td>
                                             <td className="p-4">
@@ -910,11 +1229,11 @@ const AdminDashboard = () => {
                                         <select className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-gym-accent outline-none"
                                             value={paymentForm.planId} onChange={e => setPaymentForm({ ...paymentForm, planId: e.target.value })}>
                                             <option value="">None</option>
-                                            {plans.map(p => <option key={p._id} value={p._id}>{p.name} - ${p.price}</option>)}
+                                            {plans.map(p => <option key={p._id} value={p._id}>{p.name} - ₹{p.price}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 mb-1 block">Amount ($)</label>
+                                        <label className="text-xs text-gray-400 mb-1 block">Amount (₹)</label>
                                         <input required type="number" step="0.01" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-gym-accent outline-none"
                                             value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} />
                                     </div>

@@ -36,9 +36,9 @@ const Trainers = () => {
     return (
         <section className="py-20 bg-gym-dark border-t border-white/5">
             <div className="container mx-auto px-4 max-w-6xl">
-                <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Our Expert Trainers</h2>
-                    <p className="text-sm text-zinc-400 max-w-xl mx-auto">
+                <div className="text-center mb-14">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Our Expert Trainers</h2>
+                    <p className="text-base text-zinc-400 max-w-xl mx-auto">
                         Work with certified professionals to reach your fitness goals.
                     </p>
                 </div>
@@ -48,7 +48,7 @@ const Trainers = () => {
                         <div className="spinner" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
                         {trainers.map((trainer) => (
                             <div key={trainer._id} className="clean-card overflow-hidden flex flex-col group">
                                 <div className="aspect-[3/4] bg-zinc-800 relative overflow-hidden">
@@ -59,18 +59,18 @@ const Trainers = () => {
                                         onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; }}
                                     />
                                 </div>
-                                <div className="p-3 text-center border-t border-white/5">
-                                    <h3 className="text-sm font-semibold text-white truncate">{trainer.name}</h3>
-                                    <p className="text-[10px] text-zinc-400 uppercase mb-2">{trainer.role}</p>
-                                    <div className="flex justify-center gap-2 text-zinc-500">
+                                <div className="p-5 text-center border-t border-white/5">
+                                    <h3 className="text-base font-semibold text-white truncate">{trainer.name}</h3>
+                                    <p className="text-xs text-zinc-400 uppercase mb-3">{trainer.role}</p>
+                                    <div className="flex justify-center gap-3 text-zinc-500">
                                         {trainer.socials?.instagram && (
-                                            <a href={trainer.socials.instagram} className="hover:text-gym-accent transition-colors"><Instagram size={14} /></a>
+                                            <a href={trainer.socials.instagram} className="hover:text-gym-accent transition-colors"><Instagram size={18} /></a>
                                         )}
                                         {trainer.socials?.twitter && (
-                                            <a href={trainer.socials.twitter} className="hover:text-gym-accent transition-colors"><Twitter size={14} /></a>
+                                            <a href={trainer.socials.twitter} className="hover:text-gym-accent transition-colors"><Twitter size={18} /></a>
                                         )}
                                         {trainer.socials?.linkedin && (
-                                            <a href={trainer.socials.linkedin} className="hover:text-gym-accent transition-colors"><Linkedin size={14} /></a>
+                                            <a href={trainer.socials.linkedin} className="hover:text-gym-accent transition-colors"><Linkedin size={18} /></a>
                                         )}
                                     </div>
                                 </div>

@@ -1,131 +1,135 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { Utensils } from 'lucide-react';
 import api from '../api/axios';
-import toast from 'react-hot-toast';
 
 const Diet = () => {
-    const [diets, setDiets] = useState([]);
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [selected, setSelected] = useState(null);
+    const [planProgram, setPlanProgram] = useState(null);
+    const [profileData, setProfileData] = useState(null);
+    const [activeProgramDay, setActiveProgramDay] = useState('Monday');
 
-    useEffect(() => { fetchDiets(); }, []);
-
-    const fetchDiets = async () => {
-        try {
-            const res = await api.get('/diets');
-            setDiets(res.data);
-        } catch {
-            toast.error('Failed to load diet plans');
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
         }
-    };
+
+        const loadData = async () => {
+            try {
+                const { data } = await api.get('/users/profile');
+                setProfileData(data);
+                if (data.membershipType && data.membershipType !== 'custom') {
+                    const progRes = await api.get(`/plan-programs/${data.membershipType}`);
+                    setPlanProgram(progRes.data);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, [user, navigate]);
+
+    if (loading) {
+        return (
+            <div className="page-container flex justify-center items-center min-h-[60vh]">
+                <div className="spinner" />
+            </div>
+        );
+    }
+
+    if (!profileData?.membershipType || profileData.membershipType === 'custom') {
+        return (
+            <div className="page-container">
+                <div className="section-header">
+                    <h1 className="section-title">Weekly Nutrition Plan</h1>
+                    <p className="section-subtitle">Your personalized regimen.</p>
+                </div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+                    <Utensils size={32} className="mx-auto text-zinc-700 mb-3" />
+                    <h3 className="text-sm font-bold text-white mb-1">No Active Plan</h3>
+                    <p className="text-xs text-zinc-500">You do not have a standard membership plan. Contact an admin to configure your diet.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page-container">
-            <div className="section-header">
-                <h1 className="section-title">Nutrition Plans</h1>
-                <p className="section-subtitle">Goal-oriented meal protocols.</p>
+            <div className="section-header flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="section-title">Weekly Nutrition Plan</h1>
+                    <p className="section-subtitle">{profileData.membershipType.toUpperCase()} Plan — Mon to Sat</p>
+                </div>
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase rounded-lg border border-emerald-500/20">
+                    {profileData.membershipType}
+                </span>
             </div>
 
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="spinner" />
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {diets.map((diet) => (
-                        <div key={diet._id} className="clean-card p-5 flex flex-col">
-                            <div className="flex justify-between items-start mb-3">
-                                <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-gym-accent/10 text-gym-accent">
-                                    {diet.goal || 'Standard'}
-                                </span>
-                                <span className="text-sm font-bold text-white">
-                                    {diet.calories || diet.totalCalories} <span className="text-[10px] text-zinc-500 font-normal">kcal</span>
-                                </span>
-                            </div>
-
-                            <h3 className="text-base font-semibold text-white mb-1">{diet.title || diet.name}</h3>
-                            <p className="text-xs text-zinc-400 mb-4 line-clamp-2">{diet.description}</p>
-
-                            {diet.macros && (
-                                <div className="grid grid-cols-3 gap-2 mb-4">
-                                    {Object.entries(diet.macros).map(([key, val]) => (
-                                        <div key={key} className="bg-white/5 rounded p-2 text-center">
-                                            <div className="text-xs font-semibold text-white">{val}</div>
-                                            <div className="text-[9px] text-zinc-500 uppercase">{key}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <button
-                                onClick={() => setSelected(diet)}
-                                className="mt-auto btn-outline w-full py-2 text-xs"
-                            >
-                                View Details
-                            </button>
-                        </div>
+            <div className="space-y-4">
+                {/* Day selector */}
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(day => (
+                        <button key={day} onClick={() => setActiveProgramDay(day)}
+                            className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                                activeProgramDay === day
+                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                    : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                            }`}>{day}
+                        </button>
                     ))}
                 </div>
-            )}
 
-            {/* Diet Modal */}
-            {selected && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelected(null)}>
-                    <div className="clean-card w-full max-w-xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-gym-gray border-b border-white/5 p-4 flex justify-between items-center z-10">
-                            <div>
-                                <span className="text-[10px] text-gym-accent uppercase font-bold">{selected.goal}</span>
-                                <h2 className="text-lg font-bold text-white leading-tight">{selected.title || selected.name}</h2>
+                {(() => {
+                    const dayData = planProgram?.weeklySchedule?.find(d => d.day === activeProgramDay);
+                    if (!dayData) return <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500 text-sm">No data for {activeProgramDay}</div>;
+                    
+                    return (
+                        <div className="space-y-4">
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex items-center justify-between">
+                                <span className="text-sm font-bold text-white">{activeProgramDay} Nutrition</span>
+                                {dayData.totalCalories && <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-lg font-bold">{dayData.totalCalories} kcal Total</span>}
                             </div>
-                            <button onClick={() => setSelected(null)} className="text-zinc-400 hover:text-white p-1">
-                                <X size={18} />
-                            </button>
-                        </div>
 
-                        <div className="p-4 md:p-6 space-y-6">
-                            <p className="text-sm text-zinc-400">{selected.description}</p>
-                            
-                            {selected.macros && (
-                                <div className="grid grid-cols-3 gap-3">
-                                    {Object.entries(selected.macros).map(([key, val]) => (
-                                        <div key={key} className="bg-white/5 rounded-lg p-3 text-center border border-white/5">
-                                            <div className="text-sm font-bold text-white">{val}</div>
-                                            <div className="text-[10px] text-zinc-500 uppercase">{key}</div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {dayData.meals?.map((meal, i) => (
+                                    <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+                                        <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-800/20">
+                                            <h4 className="text-sm font-bold text-white uppercase">{meal.type}</h4>
+                                            {meal.time && <span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-2 py-1 rounded">{meal.time}</span>}
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div>
-                                <h3 className="text-sm font-semibold text-white mb-3 border-b border-white/5 pb-2">Meals</h3>
-                                <div className="space-y-3">
-                                    {selected.dailyMeals?.map((meal, i) => (
-                                        <div key={i} className="bg-white/5 rounded-lg p-3">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <h4 className="text-xs font-bold text-white uppercase">{meal.type}</h4>
-                                                {meal.time && <span className="text-[10px] text-zinc-500">{meal.time}</span>}
-                                            </div>
-                                            <div className="space-y-1.5 border-t border-white/5 pt-2 mt-1">
-                                                {meal.items?.map((item, j) => (
-                                                    <div key={j} className="flex justify-between items-center text-xs">
-                                                        <span className="text-zinc-300">{item.name}</span>
-                                                        <div className="flex gap-2 text-zinc-500 text-[10px]">
-                                                            <span>{item.portion}</span>
-                                                            {item.calories && <span className="text-gym-accent">{item.calories} cal</span>}
-                                                        </div>
+                                        <div className="p-5 space-y-3">
+                                            {meal.items?.map((item, j) => (
+                                                <div key={j} className="flex items-center justify-between border-b border-zinc-800/50 pb-2 last:border-0 last:pb-0">
+                                                    <span className="text-sm text-zinc-200">{item.name}</span>
+                                                    <div className="flex gap-3 text-xs text-right">
+                                                        <span className="text-zinc-500 w-16">{item.portion}</span>
+                                                        {item.calories && <span className="text-emerald-400 font-bold w-12">{item.calories} cal</span>}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                </div>
+                                            ))}
+                                            {(!meal.items || meal.items.length === 0) && (
+                                                <p className="text-xs text-zinc-600 text-center py-2">No items listed</p>
+                                            )}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
+                                {(!dayData.meals || dayData.meals.length === 0) && (
+                                    <div className="col-span-full p-8 text-center text-zinc-600 text-sm border border-dashed border-zinc-800 rounded-xl">
+                                        No meals specified for this day.
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    </div>
-                </div>
-            )}
+                    );
+                })()}
+            </div>
         </div>
     );
 };

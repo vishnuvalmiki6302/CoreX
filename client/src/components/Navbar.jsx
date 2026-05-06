@@ -11,12 +11,22 @@ const Navbar = () => {
     const { user, logout } = useAuth();
     const { cart } = useCart();
 
-    const navLinks = [
+    // Base links visible to everyone
+    const publicLinks = [
         { name: 'Home', path: '/' },
         { name: 'Classes', path: '/classes' },
         { name: 'Store', path: '/products' },
+    ];
+
+    // Member-only links (not for admin or trainer — they run the gym, not use it)
+    const memberLinks = [
         { name: 'Exercises', path: '/exercises' },
         { name: 'Diet', path: '/diets' },
+    ];
+
+    const navLinks = [
+        ...publicLinks,
+        ...((user && user.role === 'user') ? memberLinks : []),
     ];
 
     useEffect(() => {

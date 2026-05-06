@@ -6,10 +6,27 @@ import {
     User, Mail, Calendar, Activity, Save, Ruler, Weight, Phone,
     MapPin, HeartPulse, AlertCircle, Settings, Dumbbell, Utensils,
     CreditCard, CheckCircle2, ChevronRight, Camera, LogOut,
-    TrendingUp, Clock, Info, Shield, Edit3, Trash2
+    TrendingUp, Clock, Info, Shield, Edit3, Trash2, X, Zap
 } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+
+const InputField = ({ label, icon: Icon, type = 'text', value, onChange, placeholder, disabled }) => (
+    <div className="space-y-1.5">
+        <label className="text-xs font-medium text-zinc-400">{label}</label>
+        <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>
+            {Icon && <Icon size={15} className="absolute left-3 text-zinc-500 pointer-events-none" />}
+            <input
+                type={type}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                disabled={disabled}
+                className={`w-full h-10 ${Icon ? 'pl-9' : 'pl-3'} pr-3 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all disabled:bg-zinc-900 disabled:cursor-not-allowed`}
+            />
+        </div>
+    </div>
+);
 
 const Profile = () => {
     const { user, logout } = useAuth();
@@ -19,13 +36,13 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isEditing, setIsEditing] = useState(false);
 
-    // States for data
     const [attendance, setAttendance] = useState([]);
     const [payments, setPayments] = useState([]);
     const [workoutPlans, setWorkoutPlans] = useState([]);
     const [dietPlans, setDietPlans] = useState([]);
+    const [planProgram, setPlanProgram] = useState(null);
+    const [activeProgramDay, setActiveProgramDay] = useState('Monday');
 
-    // Form state
     const [formData, setFormData] = useState({
         username: '',
         age: '',
@@ -44,10 +61,7 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
+        if (!user) { navigate('/login'); return; }
         fetchUserProfile();
         fetchInitialData();
     }, [user, navigate]);
@@ -69,10 +83,21 @@ const Profile = () => {
         }
     };
 
+    const fetchPlanProgram = async (planType) => {
+        if (!planType || planType === 'none') return;
+        try {
+            const { data } = await api.get(`/plan-programs/${planType.toLowerCase()}`);
+            setPlanProgram(data);
+        } catch (error) {
+            console.error('No plan program found for this plan type');
+        }
+    };
+
     const fetchUserProfile = async () => {
         try {
             const { data } = await api.get('/users/profile');
             setProfileData(data);
+            if (data.membershipType) fetchPlanProgram(data.membershipType);
             setFormData({
                 username: data.username || '',
                 age: data.profile?.age || '',
@@ -86,7 +111,6 @@ const Profile = () => {
                 emergencyContactPhone: data.emergencyContact?.phone || '',
                 emergencyContactRelation: data.emergencyContact?.relation || ''
             });
-
             if (data.profilePhoto) {
                 const serverUrl = import.meta.env.VITE_API_URL || '';
                 const photoUrl = data.profilePhoto.startsWith('http') ? data.profilePhoto : `${serverUrl}${data.profilePhoto}`;
@@ -104,20 +128,17 @@ const Profile = () => {
         if (file) {
             setSelectedFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
+            reader.onloadend = () => setPreviewImage(reader.result);
             reader.readAsDataURL(file);
         }
     };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        const loadToast = toast.loading("Updating your profile...");
+        const loadToast = toast.loading("Saving changes...");
         try {
             const goalsArray = formData.goals.split(',').map(g => g.trim()).filter(g => g);
             const formDataPayload = new FormData();
-
             formDataPayload.append('username', formData.username);
             formDataPayload.append('profile', JSON.stringify({
                 age: Number(formData.age),
@@ -125,7 +146,6 @@ const Profile = () => {
                 height: Number(formData.height),
                 goals: goalsArray
             }));
-
             formDataPayload.append('phoneNumber', formData.phoneNumber);
             formDataPayload.append('address', formData.address);
             formDataPayload.append('medicalNotes', formData.medicalNotes);
@@ -134,856 +154,486 @@ const Profile = () => {
                 phone: formData.emergencyContactPhone,
                 relation: formData.emergencyContactRelation
             }));
-
-            if (selectedFile) {
-                formDataPayload.append('profilePhoto', selectedFile);
-            }
-
+            if (selectedFile) formDataPayload.append('profilePhoto', selectedFile);
             const { data } = await api.put('/users/profile', formDataPayload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-
             setProfileData(data);
             setIsEditing(false);
-            toast.success("Profile forged successfully!", { id: loadToast });
+            toast.success("Profile updated successfully.", { id: loadToast });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to update profile", { id: loadToast });
         }
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-16 h-16 border-4 border-gym-accent border-t-transparent rounded-full"
-                />
-                <p className="text-zinc-400 font-black tracking-widest uppercase text-xs">Synchronizing Profile...</p>
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-zinc-500 text-sm font-medium">Synchronizing profile...</p>
             </div>
         </div>
     );
 
     const tabs = [
-        { id: 'overview', name: 'Overview', icon: <Activity size={18} /> },
-        { id: 'details', name: 'Health & Info', icon: <Shield size={18} /> },
-        { id: 'workout', name: 'Workouts', icon: <Dumbbell size={18} /> },
-        { id: 'diet', name: 'Nutrition', icon: <Utensils size={18} /> },
-        { id: 'attendance', name: 'Activity', icon: <Calendar size={18} /> },
-        { id: 'payments', name: 'Billing', icon: <CreditCard size={18} /> },
+        { id: 'overview', name: 'Overview', icon: Activity },
+        { id: 'details', name: 'Profile', icon: User },
+        { id: 'attendance', name: 'Attendance', icon: Calendar },
+        { id: 'payments', name: 'Billing', icon: CreditCard },
     ];
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-white pt-24 pb-20 px-4 md:px-8 selection:bg-gym-accent selection:text-white">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-zinc-950 text-zinc-100" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            <div className="max-w-6xl mx-auto px-4 md:px-6 pt-24 pb-16">
 
-                {/* PREMIER PROFILE HEADER */}
-                <div className="relative mb-12">
-                    <div className="h-48 md:h-64 w-full rounded-[2.5rem] overflow-hidden relative border border-white/5 shadow-2xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-gym-accent via-black to-zinc-900" />
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay" />
-                        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+                {/* ─── PROFILE HEADER ─── */}
+                <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl mb-6 overflow-hidden">
+                    <div className="h-32 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-950 relative">
+                        <div className="absolute inset-0 opacity-30"
+                            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #f9731611 0%, transparent 60%), radial-gradient(circle at 80% 50%, #ffffff05 0%, transparent 60%)' }} />
                     </div>
+                    <div className="px-6 pb-6 relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 -mt-12">
+                            <div className="flex items-end gap-5">
+                                {/* Avatar */}
+                                <div className="relative group">
+                                    <div className="w-24 h-24 rounded-2xl border-4 border-zinc-900 shadow-2xl bg-zinc-800 overflow-hidden flex items-center justify-center text-zinc-500">
+                                        {previewImage
+                                            ? <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+                                            : <span className="text-3xl font-bold text-zinc-400">{profileData?.username?.charAt(0)?.toUpperCase() || 'U'}</span>
+                                        }
+                                    </div>
+                                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center justify-center cursor-pointer shadow-lg transition-all transform hover:scale-110 active:scale-95">
+                                        <Camera size={14} />
+                                        <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
+                                    </label>
+                                </div>
+                                <div className="mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <h1 className="text-2xl font-bold text-white tracking-tight">{profileData?.username || 'Member'}</h1>
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold ${
+                                            profileData?.status === 'active'
+                                                ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20'
+                                                : 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20'
+                                        }`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${profileData?.status === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                                            {profileData?.status === 'active' ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-400">
+                                        <span className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md"><Mail size={13} className="text-zinc-500" />{profileData?.email}</span>
+                                        {profileData?.memberId && <span className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md"><Shield size={13} className="text-zinc-500" />#{profileData.memberId}</span>}
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div className="absolute -bottom-16 left-6 md:left-12 flex flex-col md:flex-row items-end md:items-center gap-6 w-[calc(100%-3rem)] md:w-auto">
-                        <div className="relative group">
-                            <motion.div
-                                whileHover={{ scale: 1.02 }}
-                                className="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] bg-zinc-900 border-[6px] border-[#09090b] shadow-2xl overflow-hidden flex items-center justify-center text-6xl font-black text-gym-accent uppercase"
-                            >
-                                {previewImage ? (
-                                    <img src={previewImage} alt="Profile" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
-                                ) : (
-                                    profileData?.username?.charAt(0) || 'U'
-                                )}
-                            </motion.div>
-                            <label className="absolute -bottom-2 -right-2 p-3 bg-gym-accent text-white rounded-2xl shadow-xl cursor-pointer hover:scale-110 active:scale-95 transition-all border border-white/20 z-10">
-                                <Camera size={20} />
-                                <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
-                            </label>
-                        </div>
-
-                        <div className="mb-4 md:mb-6 flex-grow">
                             <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-lg">
-                                    {profileData?.username || 'CoreX User'}
-                                </h1>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${profileData?.status === 'active' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                                    {profileData?.status || 'Active'}
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-zinc-400 text-sm font-bold uppercase tracking-wider">
-                                <span className="flex items-center gap-2"><Mail size={16} className="text-gym-accent" /> {profileData?.email}</span>
-                                {profileData?.memberId && <span className="flex items-center gap-2"><Shield size={16} className="text-gym-accent" /> ID: {profileData.memberId}</span>}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 mb-6">
-                            <button
-                                onClick={() => {
-                                    setIsEditing(!isEditing);
-                                    if (!isEditing) setActiveTab('details');
-                                }}
-                                className={`px-6 py-3 rounded-2xl font-black flex items-center gap-2 text-xs uppercase tracking-widest transition-all shadow-xl ${isEditing
-                                    ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                                    : 'bg-white text-black hover:bg-gym-accent hover:text-white'
+                                <button
+                                    onClick={() => { setIsEditing(!isEditing); if (!isEditing) setActiveTab('details'); }}
+                                    className={`inline-flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all ${
+                                        isEditing
+                                            ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                                            : 'bg-white text-zinc-950 hover:bg-zinc-200 shadow-lg shadow-white/5'
                                     }`}
-                            >
-                                {isEditing ? <Trash2 size={18} /> : <Settings size={18} />}
-                                {isEditing ? 'Discard' : 'Settings'}
-                            </button>
+                                >
+                                    {isEditing ? <><X size={16} /> Cancel</> : <><Settings size={16} /> Edit Profile</>}
+                                </button>
+                                <button
+                                    onClick={logout}
+                                    className="inline-flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                                >
+                                    <LogOut size={16} /> Sign out
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* CONTENT GRID */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-28">
+                {/* ─── MEMBERSHIP BADGE ─── */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    {[
+                        { label: 'Membership', value: profileData?.membershipType || 'Premium', icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+                        { label: 'Expires', value: profileData?.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—', icon: Clock, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                        { label: 'Sessions', value: attendance.length, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                    ].map((item, i) => (
+                        <div key={i} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-5 flex items-center gap-4 shadow-xl">
+                            <div className={`w-11 h-11 ${item.bg} rounded-xl flex items-center justify-center shadow-inner`}>
+                                <item.icon size={20} className={item.color} />
+                            </div>
+                            <div>
+                                <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{item.label}</p>
+                                <p className="text-base font-bold text-white mt-0.5">{item.value}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
-                    {/* SIDEBAR NAVIGATION */}
-                    <div className="lg:col-span-3 space-y-4">
-                        <div className="bg-[#18181b]/50 backdrop-blur-xl border border-white/5 rounded-[2rem] p-3 sticky top-28 shadow-2xl">
-                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] px-4 py-4">Terminal</p>
-                            <nav className="space-y-1.5">
-                                {tabs.map((tab) => (
+                {/* ─── TABS + CONTENT ─── */}
+                <div className="flex flex-col lg:flex-row gap-6">
+
+                    {/* Sidebar tabs */}
+                    <div className="lg:w-60 shrink-0">
+                        <nav className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl shadow-xl overflow-hidden sticky top-24">
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                return (
                                     <button
                                         key={tab.id}
-                                        onClick={() => {
-                                            setActiveTab(tab.id);
-                                            if (tab.id !== 'details') setIsEditing(false);
-                                        }}
-                                        className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black transition-all group ${activeTab === tab.id
-                                            ? 'bg-gym-accent text-white shadow-lg shadow-gym-accent/30 translate-x-1'
-                                            : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                                            }`}
+                                        onClick={() => { setActiveTab(tab.id); if (tab.id !== 'details') setIsEditing(false); }}
+                                        className={`w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-all border-b border-zinc-800/50 last:border-0 ${
+                                            activeTab === tab.id
+                                                ? 'bg-gradient-to-r from-orange-500/20 to-transparent text-orange-400 border-r-2 border-r-orange-500'
+                                                : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-200'
+                                        }`}
                                     >
-                                        <span className={`${activeTab === tab.id ? 'text-white' : 'group-hover:text-gym-accent'} transition-colors`}>
-                                            {tab.icon}
-                                        </span>
-                                        <span className="text-sm uppercase tracking-widest">{tab.name}</span>
-                                        {activeTab === tab.id && <motion.div layoutId="nav-indicator" className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />}
+                                        <Icon size={18} className={activeTab === tab.id ? 'text-orange-400' : 'text-zinc-600'} />
+                                        {tab.name}
                                     </button>
-                                ))}
-                            </nav>
-                            <div className="h-px bg-white/5 my-4 mx-4" />
-                            <button
-                                onClick={logout}
-                                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black text-red-500 hover:bg-red-500/10 transition-all uppercase tracking-widest text-sm"
-                            >
-                                <LogOut size={18} />
-                                <span>Termination</span>
-                            </button>
-                        </div>
-
-                        {/* MINI MEMBERSHIP STATUS */}
-                        <div className="bg-gradient-to-br from-gym-accent/20 to-black border border-gym-accent/20 rounded-[2rem] p-6 hidden lg:block overflow-hidden relative">
-                            <div className="relative z-10">
-                                <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.2em] mb-2">Membership Status</p>
-                                <p className="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">{profileData?.membershipType || 'PREMIUM'}</p>
-                                <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
-                                    <Clock size={14} />
-                                    Expires: {profileData?.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString() : 'Never'}
-                                </div>
-                            </div>
-                            <Activity className="absolute -bottom-6 -right-6 text-white/5" size={100} />
-                        </div>
+                                );
+                            })}
+                        </nav>
                     </div>
 
-                    {/* MAIN CONTENT AREA */}
-                    <div className="lg:col-span-9">
+                    {/* Main content */}
+                    <div className="flex-1 min-w-0">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab + isEditing}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3, ease: "circOut" }}
-                                className="min-h-[600px]"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.18, ease: "easeOut" }}
                             >
-                                {/* OVERVIEW PANEL */}
+                                {/* ── OVERVIEW ── */}
                                 {activeTab === 'overview' && (
-                                    <div className="space-y-8">
-                                        {/* STATS STRIP */}
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div className="space-y-6">
+                                        {/* Stats */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                             {[
-                                                { label: 'Weight', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : 'N/A', icon: <Weight className="text-blue-500" />, sub: 'Current Mass' },
-                                                { label: 'Height', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : 'N/A', icon: <Ruler className="text-purple-500" />, sub: 'Vertical Axis' },
-                                                { label: 'Age', value: profileData?.profile?.age || 'N/A', icon: <Activity className="text-green-500" />, sub: 'Life Cycles' },
-                                                { label: 'Workouts', value: workoutPlans.length, icon: <Dumbbell className="text-gym-accent" />, sub: 'Assigned Plans' },
-                                            ].map((stat, i) => (
-                                                <motion.div
-                                                    key={i}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: i * 0.1 }}
-                                                    className="bg-[#18181b] border border-white/5 rounded-3xl p-6 flex flex-col gap-3 group hover:border-gym-accent/30 transition-all hover:translate-y-[-4px]"
-                                                >
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="p-2 bg-white/5 rounded-xl group-hover:bg-gym-accent/10 transition-colors">
-                                                            {stat.icon}
-                                                        </div>
-                                                        <TrendingUp size={14} className="text-zinc-600" />
+                                                { label: 'Weight', value: profileData?.profile?.weight ? `${profileData.profile.weight} kg` : '—', icon: Weight, color: 'text-orange-400' },
+                                                { label: 'Height', value: profileData?.profile?.height ? `${profileData.profile.height} cm` : '—', icon: Ruler, color: 'text-blue-400' },
+                                                { label: 'Age', value: profileData?.profile?.age || '—', icon: User, color: 'text-purple-400' },
+                                                { label: 'Plans', value: workoutPlans.length, icon: Dumbbell, color: 'text-emerald-400' },
+                                            ].map((s, i) => (
+                                                <div key={i} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 shadow-xl group hover:border-zinc-700 transition-all">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{s.label}</p>
+                                                        <s.icon size={16} className={`${s.color} opacity-80 group-hover:opacity-100 transition-opacity`} />
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{stat.label}</p>
-                                                        <p className="text-2xl font-black text-white italic tracking-tighter">{stat.value}</p>
-                                                        <p className="text-[9px] font-bold text-zinc-600 uppercase mt-1">{stat.sub}</p>
-                                                    </div>
-                                                </motion.div>
+                                                    <p className="text-3xl font-bold text-white tabular-nums">{s.value}</p>
+                                                </div>
                                             ))}
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            {/* PERFORMANCE CARD */}
-                                            <div className="bg-[#18181b] border border-white/5 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 p-12 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity rotate-12">
-                                                    <Activity size={200} />
-                                                </div>
-                                                <h3 className="text-xl font-black text-white mb-8 uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <TrendingUp size={24} className="text-gym-accent" /> Discipline Level
-                                                </h3>
-                                                <div className="space-y-6">
-                                                    <div className="flex justify-between items-end">
-                                                        <div>
-                                                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Current Streak</p>
-                                                            <p className="text-4xl font-black text-white italic tracking-tighter">12 <span className="text-sm font-bold text-zinc-500 not-italic uppercase ml-1">Days</span></p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Consistency</p>
-                                                            <p className="text-2xl font-black text-green-500 italic">94%</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="pt-2">
-                                                        <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                                                            <motion.div
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: '94%' }}
-                                                                transition={{ duration: 1.5, ease: "circOut" }}
-                                                                className="bg-gym-accent h-full rounded-full shadow-[0_0_20px_rgba(239,68,68,0.4)]"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        {[1, 2, 3, 4, 5, 6, 7].map(d => (
-                                                            <div key={d} className={`h-8 rounded-lg border border-white/5 ${d < 6 ? 'bg-gym-accent/20 border-gym-accent/30' : 'bg-white/5'}`} />
-                                                        ))}
-                                                    </div>
+                                        {/* Goals */}
+                                        {profileData?.profile?.goals?.length > 0 && (
+                                            <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 shadow-xl">
+                                                <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider mb-4">Core Objectives</h3>
+                                                <div className="flex flex-wrap gap-2.5">
+                                                    {profileData.profile.goals.map((g, i) => (
+                                                        <span key={i} className="px-4 py-1.5 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-700/50 shadow-sm">{g}</span>
+                                                    ))}
                                                 </div>
                                             </div>
+                                        )}
 
-                                            {/* ACTIVITY LOG */}
-                                            <div className="bg-[#18181b] border border-white/5 rounded-[2rem] p-8 shadow-2xl">
-                                                <h3 className="text-xl font-black text-white mb-8 uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <Clock size={24} className="text-gym-accent" /> Session History
-                                                </h3>
-                                                <div className="space-y-4">
-                                                    {attendance.length > 0 ? attendance.slice(0, 4).map((record, i) => (
-                                                        <div key={i} className="flex items-center justify-between p-4 bg-black/40 rounded-[1.25rem] border border-white/5 hover:border-white/10 transition-all">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center border border-green-500/20">
-                                                                    <CheckCircle2 size={18} />
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-sm font-black text-white uppercase italic">{new Date(record.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                                                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Verified Session</p>
-                                                                </div>
+                                        {/* Recent sessions */}
+                                        <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
+                                            <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
+                                                <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Recent Activity</h3>
+                                                <button onClick={() => setActiveTab('attendance')} className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5 transition-colors group">
+                                                    History <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                                </button>
+                                            </div>
+                                            <div className="divide-y divide-zinc-800/50">
+                                                {attendance.length > 0 ? attendance.slice(0, 5).map((record, i) => (
+                                                    <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-all">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center ring-1 ring-emerald-500/20">
+                                                                <CheckCircle2 size={18} className="text-emerald-400" />
                                                             </div>
-                                                            <div className="text-right">
-                                                                <p className="text-xs font-black text-white font-mono">{new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                                                <p className="text-[9px] text-green-500 font-black uppercase">Clocked In</p>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-white">{new Date(record.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+                                                                <p className="text-xs text-zinc-500 mt-0.5 font-medium">Checked in at {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                                             </div>
                                                         </div>
-                                                    )) : (
-                                                        <div className="text-center py-12">
-                                                            <p className="text-zinc-600 text-sm font-bold uppercase tracking-widest italic">No combat records found.</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full uppercase tracking-tighter ring-1 ring-emerald-500/20">Confirmed</span>
+                                                    </div>
+                                                )) : (
+                                                    <div className="px-6 py-12 text-center">
+                                                        <Activity size={32} className="mx-auto text-zinc-800 mb-3" />
+                                                        <p className="text-sm font-bold text-zinc-600 tracking-tight">No sessions logged yet.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* HEALTH & DETAILS (EDIT MODE) */}
+                                {/* ── PROFILE / EDIT ── */}
                                 {activeTab === 'details' && (
-                                    <div className="bg-[#18181b] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                                        <div className="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
+                                        <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
                                             <div>
-                                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <Settings size={24} className="text-gym-accent" /> {isEditing ? 'Forge New Identity' : 'Core Identification'}
-                                                </h3>
-                                                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">Manage your physical parameters and security</p>
+                                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">{isEditing ? 'Edit Parameters' : 'User Identity'}</h3>
+                                                <p className="text-xs text-zinc-500 mt-1 font-medium">Manage biometric data and contact credentials</p>
                                             </div>
                                             {!isEditing && (
-                                                <button onClick={() => setIsEditing(true)} className="p-3 bg-white/5 text-gym-accent rounded-2xl hover:bg-gym-accent hover:text-white transition-all shadow-lg border border-white/5">
-                                                    <Edit3 size={20} />
+                                                <button onClick={() => setIsEditing(true)} className="inline-flex items-center gap-2 px-4 h-9 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all border border-zinc-700">
+                                                    <Edit3 size={14} /> Update
                                                 </button>
                                             )}
                                         </div>
 
-                                        <div className="p-8 md:p-12">
+                                        <div className="p-6">
                                             {isEditing ? (
-                                                <form onSubmit={handleUpdate} className="space-y-10">
-                                                    {/* BASIC INFO SECTION */}
-                                                    <div className="space-y-6">
-                                                        <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] flex items-center gap-2">
-                                                            <User size={12} /> System Identity
-                                                        </p>
-                                                        <div className="grid md:grid-cols-2 gap-6">
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Display Name</label>
-                                                                <div className="relative">
-                                                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                                                                    <input
-                                                                        type="text"
-                                                                        required
-                                                                        value={formData.username}
-                                                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:border-gym-accent focus:outline-none focus:ring-1 focus:ring-gym-accent/30 transition-all font-bold"
-                                                                        placeholder="Your Fighter Name"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2 opacity-50 cursor-not-allowed">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Email (Permanent)</label>
-                                                                <div className="relative">
-                                                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                                                                    <input
-                                                                        type="email"
-                                                                        disabled
-                                                                        value={profileData?.email || ''}
-                                                                        className="w-full bg-black/20 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-zinc-500 text-sm outline-none font-bold"
-                                                                    />
-                                                                </div>
-                                                            </div>
+                                                <form onSubmit={handleUpdate} className="space-y-8">
+                                                    {/* Basic Info */}
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Primary Records</h4>
+                                                        <div className="grid md:grid-cols-2 gap-5">
+                                                            <InputField label="Display Name" icon={User} value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} placeholder="Your name" />
+                                                            <InputField label="Identity Email" icon={Mail} value={profileData?.email || ''} disabled />
                                                         </div>
-                                                    </div>
+                                                    </section>
 
-                                                    {/* BIOMETRICS SECTION */}
-                                                    <div className="space-y-6">
-                                                        <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] flex items-center gap-2">
-                                                            <HeartPulse size={12} /> Biological Parameters
-                                                        </p>
-                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                                            {[
-                                                                { label: 'Age', key: 'age', icon: <Calendar size={18} />, unit: 'Years' },
-                                                                { label: 'Weight', key: 'weight', icon: <Weight size={18} />, unit: 'KG' },
-                                                                { label: 'Height', key: 'height', icon: <Ruler size={18} />, unit: 'CM' },
-                                                            ].map(bio => (
-                                                                <div key={bio.key} className="space-y-2">
-                                                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">{bio.label} ({bio.unit})</label>
-                                                                    <div className="relative">
-                                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">{bio.icon}</span>
-                                                                        <input
-                                                                            type="number"
-                                                                            value={formData[bio.key]}
-                                                                            onChange={(e) => setFormData({ ...formData, [bio.key]: e.target.value })}
-                                                                            className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:border-gym-accent focus:outline-none transition-all font-black italic"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                    {/* Biometrics */}
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Biometric Stats</h4>
+                                                        <div className="grid grid-cols-3 gap-5">
+                                                            <InputField label="Age (Y)" icon={Calendar} type="number" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
+                                                            <InputField label="Mass (KG)" icon={Weight} type="number" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: e.target.value })} />
+                                                            <InputField label="Height (CM)" icon={Ruler} type="number" value={formData.height} onChange={(e) => setFormData({ ...formData, height: e.target.value })} />
                                                         </div>
-                                                    </div>
+                                                    </section>
 
-                                                    {/* CONTACT & ADDRESS SECTION */}
-                                                    <div className="space-y-6">
-                                                        <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] flex items-center gap-2">
-                                                            <MapPin size={12} /> Logistics & Location
-                                                        </p>
-                                                        <div className="grid md:grid-cols-2 gap-6">
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Communication Line</label>
-                                                                <div className="relative">
-                                                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                                                                    <input
-                                                                        type="tel"
-                                                                        value={formData.phoneNumber}
-                                                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:border-gym-accent focus:outline-none transition-all font-bold"
-                                                                        placeholder="+1 (000) 000-0000"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Base of Operations</label>
-                                                                <div className="relative">
-                                                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={formData.address}
-                                                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:border-gym-accent focus:outline-none transition-all font-bold"
-                                                                        placeholder="Sector, City, Grid"
-                                                                    />
-                                                                </div>
-                                                            </div>
+                                                    {/* Contact */}
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Communications</h4>
+                                                        <div className="grid md:grid-cols-2 gap-5">
+                                                            <InputField label="Signal Number" icon={Phone} type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} placeholder="+1 (000) 000-0000" />
+                                                            <InputField label="Base Location" icon={MapPin} value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} placeholder="City, Country" />
                                                         </div>
-                                                    </div>
+                                                    </section>
 
-                                                    {/* HEALTH INTEL SECTION */}
-                                                    <div className="space-y-6">
-                                                        <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] flex items-center gap-2">
-                                                            <AlertCircle size={12} /> Medical Intelligence
-                                                        </p>
-                                                        <div className="space-y-6">
+                                                    {/* Health */}
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Strategic Goals</h4>
+                                                        <div className="space-y-5">
+                                                            <InputField label="Target Milestones (comma-separated)" value={formData.goals} onChange={(e) => setFormData({ ...formData, goals: e.target.value })} placeholder="e.g. Hypertrophy, Fat Loss, Powerlifting" />
                                                             <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Strategic Goals (Comma Separated)</label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={formData.goals}
-                                                                    onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm focus:border-gym-accent focus:outline-none transition-all font-bold italic"
-                                                                    placeholder="Strength, Hypertrophy, Metabolic Conditioning..."
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Injury Intel & Vulnerabilities</label>
+                                                                <label className="text-xs font-bold text-zinc-400">Medical Intelligence</label>
                                                                 <textarea
                                                                     value={formData.medicalNotes}
                                                                     onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-[2rem] px-6 py-5 text-white text-sm focus:border-gym-accent focus:outline-none transition-all h-32 resize-none leading-relaxed font-medium"
-                                                                    placeholder="Report any physical limitations or strategic vulnerabilities..."
+                                                                    placeholder="Specify any restrictions, past injuries, or critical health data..."
+                                                                    rows={3}
+                                                                    className="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-xl text-sm text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all resize-none"
                                                                 />
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </section>
 
-                                                    {/* EMERGENCY OVERRIDE SECTION */}
-                                                    <div className="p-8 bg-gym-accent/5 rounded-[2.5rem] border border-gym-accent/20">
-                                                        <p className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] mb-6">Emergency Extraction Protocol</p>
-                                                        <div className="grid md:grid-cols-3 gap-6">
-                                                            <div className="space-y-2">
-                                                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Contact Name</label>
-                                                                <input
-                                                                    value={formData.emergencyContactName}
-                                                                    onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:border-gym-accent outline-none font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Kinship/Relation</label>
-                                                                <input
-                                                                    value={formData.emergencyContactRelation}
-                                                                    onChange={(e) => setFormData({ ...formData, emergencyContactRelation: e.target.value })}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:border-gym-accent outline-none font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Emergency Signal (Phone)</label>
-                                                                <input
-                                                                    value={formData.emergencyContactPhone}
-                                                                    onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:border-gym-accent outline-none font-bold"
-                                                                />
-                                                            </div>
+                                                    {/* Emergency Contact */}
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Emergency Protocols</h4>
+                                                        <div className="grid md:grid-cols-3 gap-5">
+                                                            <InputField label="Guardian Name" value={formData.emergencyContactName} onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })} placeholder="Full Name" />
+                                                            <InputField label="Relation" value={formData.emergencyContactRelation} onChange={(e) => setFormData({ ...formData, emergencyContactRelation: e.target.value })} placeholder="Kinship" />
+                                                            <InputField label="Contact Signal" icon={Phone} type="tel" value={formData.emergencyContactPhone} onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })} placeholder="Direct line" />
                                                         </div>
-                                                    </div>
+                                                    </section>
 
-                                                    <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                                                        <motion.button
-                                                            whileTap={{ scale: 0.98 }}
-                                                            type="submit"
-                                                            className="flex-grow bg-gym-accent text-white font-black py-5 rounded-[2rem] hover:bg-gym-accent/80 transition-all flex items-center justify-center gap-3 shadow-2xl shadow-gym-accent/30 uppercase tracking-[0.2em] text-sm"
-                                                        >
-                                                            <Save size={20} /> Update Biometrics
-                                                        </motion.button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setIsEditing(false)}
-                                                            className="px-10 bg-zinc-800 text-zinc-400 font-black rounded-[2rem] hover:bg-zinc-700 hover:text-white transition-all uppercase tracking-widest text-sm"
-                                                        >
-                                                            Abort
+                                                    <div className="flex gap-4 pt-4">
+                                                        <button type="submit" className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 h-12 bg-orange-500 text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98]">
+                                                            <Save size={18} /> Commit Changes
+                                                        </button>
+                                                        <button type="button" onClick={() => setIsEditing(false)} className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 h-12 bg-zinc-800 text-zinc-300 text-sm font-bold rounded-xl hover:bg-zinc-700 transition-all active:scale-[0.98]">
+                                                            <X size={18} /> Discard
                                                         </button>
                                                     </div>
                                                 </form>
                                             ) : (
-                                                <div className="grid md:grid-cols-2 gap-x-16 gap-y-12">
-                                                    <div className="space-y-10">
-                                                        <div>
-                                                            <h4 className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-                                                                <div className="w-6 h-px bg-gym-accent/50" /> Biological Intel
-                                                            </h4>
-                                                            <div className="space-y-1">
-                                                                {[
-                                                                    { label: 'Age Level', value: profileData?.profile?.age || 'Unset', icon: <Calendar size={16} /> },
-                                                                    { label: 'Physical Mass', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : 'Unset', icon: <Weight size={16} /> },
-                                                                    { label: 'Vertical Stat', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : 'Unset', icon: <Ruler size={16} /> },
-                                                                ].map((item, i) => (
-                                                                    <div key={i} className="flex items-center justify-between py-4 border-b border-white/5 group hover:bg-white/[0.02] px-2 transition-all rounded-lg">
-                                                                        <div className="flex items-center gap-3">
-                                                                            <span className="text-zinc-600 group-hover:text-gym-accent transition-colors">{item.icon}</span>
-                                                                            <span className="text-zinc-500 text-xs font-black uppercase tracking-widest">{item.label}</span>
-                                                                        </div>
-                                                                        <span className="text-white font-black italic tracking-tighter text-lg">{item.value}</span>
+                                                <div className="space-y-10">
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Physiological Stats</h4>
+                                                        <div className="grid md:grid-cols-3 gap-4">
+                                                            {[
+                                                                { label: 'Current Age', value: profileData?.profile?.age ? `${profileData.profile.age} YRS` : 'UNDEFINED', color: 'text-purple-400' },
+                                                                { label: 'Total Mass', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : 'UNDEFINED', color: 'text-orange-400' },
+                                                                { label: 'Verticality', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : 'UNDEFINED', color: 'text-blue-400' },
+                                                            ].map((item, i) => (
+                                                                <div key={i} className="bg-zinc-800/30 rounded-2xl p-5 border border-zinc-800/50 hover:border-zinc-700 transition-all">
+                                                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2">{item.label}</p>
+                                                                    <p className={`text-lg font-bold ${item.color}`}>{item.value}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </section>
+
+                                                    <section>
+                                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Contact Channels</h4>
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            {[
+                                                                { label: 'Verified Signal', value: profileData?.phoneNumber || 'NOT PROVIDED', icon: Phone },
+                                                                { label: 'Primary Base', value: profileData?.address || 'NOT PROVIDED', icon: MapPin },
+                                                            ].map((item, i) => (
+                                                                <div key={i} className="flex items-start gap-4 p-5 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
+                                                                    <div className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center shrink-0 border border-zinc-700">
+                                                                        <item.icon size={18} className="text-zinc-500" />
                                                                     </div>
+                                                                    <div>
+                                                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-1">{item.label}</p>
+                                                                        <p className="text-sm text-zinc-200 font-bold leading-relaxed">{item.value}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </section>
+
+                                                    {profileData?.profile?.goals?.length > 0 && (
+                                                        <section>
+                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Strategic Focus</h4>
+                                                            <div className="flex flex-wrap gap-2.5">
+                                                                {profileData.profile.goals.map((g, i) => (
+                                                                    <span key={i} className="px-5 py-2 bg-zinc-100 text-zinc-950 text-xs font-bold rounded-xl shadow-lg shadow-white/5">{g}</span>
                                                                 ))}
                                                             </div>
-                                                        </div>
+                                                        </section>
+                                                    )}
 
-                                                        <div>
-                                                            <h4 className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-                                                                <div className="w-6 h-px bg-gym-accent/50" /> Logistic Channels
-                                                            </h4>
-                                                            <div className="space-y-6">
-                                                                <div className="flex items-start gap-4 p-4 bg-white/5 rounded-3xl border border-white/5 group hover:border-gym-accent/30 transition-all">
-                                                                    <div className="mt-1 p-2 bg-gym-accent/10 text-gym-accent rounded-xl group-hover:bg-gym-accent group-hover:text-white transition-all"><Phone size={18} /></div>
-                                                                    <div>
-                                                                        <p className="text-zinc-500 text-[9px] font-black uppercase tracking-[0.2em] mb-1">Comm Line</p>
-                                                                        <p className="text-white text-sm font-bold tracking-wide">{profileData?.phoneNumber || 'SIGNAL LOST'}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-start gap-4 p-4 bg-white/5 rounded-3xl border border-white/5 group hover:border-gym-accent/30 transition-all">
-                                                                    <div className="mt-1 p-2 bg-gym-accent/10 text-gym-accent rounded-xl group-hover:bg-gym-accent group-hover:text-white transition-all"><MapPin size={18} /></div>
-                                                                    <div>
-                                                                        <p className="text-zinc-500 text-[9px] font-black uppercase tracking-[0.2em] mb-1">Base Coords</p>
-                                                                        <p className="text-white text-sm font-bold tracking-wide">{profileData?.address || 'UNKNOWN SECTOR'}</p>
-                                                                    </div>
-                                                                </div>
+                                                    {profileData?.medicalNotes && (
+                                                        <section>
+                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Health Intelligence</h4>
+                                                            <div className="flex items-start gap-4 p-5 bg-orange-500/5 border border-orange-500/20 rounded-2xl backdrop-blur-sm">
+                                                                <AlertCircle size={20} className="text-orange-500 mt-0.5 shrink-0" />
+                                                                <p className="text-sm text-orange-200/80 font-medium leading-relaxed">{profileData.medicalNotes}</p>
                                                             </div>
-                                                        </div>
-                                                    </div>
+                                                        </section>
+                                                    )}
 
-                                                    <div className="space-y-10">
-                                                        <div>
-                                                            <h4 className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-                                                                <div className="w-6 h-px bg-gym-accent/50" /> Strategic Objectives
-                                                            </h4>
-                                                            <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 space-y-8 relative overflow-hidden group">
-                                                                <Activity className="absolute -bottom-8 -right-8 text-white/[0.03] rotate-12 transition-transform group-hover:scale-110" size={120} />
-                                                                <div className="relative z-10">
-                                                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Tactical Goals</p>
-                                                                    <div className="flex flex-wrap gap-2.5">
-                                                                        {profileData?.profile?.goals?.length > 0 ? profileData.profile.goals.map((g, i) => (
-                                                                            <span key={i} className="px-4 py-1.5 bg-gym-accent/10 border border-gym-accent/30 text-gym-accent text-[10px] font-black rounded-xl uppercase tracking-widest">{g}</span>
-                                                                        )) : <span className="text-zinc-600 text-xs italic font-bold">NO OBJECTIVES DEFINED</span>}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="relative z-10">
-                                                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Internal Diagnostics</p>
-                                                                    <p className="text-white text-xs leading-relaxed font-medium italic opacity-80">"{profileData?.medicalNotes || 'System integrity verified. No vulnerabilities reported.'}"</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <h4 className="text-[10px] font-black text-gym-accent uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-                                                                <div className="w-6 h-px bg-gym-accent/50" /> Emergency Override
-                                                            </h4>
-                                                            <div className="bg-red-500/5 p-8 rounded-[2rem] border border-red-500/10 hover:bg-red-500/[0.08] transition-colors relative overflow-hidden">
-                                                                <Shield className="absolute -bottom-4 -right-4 text-red-500/[0.05]" size={80} />
-                                                                {profileData?.emergencyContact?.name ? (
-                                                                    <div className="flex items-center justify-between gap-4">
+                                                    {profileData?.emergencyContact?.name && (
+                                                        <section>
+                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Emergency Protocols</h4>
+                                                            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl">
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+                                                                            <Shield size={22} className="text-red-400" />
+                                                                        </div>
                                                                         <div>
-                                                                            <p className="text-white font-black text-lg italic tracking-tighter uppercase mb-1">{profileData.emergencyContact.name}</p>
-                                                                            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                                                                <span className="w-4 h-px bg-zinc-700" /> {profileData.emergencyContact.relation}
-                                                                            </p>
-                                                                        </div>
-                                                                        <div className="text-right">
-                                                                            <p className="text-gym-accent font-black text-sm tracking-widest mb-1">{profileData.emergencyContact.phone}</p>
-                                                                            <p className="text-[8px] text-zinc-600 font-black uppercase tracking-widest">Extraction Link</p>
+                                                                            <p className="text-base font-bold text-white tracking-tight">{profileData.emergencyContact.name}</p>
+                                                                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">{profileData.emergencyContact.relation}</p>
                                                                         </div>
                                                                     </div>
-                                                                ) : (
-                                                                    <div className="flex flex-col items-center gap-2 py-2">
-                                                                        <AlertCircle size={24} className="text-zinc-700" />
-                                                                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">No Extraction Point Defined</p>
-                                                                    </div>
-                                                                )}
+                                                                    <p className="text-sm font-black text-white bg-zinc-800 px-4 py-1.5 rounded-xl border border-zinc-700">{profileData.emergencyContact.phone}</p>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
+                                                        </section>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 )}
 
-                                {/* WORKOUTS PANEL */}
-                                {activeTab === 'workout' && (
-                                    <div className="space-y-8">
-                                        <div className="flex items-center justify-between bg-[#18181b] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                                            <div>
-                                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <Dumbbell size={24} className="text-gym-accent" /> Combat Protocols
-                                                </h3>
-                                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Active training regimens assigned to your profile</p>
-                                            </div>
-                                            <button className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-gym-accent uppercase tracking-[0.2em] hover:bg-gym-accent hover:text-white transition-all shadow-lg">Request Intel</button>
-                                        </div>
 
-                                        <div className="grid grid-cols-1 gap-8">
-                                            {workoutPlans.length > 0 ? workoutPlans.map((plan, pIdx) => (
-                                                <motion.div
-                                                    key={plan._id}
-                                                    initial={{ opacity: 0, y: 30 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: pIdx * 0.1 }}
-                                                    className="bg-[#18181b] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl hover:border-gym-accent/40 transition-all group relative"
-                                                >
-                                                    <div className="absolute top-0 right-0 p-12 opacity-[0.02] rotate-12"><Dumbbell size={200} /></div>
-                                                    <div className="p-8 md:p-12 relative z-10">
-                                                        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
-                                                            <div>
-                                                                <h4 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-2">{plan.name}</h4>
-                                                                <div className="flex items-center gap-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">
-                                                                    <div className="w-8 h-8 rounded-xl bg-gym-accent/10 flex items-center justify-center text-gym-accent border border-gym-accent/20">
-                                                                        <User size={14} />
-                                                                    </div>
-                                                                    Assigned by <span className="text-white font-black">{plan.trainer?.username || 'Elite Intelligence'}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="px-6 py-2.5 bg-gym-accent text-white text-[10px] font-black rounded-2xl uppercase tracking-[0.2em] shadow-2xl shadow-gym-accent/30">
-                                                                    {plan.status}
-                                                                </div>
-                                                            </div>
-                                                        </div>
 
-                                                        <p className="text-zinc-400 text-base leading-relaxed mb-12 max-w-3xl font-medium opacity-80">"{plan.description}"</p>
-
-                                                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                            {plan.schedule?.map((day, idx) => (
-                                                                <div key={idx} className="bg-black/50 p-6 rounded-[2rem] border border-white/5 hover:border-gym-accent/20 transition-all group/day">
-                                                                    <div className="flex items-center justify-between mb-6">
-                                                                        <span className="text-gym-accent text-xs font-black uppercase tracking-[0.2em] italic">{day.day}</span>
-                                                                        <span className="text-zinc-700 group-hover/day:text-gym-accent transition-colors"><Activity size={18} /></span>
-                                                                    </div>
-                                                                    <ul className="space-y-4">
-                                                                        {day.exercises.map((ex, i) => (
-                                                                            <li key={i} className="flex justify-between items-center bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                                                                                <span className="text-zinc-300 text-xs font-bold uppercase">{ex.name}</span>
-                                                                                <span className="text-white font-black italic tracking-tighter text-sm">{ex.sets} <span className="text-[10px] text-zinc-600 font-black not-italic uppercase ml-0.5">X</span> {ex.reps}</span>
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            )) : (
-                                                <div className="bg-[#18181b] border border-white/5 rounded-[3rem] p-24 text-center shadow-2xl">
-                                                    <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/5">
-                                                        <Dumbbell size={48} className="text-zinc-800" />
-                                                    </div>
-                                                    <h4 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-3">No Active Protocols</h4>
-                                                    <p className="text-zinc-500 max-w-sm mx-auto text-sm font-bold uppercase tracking-widest leading-relaxed">
-                                                        Establish connection with a Trainer to receive your personalized combat regimen.
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* NUTRITION PANEL */}
-                                {activeTab === 'diet' && (
-                                    <div className="space-y-8">
-                                        <div className="flex items-center justify-between bg-[#18181b] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                                            <div>
-                                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <Utensils size={24} className="text-green-500" /> Biological Fueling
-                                                </h3>
-                                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Optimization strategies for your metabolic output</p>
-                                            </div>
-                                            <div className="flex items-center gap-2 px-5 py-2.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
-                                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                                <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Optimized</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 gap-8">
-                                            {dietPlans.length > 0 ? dietPlans.map((plan, dIdx) => (
-                                                <motion.div
-                                                    key={plan._id}
-                                                    initial={{ opacity: 0, scale: 0.98 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    transition={{ delay: dIdx * 0.1 }}
-                                                    className="bg-[#18181b] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl group relative"
-                                                >
-                                                    <div className="absolute top-0 right-0 p-12 opacity-[0.02] -rotate-12"><Utensils size={200} /></div>
-                                                    <div className="p-8 md:p-12 relative z-10">
-                                                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-8 mb-12">
-                                                            <div>
-                                                                <h4 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-3">{plan.name}</h4>
-                                                                <div className="flex flex-wrap items-center gap-6 text-[10px] font-black tracking-[0.2em] uppercase">
-                                                                    <div className="flex items-center gap-2 py-1.5 px-4 bg-green-500/10 text-green-500 rounded-full border border-green-500/20 shadow-lg shadow-green-500/10">
-                                                                        TARGET: {plan.totalCalories || 2800} KCAL
-                                                                    </div>
-                                                                    <span className="text-zinc-500 flex items-center gap-2"><User size={14} className="text-green-500" /> STRATEGIST: {plan.trainer?.username || 'CoreX Nutrition'}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="px-6 py-3 bg-white/5 border border-white/10 text-white text-xs font-black rounded-2xl uppercase tracking-widest italic group-hover:bg-green-500 group-hover:text-black transition-all">
-                                                                STATUS: {plan.status}
-                                                            </div>
-                                                        </div>
-
-                                                        <p className="text-zinc-400 text-base leading-relaxed mb-12 max-w-3xl font-medium opacity-80">"{plan.description}"</p>
-
-                                                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                                            {[
-                                                                { m: 'Morning Fuel', t: '07:30', d: 'Complex carbs with high bioavailability protein.', i: '🍳' },
-                                                                { m: 'Metabolic Peak', t: '13:00', d: 'Dense micronutrients and sustained energy fats.', i: '🥗' },
-                                                                { m: 'Anabolic Window', t: '16:30', d: 'Rapid absorption aminos and glycogen replenishment.', i: '🥤' },
-                                                                { m: 'Recovery Phase', t: '20:00', d: 'Slow-digesting proteins for overnight tissue repair.', i: '🥩' }
-                                                            ].map((meal, i) => (
-                                                                <div key={i} className="bg-black/50 p-6 rounded-[2rem] border border-white/5 hover:border-green-500/30 transition-all group/meal relative overflow-hidden">
-                                                                    <span className="absolute -top-2 -right-2 text-4xl opacity-10 grayscale group-hover/meal:grayscale-0 group-hover/meal:opacity-20 transition-all">{meal.i}</span>
-                                                                    <div className="flex flex-col gap-4">
-                                                                        <div className="flex flex-col">
-                                                                            <span className="text-green-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{meal.t} HRS</span>
-                                                                            <span className="text-white font-black text-lg uppercase italic tracking-tighter">{meal.m}</span>
-                                                                        </div>
-                                                                        <div className="h-px bg-white/5" />
-                                                                        <p className="text-zinc-400 text-xs leading-relaxed font-medium">{meal.d}</p>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            )) : (
-                                                <div className="bg-[#18181b] border border-white/5 rounded-[3rem] p-24 text-center shadow-2xl">
-                                                    <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/5">
-                                                        <Utensils size={48} className="text-zinc-800" />
-                                                    </div>
-                                                    <h4 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-3">Nutritional Void</h4>
-                                                    <p className="text-zinc-500 max-w-sm mx-auto text-sm font-bold uppercase tracking-widest leading-relaxed">
-                                                        Optimization of biological output requires a strategic nutrition protocol.
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ACTIVITY PANEL */}
+                                {/* ── ATTENDANCE ── */}
                                 {activeTab === 'attendance' && (
-                                    <div className="bg-[#18181b] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                                        <div className="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
+                                        <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
                                             <div>
-                                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <Calendar size={24} className="text-gym-accent" /> Combat Records
-                                                </h3>
-                                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Verified physical engagement logs</p>
-                                            </div>
-                                            <div className="p-3 bg-white/5 rounded-xl text-zinc-500">
-                                                <Activity size={20} />
+                                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Deployment Logs</h3>
+                                                <p className="text-xs text-zinc-500 mt-1 font-medium">{attendance.length} total operational cycles</p>
                                             </div>
                                         </div>
-                                        <div className="p-0">
-                                            {attendance.length > 0 ? (
-                                                <div className="overflow-x-auto">
-                                                    <table className="w-full text-left">
-                                                        <thead className="bg-black/40 text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">
-                                                            <tr>
-                                                                <th className="px-10 py-6">Engagement Date</th>
-                                                                <th className="px-10 py-6">Entry/Exit Timestamps</th>
-                                                                <th className="px-10 py-6">Operational Time</th>
-                                                                <th className="px-10 py-6 text-right">Clearance</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-white/5">
-                                                            {attendance.map((record, i) => (
-                                                                <motion.tr
-                                                                    key={record._id}
-                                                                    initial={{ opacity: 0 }}
-                                                                    animate={{ opacity: 1 }}
-                                                                    transition={{ delay: i * 0.05 }}
-                                                                    className="hover:bg-white/[0.02] transition-colors"
-                                                                >
-                                                                    <td className="px-10 py-6">
-                                                                        <span className="text-white font-black italic tracking-tighter uppercase text-base">{new Date(record.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                                                                    </td>
-                                                                    <td className="px-10 py-6">
-                                                                        <div className="flex flex-col gap-1.5 font-mono">
-                                                                            <span className="text-[10px] text-green-500 font-black tracking-tighter flex items-center gap-2">
-                                                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                                                IN: {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                                                            </span>
-                                                                            {record.checkOut ? (
-                                                                                <span className="text-[10px] text-red-500 font-black tracking-tighter flex items-center gap-2">
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                                                                    OUT: {new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                                                                </span>
-                                                                            ) : <span className="text-[10px] text-zinc-600 font-black tracking-widest uppercase animate-pulse">In Progress...</span>}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="px-10 py-6 text-zinc-400 text-sm font-bold italic">78 Minutes</td>
-                                                                    <td className="px-10 py-6 text-right">
-                                                                        <span className="px-4 py-1.5 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-lg border border-green-500/20 shadow-lg shadow-green-500/5">
-                                                                            AUTHENTICATED
-                                                                        </span>
-                                                                    </td>
-                                                                </motion.tr>
+                                        {attendance.length > 0 ? (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left">
+                                                    <thead className="bg-zinc-900/60 border-b border-zinc-800">
+                                                        <tr>
+                                                            {['Cycle Date', 'Check-In', 'Check-Out', 'Status'].map(h => (
+                                                                <th key={h} className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-[0.1em]">{h}</th>
                                                             ))}
-                                                        </tbody>
-                                                    </table>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-zinc-800/50">
+                                                        {attendance.map((record, i) => (
+                                                            <tr key={record._id} className="hover:bg-zinc-800/20 transition-all">
+                                                                <td className="px-6 py-4 text-sm font-bold text-white">
+                                                                    {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                </td>
+                                                                <td className="px-6 py-4 text-sm text-zinc-400 font-mono tracking-tighter">
+                                                                    {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </td>
+                                                                <td className="px-6 py-4 text-sm text-zinc-400 font-mono tracking-tighter">
+                                                                    {record.checkOut ? new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : <span className="text-orange-500 font-black text-[10px] uppercase animate-pulse">Operational</span>}
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-lg border border-emerald-500/20">
+                                                                        <CheckCircle2 size={12} /> Present
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <div className="p-16 text-center">
+                                                <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-700">
+                                                    <Calendar size={28} className="text-zinc-600" />
                                                 </div>
-                                            ) : (
-                                                <div className="p-32 text-center flex flex-col items-center gap-6">
-                                                    <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-700 border border-white/5">
-                                                        <Calendar size={40} />
-                                                    </div>
-                                                    <p className="text-zinc-500 font-black uppercase tracking-[0.2em] text-xs italic">No activity detected on the network.</p>
-                                                </div>
-                                            )}
-                                        </div>
+                                                <p className="text-base font-bold text-zinc-300">No session logs detected</p>
+                                                <p className="text-xs text-zinc-500 mt-2 font-medium">Begin physical deployment at the facility to generate logs.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
-                                {/* BILLING PANEL */}
+                                {/* ── BILLING ── */}
                                 {activeTab === 'payments' && (
-                                    <div className="bg-[#18181b] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                                        <div className="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                                            <div>
-                                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3">
-                                                    <CreditCard size={24} className="text-gym-accent" /> Financial Ledger
-                                                </h3>
-                                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Transaction history and credit allocation</p>
-                                            </div>
-                                            <div className="p-3 bg-white/5 rounded-xl text-zinc-500">
-                                                <Shield size={20} />
-                                            </div>
+                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
+                                        <div className="px-6 py-5 border-b border-zinc-800">
+                                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Credit Protocols</h3>
+                                            <p className="text-xs text-zinc-500 mt-1 font-medium">{payments.length} financial transaction{payments.length !== 1 ? 's' : ''} authorized</p>
                                         </div>
-                                        <div className="p-6 space-y-4">
+                                        <div className="divide-y divide-zinc-800/50">
                                             {payments.length > 0 ? payments.map((payment, i) => (
-                                                <motion.div
-                                                    key={payment._id}
-                                                    initial={{ opacity: 0, x: -10 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: i * 0.05 }}
-                                                    className="bg-black/30 p-6 rounded-[2rem] border border-white/5 flex flex-col md:flex-row justify-between md:items-center gap-6 hover:border-gym-accent/30 transition-all group"
-                                                >
-                                                    <div className="flex items-center gap-6">
-                                                        <div className="w-14 h-14 bg-gym-accent/10 rounded-[1.25rem] flex items-center justify-center text-gym-accent border border-gym-accent/20 group-hover:bg-gym-accent group-hover:text-white transition-all">
-                                                            <CreditCard size={24} />
+                                                <motion.div key={payment._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
+                                                    className="px-6 py-5 flex items-center justify-between hover:bg-zinc-800/20 transition-all">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="w-11 h-11 bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-700">
+                                                            <CreditCard size={20} className="text-zinc-500" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-white font-black text-lg uppercase italic tracking-tighter mb-1">{payment.plan?.name || 'Protocol Renewal'}</p>
-                                                            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">{new Date(payment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {payment.method}</p>
+                                                            <p className="text-sm font-bold text-white tracking-tight">{payment.plan?.name || 'Membership Token Renewal'}</p>
+                                                            <p className="text-[10px] text-zinc-500 mt-1 font-bold uppercase tracking-wider">
+                                                                {new Date(payment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                {payment.method && ` · ${payment.method}`}
+                                                                {payment.invoiceNumber && <span className="ml-2 font-mono text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">ID:{payment.invoiceNumber}</span>}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center justify-between md:justify-end gap-10 border-t md:border-t-0 border-white/5 pt-5 md:pt-0">
-                                                        <div className="text-right">
-                                                            <p className="text-3xl font-black text-white italic tracking-tighter">${payment.amount}</p>
-                                                            <p className="text-[9px] text-zinc-600 font-mono font-black uppercase tracking-widest">{payment.invoiceNumber}</p>
-                                                        </div>
-                                                        <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${payment.status === 'completed'
-                                                            ? 'bg-green-500/10 text-green-500 border border-green-500/20 shadow-green-500/5'
-                                                            : 'bg-zinc-800 text-zinc-500 border border-white/5 shadow-black/20'
-                                                            }`}>
-                                                            {payment.status}
+                                                    <div className="flex items-center gap-6">
+                                                        <p className="text-lg font-black text-white tabular-nums">${payment.amount}</p>
+                                                        <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${
+                                                            payment.status === 'completed'
+                                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                                : 'bg-zinc-800 text-zinc-500 border-zinc-700'
+                                                        }`}>
+                                                            {payment.status === 'completed' ? 'Settled' : payment.status}
                                                         </span>
                                                     </div>
                                                 </motion.div>
                                             )) : (
-                                                <div className="p-32 text-center flex flex-col items-center gap-6">
-                                                    <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-700 border border-white/5">
-                                                        <CreditCard size={40} />
+                                                <div className="p-16 text-center">
+                                                    <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-700">
+                                                        <CreditCard size={28} className="text-zinc-600" />
                                                     </div>
-                                                    <p className="text-zinc-500 font-black uppercase tracking-[0.2em] text-xs italic">No financial movements detected.</p>
+                                                    <p className="text-base font-bold text-zinc-300">No transaction history</p>
+                                                    <p className="text-xs text-zinc-500 mt-2 font-medium">Your billing intelligence will populate upon credit deployment.</p>
                                                 </div>
                                             )}
                                         </div>

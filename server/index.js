@@ -51,6 +51,7 @@ app.use('/api/exercises', exerciseRoutes);
 app.use('/api/workouts', require('./routes/workouts'));
 app.use('/api/diets', require('./routes/diets'));
 app.use('/api/plans', require('./routes/plans'));
+app.use('/api/plan-programs', require('./routes/planPrograms'));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/analytics', require('./routes/analytics'));

@@ -49,8 +49,8 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-[85vh] flex items-center justify-center p-4">
-            <div className="w-full max-w-[750px] flex flex-col md:flex-row bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+        <div className="min-h-[85vh] flex items-center justify-center p-4 mt-10">
+            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 
                 {/* Left Side: Clean Visual */}
                 <div className="md:w-[45%] relative hidden md:block">
@@ -65,8 +65,8 @@ const Login = () => {
                             <img src="/logo.png" alt="CoreX Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-white mb-1.5">Welcome back</h2>
-                            <p className="text-zinc-300 text-xs leading-relaxed">
+                            <h2 className="text-xl font-bold text-white mb-2">Welcome back</h2>
+                            <p className="text-zinc-300 text-xs leading-relaxed max-w-sm">
                                 Log in to track your progress and access your personalized gym dashboard.
                             </p>
                         </div>
@@ -76,19 +76,19 @@ const Login = () => {
                 {/* Right Side: Clean Form */}
                 <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-[#18181b]">
                     <div className="mb-6">
-                        <h1 className="text-xl font-semibold text-white mb-1">Sign In</h1>
+                        <h1 className="text-2xl font-bold text-white mb-1">Sign In</h1>
                         <p className="text-xs text-zinc-400">Enter your details to access your account.</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-3.5">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1">
+                            <label className="block text-xs font-medium text-zinc-300 mb-1.5">
                                 Email
                             </label>
                             <input
                                 type="email"
                                 required
-                                className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder="Enter your email"
@@ -96,7 +96,7 @@ const Login = () => {
                         </div>
 
                         <div>
-                            <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center justify-between mb-1.5">
                                 <label className="block text-xs font-medium text-zinc-300">
                                     Password
                                 </label>
@@ -107,32 +107,32 @@ const Login = () => {
                             <input
                                 type="password"
                                 required
-                                className="w-full px-3 py-1.5 bg-[#09090b] border border-white/10 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 placeholder="••••••••"
                             />
                         </div>
                         
-                        <button type="submit" disabled={loading} className="w-full py-1.5 mt-2 bg-white text-black rounded-md font-medium text-sm hover:bg-zinc-200 transition-colors">
+                        <button type="submit" disabled={loading} className="w-full py-2.5 mt-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors">
                             {loading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
 
                     <div className="mt-6">
-                        <div className="relative flex py-2 items-center mb-5">
+                        <div className="relative flex py-2 items-center mb-4">
                             <div className="flex-grow border-t border-white/10"></div>
-                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-xs">Or continue with</span>
+                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-[10px] uppercase tracking-wider font-semibold">Or continue with</span>
                             <div className="flex-grow border-t border-white/10"></div>
                         </div>
                         
                         <div className="flex justify-center w-full">
-                            <div id="signInDiv" className="w-full flex justify-center overflow-hidden rounded-md"></div>
+                            <div id="signInDiv" className="w-full flex justify-center overflow-hidden rounded-lg"></div>
                         </div>
                     </div>
 
                     <div className="mt-6 text-center text-xs text-zinc-400">
-                        Don't have an account? <Link to="/register" className="text-white font-medium hover:underline">Sign up</Link>
+                        Don't have an account? <Link to="/register" className="text-white font-bold hover:underline">Sign up</Link>
                     </div>
                 </div>
             </div>

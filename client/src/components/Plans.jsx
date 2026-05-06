@@ -48,9 +48,9 @@ const Plans = () => {
             )}
             
             <div className="container mx-auto px-4 max-w-6xl">
-                <div className="text-center mb-12">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Membership Plans</h2>
-                    <p className="text-sm text-zinc-400 max-w-xl mx-auto">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Membership Plans</h2>
+                    <p className="text-base text-zinc-400 max-w-xl mx-auto">
                         Choose the right tier for your fitness journey. Upgrade or downgrade at any time.
                     </p>
                 </div>
@@ -64,28 +64,28 @@ const Plans = () => {
                         {plans.map((plan) => (
                             <div
                                 key={plan._id}
-                                className={`clean-card p-6 flex flex-col h-full relative ${
+                                className={`clean-card p-8 flex flex-col h-full relative ${
                                     plan.highlight ? 'border-gym-accent shadow-lg md:-translate-y-4' : ''
                                 }`}
                             >
                                 {plan.highlight && (
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gym-accent text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gym-accent text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase">
                                         Most Popular
                                     </div>
                                 )}
 
-                                <div className="mb-4">
-                                    <h3 className="text-lg font-semibold text-white mb-1">{plan.name}</h3>
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-white">₹{plan.price}</span>
-                                        <span className="text-xs text-zinc-500">/mo</span>
+                                        <span className="text-4xl font-bold text-white">₹{plan.price}</span>
+                                        <span className="text-sm text-zinc-500">/mo</span>
                                     </div>
                                 </div>
 
-                                <ul className="space-y-3 mb-6 flex-grow">
+                                <ul className="space-y-4 mb-8 flex-grow">
                                     {plan.features.map((feature, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-xs text-zinc-300">
-                                            <Check size={14} className={plan.highlight ? 'text-gym-accent mt-0.5' : 'text-zinc-500 mt-0.5'} />
+                                        <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                                            <Check size={18} className={plan.highlight ? 'text-gym-accent mt-0.5' : 'text-zinc-500 mt-0.5'} />
                                             <span>{feature}</span>
                                         </li>
                                     ))}
@@ -93,7 +93,7 @@ const Plans = () => {
 
                                 <button
                                     onClick={() => handleSelectPlan(plan)}
-                                    className={`w-full py-2.5 text-xs rounded transition-colors font-medium mt-auto ${
+                                    className={`w-full py-3 text-base rounded transition-colors font-bold mt-auto ${
                                         plan.highlight ? 'btn-primary' : 'btn-outline'
                                     }`}
                                 >
