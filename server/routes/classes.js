@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { admin } = require('../middleware/adminMiddleware');
+const { isAdmin } = require('../middleware/rbac');
 const Class = require('../models/Class');
 
 // @desc    Get all classes
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 // @desc    Create a class session
 // @route   POST /api/classes
 // @access  Private/Admin
-router.post('/', protect, admin, async (req, res) => {
+router.post('/', protect, isAdmin, async (req, res) => {
     try {
         const { name, description, trainerId, startTime, durationMinutes, capacity } = req.body;
 

@@ -1,25 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, logoutUser } = require('../controllers/authController');
+const { registerUser, loginUser, logoutUser, refreshAccessToken, googleLogin } = require('../controllers/authController');
+const { protect } = require('../middleware/authMiddleware');
+const { authLimiter } = require('../middleware/rateLimiter');
 
-// @route   POST api/auth/register
-// @desc    Register user
-// @access  Public
-router.post('/register', registerUser);
-
-// @route   POST api/auth/login
-// @desc    Login user & get token
-// @access  Public
-router.post('/login', loginUser);
-
-// @route   POST api/auth/logout
-// @desc    Logout user
-// @access  Public
-router.post('/logout', logoutUser);
-
-// @route   POST api/auth/google
-// @desc    Login with Google
-// @access  Public
-router.post('/google', require('../controllers/authController').googleLogin);
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
+router.post('/logout', protect, logoutUser);
+router.post('/refresh', refreshAccessToken);
+router.post('/google', authLimiter, googleLogin);
 
 module.exports = router;

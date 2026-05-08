@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import Logo from './Logo';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -18,15 +19,16 @@ const Navbar = () => {
         { name: 'Store', path: '/products' },
     ];
 
-    // Member-only links (not for admin or trainer — they run the gym, not use it)
+    // Member-only links
     const memberLinks = [
         { name: 'Exercises', path: '/exercises' },
         { name: 'Diet', path: '/diets' },
+        { name: 'AI Assessment', path: '/ai/assessment' },
     ];
 
     const navLinks = [
         ...publicLinks,
-        ...((user && user.role === 'user') ? memberLinks : []),
+        ...((user && (user.role === 'member' || user.role === 'user')) ? memberLinks : []),
     ];
 
     useEffect(() => {
@@ -39,24 +41,24 @@ const Navbar = () => {
 
     const getDashboardLink = () => {
         if (!user) return null;
-        if (user.role === 'admin') return '/admin';
-        if (user.role === 'trainer') return '/trainer';
+        if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'gym_owner') return '/admin';
+        if (user.role === 'receptionist') return '/reception';
+        if (user.role?.includes('trainer')) return '/trainer';
         return '/profile';
     };
+
+    const isStaff = user && ['super_admin', 'admin', 'gym_owner', 'receptionist', 'male_trainer', 'female_trainer', 'dietician'].includes(user.role);
 
     return (
         <nav
             className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-                scrolled ? 'bg-gym-dark/80 backdrop-blur-md border-b border-white/10 py-3 shadow-lg' : 'bg-gym-dark/50 backdrop-blur-sm border-b border-transparent py-4'
+                scrolled ? 'bg-gym-dark/80 backdrop-blur-md border-b border-gray-200 py-3 shadow-lg' : 'bg-gym-dark/50 backdrop-blur-sm border-b border-transparent py-4'
             }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 group">
-                    <img src="/logo.png" alt="CoreX" className="w-8 h-8 object-contain transform group-hover:scale-105 transition-transform" />
-                    <span className="text-xl font-bold tracking-tight text-white uppercase">
-                        CoreX
-                    </span>
+                <Link to="/" className="group">
+                    <Logo className="transition-transform group-hover:scale-105" />
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -65,12 +67,12 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`text-sm font-semibold transition-colors relative group ${
-                                location.pathname === link.path ? 'text-white' : 'text-zinc-400 hover:text-white'
+                            className={`text-[15px] font-semibold transition-all relative group py-2 tracking-tight ${
+                                location.pathname === link.path ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'
                             }`}
                         >
                             {link.name}
-                            <span className={`absolute -bottom-1 left-0 h-0.5 bg-gym-accent transition-all duration-300 ${
+                            <span className={`absolute -bottom-0.5 left-0 h-[2.5px] bg-gym-orange rounded-full transition-all duration-300 ${
                                 location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'
                             }`} />
                         </Link>
@@ -79,22 +81,22 @@ const Navbar = () => {
 
                 {/* Desktop Right Actions */}
                 <div className="hidden md:flex items-center gap-5">
-                    <Link to="/cart" className="relative text-zinc-400 hover:text-white transition-colors group">
+                    <Link to="/cart" className="relative text-gray-600 hover:text-gray-900 transition-colors group">
                         <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
                         {cart.length > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-gym-accent text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-gym-accent/50">
+                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-gym-accent text-gray-900 text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-gym-accent/50">
                                 {cart.length}
                             </span>
                         )}
                     </Link>
 
                     {user ? (
-                        <div className="flex items-center gap-3 pl-5 border-l border-white/10">
+                        <div className="flex items-center gap-3 pl-5 border-l border-gray-200">
                             <Link
                                 to="/profile"
-                                className="flex items-center gap-2.5 p-1 pr-3 rounded-xl bg-white/5 border border-white/5 hover:border-gym-accent/30 hover:bg-white/10 transition-all group"
+                                className="flex items-center gap-2.5 p-1 pr-4 rounded-full bg-gray-50 border border-gray-100 hover:border-gym-accent/30 hover:bg-gray-100 transition-all group"
                             >
-                                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
                                     {user.profilePhoto ? (
                                         <img 
                                             src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL || ''}${user.profilePhoto}`} 
@@ -106,7 +108,7 @@ const Navbar = () => {
                                     )}
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xs font-black text-white leading-none uppercase tracking-tighter">
+                                    <span className="text-xs font-black text-gray-900 leading-none uppercase tracking-tighter">
                                         {user.username}
                                     </span>
                                     <span className="text-[9px] font-bold text-gym-accent leading-none uppercase tracking-widest mt-0.5">
@@ -115,27 +117,28 @@ const Navbar = () => {
                                 </div>
                             </Link>
 
-                            {(user.role === 'admin' || user.role === 'trainer') && (
+                            {isStaff && (
                                 <Link
-                                    to={user.role === 'admin' ? "/admin" : "/trainer"}
-                                    className="p-2 bg-white/5 hover:bg-gym-accent/10 text-zinc-400 hover:text-gym-accent rounded-xl transition-all border border-white/5"
+                                    to={getDashboardLink()}
+                                    className="flex items-center gap-2 p-2 px-3 bg-gym-accent/10 hover:bg-gym-accent/20 text-gym-accent rounded-xl transition-all border border-gym-accent/20"
                                     title="Dashboard"
                                 >
                                     <LayoutDashboard size={18} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Dashboard</span>
                                 </Link>
                             )}
 
                             <button
                                 onClick={logout}
-                                className="p-2 bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-500 rounded-xl transition-all border border-white/5"
+                                className="p-2 bg-gray-50 hover:bg-red-500/10 text-gray-600 hover:text-red-500 rounded-xl transition-all border border-gray-100"
                                 title="Logout"
                             >
                                 <LogOut size={18} />
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4 pl-5 border-l border-white/10">
-                            <Link to="/login" className="text-sm font-semibold text-zinc-300 hover:text-white transition-colors">
+                        <div className="flex items-center gap-4 pl-5 border-l border-gray-200">
+                            <Link to="/login" className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
                                 Log in
                             </Link>
                             <Link to="/register" className="btn-primary text-sm px-4 py-1.5 rounded-lg">
@@ -147,7 +150,7 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <button
-                    className="md:hidden text-zinc-300 hover:text-white p-1"
+                    className="md:hidden text-gray-700 hover:text-gray-900 p-1"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -156,7 +159,7 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="absolute top-full left-0 w-full bg-gym-dark border-b border-white/10 shadow-2xl md:hidden">
+                <div className="absolute top-full left-0 w-full bg-gym-dark border-b border-gray-200 shadow-2xl md:hidden">
                     <div className="px-4 py-4 flex flex-col gap-2">
                         {navLinks.map((link) => (
                             <Link
@@ -165,24 +168,24 @@ const Navbar = () => {
                                 className={`text-base font-semibold px-4 py-3 rounded-lg transition-colors ${
                                     location.pathname === link.path
                                         ? 'bg-gym-accent/10 text-gym-accent'
-                                        : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                             >
                                 {link.name}
                             </Link>
                         ))}
 
-                        <div className="h-px bg-white/5 my-2" />
+                        <div className="h-px bg-gray-50 my-2" />
 
                         <Link
                             to="/cart"
-                            className="flex items-center justify-between text-base font-semibold px-4 py-3 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg"
+                            className="flex items-center justify-between text-base font-semibold px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg"
                         >
                             <div className="flex items-center gap-3">
                                 <ShoppingCart size={18} /> Cart
                             </div>
                             {cart.length > 0 && (
-                                <span className="bg-gym-accent text-white text-xs px-2 py-0.5 rounded-full">
+                                <span className="bg-gym-accent text-gray-900 text-xs px-2 py-0.5 rounded-full">
                                     {cart.length}
                                 </span>
                             )}
@@ -192,9 +195,9 @@ const Navbar = () => {
                             <>
                                 <Link
                                     to={getDashboardLink()}
-                                    className="flex items-center gap-3 text-base font-semibold px-4 py-3 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg"
+                                    className="flex items-center gap-3 text-base font-semibold px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg"
                                 >
-                                    {user.role === 'admin' || user.role === 'trainer' ? (
+                                    {isStaff ? (
                                         <><LayoutDashboard size={18} /> Dashboard</>
                                     ) : (
                                         <><User size={18} /> Profile</>

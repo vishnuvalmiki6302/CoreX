@@ -6,11 +6,26 @@ const User = require('../models/User');
 // @access  Private/Admin/Trainer
 exports.checkIn = async (req, res, next) => {
     try {
-        const { userId } = req.body;
+        let { userId, memberId } = req.body;
 
-        // Check if already checked in today and not checked out? 
-        // Or just create a new record.
-        // Let's check if there is an open check-in (no checkOut)
+        // Resolve user if memberId is provided instead of userId
+        if (!userId && memberId) {
+            const user = await User.findOne({ 
+                $or: [{ memberId: memberId }, { phoneNumber: memberId }] 
+            });
+            if (!user) {
+                res.status(404);
+                throw new Error('Member not found with provided ID or Phone');
+            }
+            userId = user._id;
+        }
+
+        if (!userId) {
+            res.status(400);
+            throw new Error('User ID or Member ID is required');
+        }
+
+        // Check if already checked in today and not checked out
         const openSession = await Attendance.findOne({ user: userId, checkOut: null });
         if (openSession) {
             res.status(400);

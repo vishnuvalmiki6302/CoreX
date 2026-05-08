@@ -236,7 +236,7 @@ exports.createMember = async (req, res, next) => {
             phoneNumber,
             address,
             membershipType: membershipType || 'none',
-            role: 'user',
+            role: req.body.role || 'member',
             planStartDate,
             membershipExpiry
         });

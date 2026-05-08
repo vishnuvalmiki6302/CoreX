@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
+const { isStaff, isAdmin } = require('../middleware/rbac');
 const {
     getUserProfile,
     updateUserProfile,
@@ -22,12 +23,12 @@ router.route('/trainers').get(getTrainers);
 router.route('/my-clients').get(protect, getMyClients);
 
 router.route('/')
-    .get(protect, admin, getMembers)
-    .post(protect, admin, createMember);
+    .get(protect, isStaff, getMembers)
+    .post(protect, isStaff, createMember);
 
 router.route('/:id')
-    .get(protect, admin, getMemberById)
-    .put(protect, admin, updateMember)
-    .delete(protect, admin, deleteMember);
+    .get(protect, isStaff, getMemberById)
+    .put(protect, isStaff, updateMember)
+    .delete(protect, isAdmin, deleteMember);
 
 module.exports = router;

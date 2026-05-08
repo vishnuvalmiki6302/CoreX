@@ -38,9 +38,19 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await login(formData.email, formData.password);
+            const userData = await login(formData.email, formData.password);
             toast.success('Logged in successfully');
-            navigate('/');
+            
+            // Staff Redirect Logic
+            if (['super_admin', 'admin', 'gym_owner'].includes(userData.role)) {
+                navigate('/admin');
+            } else if (userData.role === 'receptionist') {
+                navigate('/reception');
+            } else if (userData.role?.includes('trainer')) {
+                navigate('/trainer');
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             toast.error(error.response?.data?.message || 'Login failed');
         } finally {
@@ -50,23 +60,23 @@ const Login = () => {
 
     return (
         <div className="min-h-[85vh] flex items-center justify-center p-4 mt-10">
-            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
                 
                 {/* Left Side: Clean Visual */}
                 <div className="md:w-[45%] relative hidden md:block">
                     <img
-                        src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2069&auto=format&fit=crop"
+                        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
                         alt="Gym"
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 grayscale"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
                         <div className="w-8 h-8 flex items-center justify-center">
                             <img src="/logo.png" alt="CoreX Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white mb-2">Welcome back</h2>
-                            <p className="text-zinc-300 text-xs leading-relaxed max-w-sm">
+                            <p className="text-gray-200 text-xs leading-relaxed max-w-sm">
                                 Log in to track your progress and access your personalized gym dashboard.
                             </p>
                         </div>
@@ -74,21 +84,21 @@ const Login = () => {
                 </div>
 
                 {/* Right Side: Clean Form */}
-                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-[#18181b]">
+                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-gray-50">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-white mb-1">Sign In</h1>
-                        <p className="text-xs text-zinc-400">Enter your details to access your account.</p>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-1">Sign In</h1>
+                        <p className="text-xs text-gray-600">Enter your details to access your account.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">
                                 Email
                             </label>
                             <input
                                 type="email"
                                 required
-                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder="Enter your email"
@@ -97,17 +107,17 @@ const Login = () => {
 
                         <div>
                             <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-xs font-medium text-zinc-300">
+                                <label className="block text-xs font-medium text-gray-700">
                                     Password
                                 </label>
-                                <Link to="/forgot-password" className="text-xs font-medium text-zinc-400 hover:text-white transition-colors">
+                                <Link to="/forgot-password" className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors">
                                     Forgot password?
                                 </Link>
                             </div>
                             <input
                                 type="password"
                                 required
-                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 placeholder="••••••••"
@@ -121,9 +131,9 @@ const Login = () => {
 
                     <div className="mt-6">
                         <div className="relative flex py-2 items-center mb-4">
-                            <div className="flex-grow border-t border-white/10"></div>
-                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-[10px] uppercase tracking-wider font-semibold">Or continue with</span>
-                            <div className="flex-grow border-t border-white/10"></div>
+                            <div className="flex-grow border-t border-gray-200"></div>
+                            <span className="flex-shrink-0 mx-4 text-gray-500 text-[10px] uppercase tracking-wider font-semibold">Or continue with</span>
+                            <div className="flex-grow border-t border-gray-200"></div>
                         </div>
                         
                         <div className="flex justify-center w-full">
@@ -131,8 +141,8 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="mt-6 text-center text-xs text-zinc-400">
-                        Don't have an account? <Link to="/register" className="text-white font-bold hover:underline">Sign up</Link>
+                    <div className="mt-6 text-center text-xs text-gray-600">
+                        Don't have an account? <Link to="/register" className="text-gray-900 font-bold hover:underline">Sign up</Link>
                     </div>
                 </div>
             </div>

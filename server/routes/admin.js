@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { admin } = require('../middleware/adminMiddleware');
+const { isAdmin } = require('../middleware/rbac');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -9,7 +9,7 @@ const Order = require('../models/Order');
 // @desc    Get dashboard stats
 // @route   GET /api/admin/stats
 // @access  Private/Admin
-router.get('/stats', protect, admin, async (req, res) => {
+router.get('/stats', protect, isAdmin, async (req, res) => {
     try {
         const userCount = await User.countDocuments();
         const productCount = await Product.countDocuments();
@@ -33,7 +33,7 @@ router.get('/stats', protect, admin, async (req, res) => {
 // @desc    Get all users
 // @route   GET /api/admin/users
 // @access  Private/Admin
-router.get('/users', protect, admin, async (req, res) => {
+router.get('/users', protect, isAdmin, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
         res.json(users);
@@ -45,7 +45,7 @@ router.get('/users', protect, admin, async (req, res) => {
 // @desc    Update user role
 // @route   PUT /api/admin/users/:id/role
 // @access  Private/Admin
-router.put('/users/:id/role', protect, admin, async (req, res) => {
+router.put('/users/:id/role', protect, isAdmin, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (user) {

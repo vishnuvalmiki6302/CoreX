@@ -50,23 +50,23 @@ const Register = () => {
 
     return (
         <div className="min-h-[85vh] flex items-center justify-center p-4 mt-10">
-            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row-reverse bg-[#09090b] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row-reverse bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
 
                 {/* Right Side: Clean Visual */}
-                <div className="md:w-[45%] relative hidden md:block border-l border-white/10">
+                <div className="md:w-[45%] relative hidden md:block border-l border-gray-200">
                     <img
-                        src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop"
+                        src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop"
                         alt="Gym Equipment"
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 grayscale"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
                         <div className="w-8 h-8 flex items-center justify-center">
-                            <img src="/logo.png" alt="TitanEdge Logo" className="w-full h-full object-contain" />
+                            <img src="/logo.png" alt="CoreX Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white mb-2">Join CoreX!</h2>
-                            <p className="text-zinc-300 text-xs leading-relaxed max-w-sm mb-2">
+                            <p className="text-gray-200 text-xs leading-relaxed max-w-sm mb-2">
                                 Create an account to access premium classes, diet plans, and our exclusive gear store.
                             </p>
                         </div>
@@ -74,30 +74,30 @@ const Register = () => {
                 </div>
 
                 {/* Left Side: Clean Form */}
-                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-[#18181b]">
+                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-gray-50">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-white mb-1">Create Account</h1>
-                        <p className="text-xs text-zinc-400">Join our community and transform your life.</p>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-1">Create Account</h1>
+                        <p className="text-xs text-gray-600">Join our community and transform your life.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-zinc-300 mb-1.5">Username</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1.5">Username</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                     value={formData.username}
                                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                     placeholder="JohnDoe"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-300 mb-1.5">Phone <span className="text-zinc-500">(Optional)</span></label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1.5">Phone <span className="text-gray-500">(Optional)</span></label>
                                 <input
                                     type="tel"
-                                    className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     placeholder="+1 234 567"
@@ -106,11 +106,11 @@ const Register = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1.5">Email</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Email</label>
                             <input
                                 type="email"
                                 required
-                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder="john@example.com"
@@ -118,11 +118,11 @@ const Register = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1.5">Password</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Password</label>
                             <input
                                 type="password"
                                 required
-                                className="w-full px-3 py-2 bg-[#09090b] border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 placeholder="••••••••"
@@ -136,9 +136,9 @@ const Register = () => {
 
                     <div className="mt-6">
                         <div className="relative flex py-2 items-center mb-4">
-                            <div className="flex-grow border-t border-white/10"></div>
-                            <span className="flex-shrink-0 mx-4 text-zinc-500 text-[10px] uppercase tracking-wider font-semibold">Or join with</span>
-                            <div className="flex-grow border-t border-white/10"></div>
+                            <div className="flex-grow border-t border-gray-200"></div>
+                            <span className="flex-shrink-0 mx-4 text-gray-500 text-[10px] uppercase tracking-wider font-semibold">Or join with</span>
+                            <div className="flex-grow border-t border-gray-200"></div>
                         </div>
 
                         <div className="flex justify-center w-full">
@@ -146,8 +146,8 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="mt-6 text-center text-xs text-zinc-400">
-                        Already have an account? <Link to="/login" className="text-white font-bold hover:underline">Sign in</Link>
+                    <div className="mt-6 text-center text-xs text-gray-600">
+                        Already have an account? <Link to="/login" className="text-gray-900 font-bold hover:underline">Sign in</Link>
                     </div>
                 </div>
             </div>

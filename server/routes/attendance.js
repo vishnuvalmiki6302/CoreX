@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { checkIn, checkOut, getUserAttendance, getActiveCheckIns, getAttendanceStats, getMyAttendance } = require('../controllers/attendanceController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
+const { requireRole, isStaff, isTrainer, ADMIN_ROLES } = require('../middleware/rbac');
 
-router.post('/check-in', protect, checkIn);
-router.post('/check-out', protect, checkOut);
-router.get('/active', protect, getActiveCheckIns);
-router.get('/stats', protect, admin, getAttendanceStats);
+router.post('/check-in', protect, isStaff, checkIn);
+router.post('/check-out', protect, isStaff, checkOut);
+router.get('/active', protect, isStaff, getActiveCheckIns);
+router.get('/stats', protect, isStaff, getAttendanceStats);
 router.get('/me', protect, getMyAttendance);
-router.get('/user/:id', protect, getUserAttendance);
+router.get('/user/:id', protect, isStaff, getUserAttendance);
 
 module.exports = router;

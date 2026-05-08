@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, PlayCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Hero = () => {
@@ -10,99 +10,92 @@ const Hero = () => {
         : '/register';
 
     return (
-        <section className="w-full h-screen flex pt-16 bg-black overflow-hidden">
+        <section className="relative w-full min-h-screen bg-white overflow-hidden pt-24 pb-20 flex flex-col items-center justify-center">
+            
+            {/* Soft Ambient Background Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-orange-400/5 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* ── LEFT PANEL: Content ── */}
-            <div className="relative z-10 w-full lg:w-[52%] flex flex-col justify-between px-8 md:px-14 py-12">
-
-                {/* Top label */}
-                <div className="flex items-center gap-3">
-                    <span className="h-[2px] w-8 bg-orange-500 inline-block" />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-400">
-                        Premium · Unisex · Est. 2020
+            <div className="relative z-10 max-w-5xl mx-auto px-6 w-full flex flex-col items-center text-center">
+                
+                {/* Micro-Header Badge */}
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 border border-orange-100 mb-8 cursor-default hover:bg-orange-100 transition-colors">
+                    <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-orange-600">
+                        Premium Fitness Intelligence
                     </span>
                 </div>
 
-                {/* Middle: Main headline + CTA */}
-                <div>
-                    <h1
-                        className="font-black text-white leading-[1.0] tracking-tight mb-6"
-                        style={{
-                            fontSize: 'clamp(3rem, 6.5vw, 6rem)',
-                            fontFamily: "'Inter', sans-serif",
-                        }}
-                    >
-                        No Excuses.<br />
-                        <span className="text-orange-500">Just Results.</span>
-                    </h1>
-
-                    <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed max-w-md mb-10">
-                        Premium unisex fitness club built for everyone who's ready to work.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-4 mb-14">
-                        {/* Primary — gradient pill with glow */}
-                        <Link
-                            to={dest}
-                            className="group relative inline-flex items-center justify-center gap-3 px-9 py-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold uppercase tracking-widest shadow-[0_0_24px_rgba(249,115,22,0.45)] hover:shadow-[0_0_40px_rgba(249,115,22,0.7)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
-                        >
-                            {user ? 'My Dashboard' : 'Start Free Trial'}
-                            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />
-                        </Link>
-
-                        {/* Secondary — transparent pill, subtle border */}
-                        <Link
-                            to="/classes"
-                            className="group relative inline-flex items-center justify-center gap-3 px-9 py-4 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-widest backdrop-blur-sm transition-all duration-200"
-                        >
-                            View Classes
-                            <ChevronRight size={15} className="text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-200" />
-                        </Link>
-                    </div>
-
-                    {/* Stats row */}
-                    <div className="grid grid-cols-3 gap-6 border-t border-zinc-800 pt-8">
-                        {[
-                            { n: '2,400+', l: 'Members' },
-                            { n: '50+',    l: 'Weekly Classes' },
-                            { n: '25+',    l: 'Expert Trainers' },
-                        ].map((s, i) => (
-                            <div key={i}>
-                                <p className="text-white font-black text-2xl md:text-3xl leading-none mb-1"
-                                   style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {s.n}
-                                </p>
-                                <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-semibold">{s.l}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Bottom: Tags */}
-                <div className="flex flex-wrap gap-2">
-                    {['Strength', 'Yoga', 'HIIT', 'Pilates', 'Cardio', 'Boxing'].map(t => (
-                        <span key={t} className="px-3 py-1 border border-zinc-800 text-zinc-500 text-[10px] uppercase tracking-widest font-semibold hover:border-orange-500 hover:text-orange-400 transition-colors cursor-default">
-                            {t}
+                {/* Massive Centered Headline */}
+                <h1 className="font-extrabold text-gray-900 leading-[1.05] tracking-tight mb-8"
+                    style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', fontFamily: "'Inter', sans-serif" }}>
+                    Redefining Your <br />
+                    <span className="relative inline-block mt-2">
+                        <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-400">
+                            Physical Limits.
                         </span>
-                    ))}
+                        {/* Decorative swoosh under text */}
+                        <svg className="absolute w-full h-4 -bottom-1 left-0 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                            <path d="M0 5 Q 50 15 100 5" stroke="currentColor" strokeWidth="8" fill="transparent" strokeLinecap="round" />
+                        </svg>
+                    </span>
+                </h1>
+
+                {/* Sub-headline */}
+                <p className="text-gray-500 text-lg md:text-xl font-normal leading-relaxed max-w-2xl mb-12">
+                    CoreX is an elite, technology-driven training facility. We combine expert coaching, state-of-the-art equipment, and AI analytics to guarantee results.
+                </p>
+
+                {/* Primary Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 w-full sm:w-auto">
+                    <Link
+                        to={dest}
+                        className="group flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-orange-500 text-white text-base font-bold uppercase tracking-wide shadow-xl shadow-orange-500/25 hover:bg-orange-600 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto"
+                    >
+                        {user ? 'Open Dashboard' : 'Start Your Journey'}
+                        <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" />
+                    </Link>
+
+                    <button
+                        className="group flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-white border-2 border-gray-200 text-gray-900 text-base font-bold uppercase tracking-wide hover:border-gray-900 transition-all duration-300 w-full sm:w-auto"
+                    >
+                        <PlayCircle size={22} className="text-orange-500 group-hover:scale-110 transition-transform duration-300" />
+                        Facility Tour
+                    </button>
                 </div>
             </div>
 
-            {/* ── RIGHT PANEL: Image ── */}
-            <div className="hidden lg:block relative flex-1 overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?q=90&w=2070&auto=format&fit=crop"
-                    alt="CoreX Unisex Fitness Facility"
-                    className="w-full h-full object-cover object-center"
-                    style={{ filter: 'brightness(0.75) contrast(1.05)' }}
-                />
-                {/* Subtle left edge fade to blend with dark panel */}
-                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent" />
+            {/* ── Massive Feature Image Component ── */}
+            <div className="relative z-10 w-full max-w-6xl mx-auto px-6 mt-4">
+                <div className="relative aspect-[16/7] md:aspect-[21/9] rounded-[2rem] overflow-hidden shadow-2xl shadow-gray-900/10 border-8 border-white group">
+                    <img
+                        src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop"
+                        alt="CoreX Facility Interior"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-1000 ease-out"
+                    />
+                    
+                    {/* Dark gradient at bottom to make floating stats readable */}
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/80 to-transparent" />
 
-                {/* Floating "Unisex" badge on the image */}
-                <div className="absolute bottom-12 right-10 bg-black/70 backdrop-blur-md border border-white/10 px-6 py-4 text-right">
-                    <p className="text-white font-bold text-lg leading-none mb-1">Men &amp; Women</p>
-                    <p className="text-zinc-400 text-xs uppercase tracking-widest">Fully Inclusive</p>
+                    {/* Integrated Floating Stats inside the image */}
+                    <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-6 py-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                        <div className="flex items-center gap-3">
+                            <CheckCircle2 className="text-orange-400" size={24} />
+                            <span className="text-white font-semibold tracking-wide">Premium Biometric Scanners</span>
+                        </div>
+                        <div className="hidden md:block w-px h-8 bg-white/20"></div>
+                        <div className="flex items-center gap-3">
+                            <CheckCircle2 className="text-orange-400" size={24} />
+                            <span className="text-white font-semibold tracking-wide">Olympic Grade Lifting Platforms</span>
+                        </div>
+                        <div className="hidden lg:block w-px h-8 bg-white/20"></div>
+                        <div className="hidden lg:flex items-center gap-3">
+                            <CheckCircle2 className="text-orange-400" size={24} />
+                            <span className="text-white font-semibold tracking-wide">24/7 Unlimited Access</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

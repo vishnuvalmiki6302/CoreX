@@ -51,20 +51,20 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm"
                 onClick={onClose}
             >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
-                    className="bg-zinc-900 border border-white/10 rounded-3xl p-6 max-w-md w-full shadow-2xl relative overflow-hidden"
+                    className="bg-gray-50 border border-gray-200 rounded-3xl p-6 max-w-md w-full shadow-2xl relative overflow-hidden"
                     onClick={e => e.stopPropagation()}
                 >
                     {/* Close Button */}
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+                        className="absolute top-4 right-4 p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"
                         disabled={loading}
                     >
                         <X size={20} className="text-gray-400" />
@@ -73,22 +73,22 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                     {step === 'summary' && (
                         <>
                             <div className="text-center mb-8">
-                                <h3 className="text-2xl font-black text-white mb-2 uppercase italic">Confirm Subscription</h3>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase italic">Confirm Subscription</h3>
                                 <p className="text-gray-400 text-sm">You are upgrading to the <span className="text-gym-accent font-bold">{plan.name}</span> plan.</p>
                             </div>
 
-                            <div className="bg-black/40 rounded-xl p-4 mb-6 border border-white/5">
+                            <div className="bg-white/60 rounded-xl p-4 mb-6 border border-gray-100">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">Plan Price</span>
-                                    <span className="text-white font-bold">₹{plan.price}</span>
+                                    <span className="text-gray-900 font-bold">₹{plan.price}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">Duration</span>
-                                    <span className="text-white font-bold">{plan.durationMonths} Month{plan.durationMonths > 1 ? 's' : ''}</span>
+                                    <span className="text-gray-900 font-bold">{plan.durationMonths} Month{plan.durationMonths > 1 ? 's' : ''}</span>
                                 </div>
-                                <div className="h-px bg-white/10 my-3"></div>
+                                <div className="h-px bg-gray-100 my-3"></div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-white font-bold text-lg">Total</span>
+                                    <span className="text-gray-900 font-bold text-lg">Total</span>
                                     <span className="text-gym-accent font-black text-2xl">₹{plan.price}</span>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                                 <div className="flex items-center gap-3 p-3 rounded-lg border border-gym-accent/30 bg-gym-accent/5">
                                     <CreditCard className="text-gym-accent" size={20} />
                                     <div className="flex-1">
-                                        <p className="text-white text-sm font-bold">Mock Credit Card</p>
+                                        <p className="text-gray-900 text-sm font-bold">Mock Credit Card</p>
                                         <p className="text-xs text-gray-500">**** **** **** 4242</p>
                                     </div>
                                     <Check className="text-gym-accent" size={16} />
@@ -110,7 +110,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
 
                             <button
                                 onClick={handlePayment}
-                                className="w-full mt-6 bg-gym-accent hover:bg-gym-accent/90 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-gym-accent/25 uppercase tracking-wide"
+                                className="w-full mt-6 bg-gym-accent hover:bg-gym-accent/90 text-gray-900 font-bold py-4 rounded-xl transition-all shadow-lg shadow-gym-accent/25 uppercase tracking-wide"
                             >
                                 Confirm & Pay
                             </button>
@@ -120,7 +120,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                     {step === 'processing' && (
                         <div className="py-12 flex flex-col items-center justify-center text-center">
                             <div className="w-16 h-16 border-4 border-gym-accent/30 border-t-gym-accent rounded-full animate-spin mb-6"></div>
-                            <h3 className="text-xl font-bold text-white mb-2">Processing Payment...</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Processing Payment...</h3>
                             <p className="text-gray-400 text-sm">Please do not close this window.</p>
                         </div>
                     )}
@@ -130,7 +130,7 @@ const PaymentModal = ({ plan, onClose, onSuccess }) => {
                             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                                 <Check size={40} className="text-green-500" />
                             </div>
-                            <h3 className="text-2xl font-black text-white mb-2 uppercase italic">Payment Successful!</h3>
+                            <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase italic">Payment Successful!</h3>
                             <p className="text-gray-400 text-sm mb-6">Welcome to the {plan.name} team.</p>
                         </div>
                     )}

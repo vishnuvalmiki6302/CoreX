@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -19,8 +20,25 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin', 'trainer'],
-        default: 'user'
+        enum: ['member', 'super_admin', 'gym_owner', 'receptionist', 'male_trainer', 'female_trainer', 'dietician', 'accountant'],
+        default: 'member'
+    },
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'other'],
+    },
+    dateOfBirth: {
+        type: Date,
+    },
+    preferredTrainerGender: {
+        type: String,
+        enum: ['male', 'female', 'no_preference'],
+        default: 'no_preference',
+    },
+    fitnessLevel: {
+        type: String,
+        enum: ['beginner', 'intermediate', 'advanced'],
+        default: 'beginner',
     },
     membershipType: {
         type: String,
@@ -33,7 +51,7 @@ const UserSchema = new mongoose.Schema({
     memberId: {
         type: String,
         unique: true,
-        sparse: true, // Allows null/undefined for admins/trainers who might not have one initially
+        sparse: true,
     },
     phoneNumber: {
         type: String,
@@ -44,7 +62,7 @@ const UserSchema = new mongoose.Schema({
         relation: String
     },
     medicalNotes: {
-        type: String, // Allergies, injuries, etc.
+        type: String,
     },
     address: {
         type: String,
@@ -70,11 +88,32 @@ const UserSchema = new mongoose.Schema({
         age: Number,
         weight: Number,
         height: Number,
+        bodyFat: Number,
+        bmi: Number,
         goals: [String],
     },
     profilePhoto: {
         type: String,
         default: ''
+    },
+    transformationPhotos: [{
+        url: String,
+        caption: String,
+        isPrivate: { type: Boolean, default: false },
+        date: { type: Date, default: Date.now }
+    }],
+    // QR & Attendance
+    qrToken: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    lastVisit: {
+        type: Date,
+    },
+    // Auth Security
+    refreshToken: {
+        type: String,
     },
     createdAt: {
         type: Date,
@@ -82,13 +121,15 @@ const UserSchema = new mongoose.Schema({
     },
 });
 
-// Pre-save hook to generate memberId if not present
+// Pre-save hook to generate memberId and qrToken
 UserSchema.pre('save', async function (next) {
-    if (this.role === 'user' && !this.memberId) {
-        // Simple ID generation logic: MEM + Timestamp + Random
+    if (this.role === 'member' && !this.memberId) {
         const dateStr = Date.now().toString().slice(-6);
         const randomStr = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
         this.memberId = `MEM${dateStr}${randomStr}`;
+    }
+    if (this.role === 'member' && !this.qrToken) {
+        this.qrToken = uuidv4();
     }
     next();
 });

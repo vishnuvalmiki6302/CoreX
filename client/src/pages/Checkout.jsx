@@ -84,14 +84,14 @@ const Checkout = () => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-zinc-900 border border-white/5 p-12 rounded-3xl max-w-lg w-full text-center shadow-2xl"
+                    className="bg-gray-50 border border-gray-100 p-12 rounded-3xl max-w-lg w-full text-center shadow-2xl"
                 >
                     <div className="w-24 h-24 bg-gym-accent/20 rounded-full flex items-center justify-center mx-auto mb-8">
                         <CheckCircle2 size={48} className="text-gym-accent" />
                     </div>
-                    <h2 className="text-4xl font-black text-white italic uppercase mb-4 tracking-tighter">Order Success!</h2>
+                    <h2 className="text-4xl font-black text-gray-900 italic uppercase mb-4 tracking-tighter">Order Success!</h2>
                     <p className="text-gray-400 mb-8 text-lg">Your gear is on the way. Redirecting to your profile to view orders...</p>
-                    <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                    <div className="w-full bg-gray-50 h-1 rounded-full overflow-hidden">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: '100%' }}
@@ -111,17 +111,17 @@ const Checkout = () => {
                     {/* Left Column: Form */}
                     <div className="flex-grow space-y-8">
                         <div>
-                            <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-2">Checkout</h1>
+                            <h1 className="text-4xl font-black text-gray-900 italic uppercase tracking-tighter mb-2">Checkout</h1>
                             <p className="text-gray-400">Complete your order and gear up for greatness.</p>
                         </div>
 
                         {/* Shipping Address */}
-                        <section className="bg-zinc-900 border border-white/5 p-8 rounded-2xl relative overflow-hidden group">
+                        <section className="bg-gray-50 border border-gray-100 p-8 rounded-2xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
                                 <MapPin size={120} />
                             </div>
 
-                            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                 <span className="w-8 h-8 rounded-full bg-gym-accent text-black flex items-center justify-center text-sm font-black italic">01</span>
                                 Shipping Information
                             </h2>
@@ -132,7 +132,7 @@ const Checkout = () => {
                                     <input
                                         type="text"
                                         defaultValue={user?.username}
-                                        className="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-gym-accent transition-colors"
+                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-gray-900 outline-none focus:border-gym-accent transition-colors"
                                         placeholder="John Doe"
                                     />
                                 </div>
@@ -142,7 +142,7 @@ const Checkout = () => {
                                         type="text"
                                         value={address.street}
                                         onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                                        className="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-gym-accent transition-colors"
+                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-gray-900 outline-none focus:border-gym-accent transition-colors"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -151,7 +151,7 @@ const Checkout = () => {
                                         type="text"
                                         value={address.city}
                                         onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                                        className="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-gym-accent transition-colors"
+                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-gray-900 outline-none focus:border-gym-accent transition-colors"
                                     />
                                 </div>
                                 <div className="flex gap-4">
@@ -161,7 +161,7 @@ const Checkout = () => {
                                             type="text"
                                             value={address.state}
                                             onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                                            className="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-gym-accent transition-colors"
+                                            className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-gray-900 outline-none focus:border-gym-accent transition-colors"
                                         />
                                     </div>
                                     <div className="w-1/2 space-y-2">
@@ -170,7 +170,7 @@ const Checkout = () => {
                                             type="text"
                                             value={address.zipCode}
                                             onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
-                                            className="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-gym-accent transition-colors"
+                                            className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-gray-900 outline-none focus:border-gym-accent transition-colors"
                                         />
                                     </div>
                                 </div>
@@ -178,23 +178,23 @@ const Checkout = () => {
                         </section>
 
                         {/* Payment Method */}
-                        <section className="bg-zinc-900 border border-white/5 p-8 rounded-2xl">
-                            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <section className="bg-gray-50 border border-gray-100 p-8 rounded-2xl">
+                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                 <span className="w-8 h-8 rounded-full bg-gym-accent text-black flex items-center justify-center text-sm font-black italic">02</span>
                                 Payment Method
                             </h2>
 
                             <div className="bg-gym-accent/5 border border-gym-accent/20 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
                                 <div className="w-full md:w-auto flex-shrink-0">
-                                    <div className="w-full md:w-56 aspect-[1.58/1] bg-gradient-to-br from-zinc-800 to-black rounded-xl p-4 flex flex-col justify-between border border-white/10 shadow-xl">
+                                    <div className="w-full md:w-56 aspect-[1.58/1] bg-gradient-to-br from-zinc-800 to-black rounded-xl p-4 flex flex-col justify-between border border-gray-200 shadow-xl">
                                         <div className="flex justify-between items-start">
-                                            <div className="w-10 h-10 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center">
+                                            <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center">
                                                 <CreditCard size={20} className="text-gym-accent" />
                                             </div>
-                                            <span className="text-white/20 font-black italic">GYM PASS</span>
+                                            <span className="text-gray-900/20 font-black italic">GYM PASS</span>
                                         </div>
                                         <div>
-                                            <p className="text-white font-mono tracking-widest text-sm mb-1">**** **** **** 4242</p>
+                                            <p className="text-gray-900 font-mono tracking-widest text-sm mb-1">**** **** **** 4242</p>
                                             <div className="flex justify-between text-[8px] text-gray-500 uppercase font-black">
                                                 <span>{user?.username}</span>
                                                 <span>12/28</span>
@@ -203,7 +203,7 @@ const Checkout = () => {
                                     </div>
                                 </div>
                                 <div className="flex-grow space-y-2">
-                                    <h3 className="text-white font-bold flex items-center gap-2">
+                                    <h3 className="text-gray-900 font-bold flex items-center gap-2">
                                         Mock Card Payment <ShieldCheck size={16} className="text-gym-accent" />
                                     </h3>
                                     <p className="text-sm text-gray-400">
@@ -216,31 +216,31 @@ const Checkout = () => {
 
                     {/* Right Column: Order Summary */}
                     <div className="w-full md:w-[400px] flex-shrink-0">
-                        <aside className="bg-zinc-900 border border-white/5 p-8 rounded-3xl sticky top-32 space-y-8">
-                            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Summary</h2>
+                        <aside className="bg-gray-50 border border-gray-100 p-8 rounded-3xl sticky top-32 space-y-8">
+                            <h2 className="text-2xl font-black text-gray-900 italic uppercase tracking-tighter">Summary</h2>
 
                             {/* Items Scroll */}
                             <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                                 {cart.map((item) => (
                                     <div key={item.id} className="flex gap-4 group">
-                                        <div className="w-16 h-16 bg-white/5 rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0">
                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                                         </div>
                                         <div className="flex-grow flex flex-col justify-center">
-                                            <h4 className="text-white font-bold text-sm line-clamp-1">{item.name}</h4>
+                                            <h4 className="text-gray-900 font-bold text-sm line-clamp-1">{item.name}</h4>
                                             <p className="text-gray-500 text-xs">Qty: {item.quantity} × ${item.price}</p>
                                         </div>
-                                        <div className="flex items-center text-white font-black italic text-sm">
+                                        <div className="flex items-center text-gray-900 font-black italic text-sm">
                                             ${(item.price * item.quantity).toFixed(0)}
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="space-y-4 pt-6 border-t border-white/10">
+                            <div className="space-y-4 pt-6 border-t border-gray-200">
                                 <div className="flex justify-between items-center text-gray-400 text-sm">
                                     <span>Subtotal</span>
-                                    <span className="text-white font-bold">${totalPrice.toFixed(2)}</span>
+                                    <span className="text-gray-900 font-bold">${totalPrice.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-gray-400 text-sm">
                                     <span>Shipping</span>
@@ -248,13 +248,13 @@ const Checkout = () => {
                                 </div>
                                 <div className="flex justify-between items-center text-gray-400 text-sm">
                                     <span>Tax (8%)</span>
-                                    <span className="text-white font-bold">${tax.toFixed(2)}</span>
+                                    <span className="text-gray-900 font-bold">${tax.toFixed(2)}</span>
                                 </div>
-                                <div className="h-px bg-white/10 my-4" />
+                                <div className="h-px bg-gray-100 my-4" />
                                 <div className="flex justify-between items-end">
                                     <div>
                                         <span className="text-gray-500 uppercase font-black text-[10px] tracking-widest block mb-1">Estimated Total</span>
-                                        <span className="text-white font-black italic text-4xl tracking-tighter">${finalTotal.toFixed(2)}</span>
+                                        <span className="text-gray-900 font-black italic text-4xl tracking-tighter">${finalTotal.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -262,7 +262,7 @@ const Checkout = () => {
                             <button
                                 onClick={handlePlaceOrder}
                                 disabled={loading}
-                                className="w-full bg-gym-accent hover:bg-gym-accent/90 disabled:bg-zinc-800 disabled:text-gray-600 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-gym-accent/20 uppercase italic tracking-wider group"
+                                className="w-full bg-gym-accent hover:bg-gym-accent/90 disabled:bg-gray-100 disabled:text-gray-600 text-gray-900 font-black py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-gym-accent/20 uppercase italic tracking-wider group"
                             >
                                 {loading ? (
                                     <>

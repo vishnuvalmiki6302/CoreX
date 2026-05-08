@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '../components/Logo';
 import {
     User, Mail, Calendar, Activity, Save, Ruler, Weight, Phone,
     MapPin, HeartPulse, AlertCircle, Settings, Dumbbell, Utensils,
@@ -13,16 +14,16 @@ import toast from 'react-hot-toast';
 
 const InputField = ({ label, icon: Icon, type = 'text', value, onChange, placeholder, disabled }) => (
     <div className="space-y-1.5">
-        <label className="text-xs font-medium text-zinc-400">{label}</label>
+        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</label>
         <div className={`relative flex items-center ${disabled ? 'opacity-50' : ''}`}>
-            {Icon && <Icon size={15} className="absolute left-3 text-zinc-500 pointer-events-none" />}
+            {Icon && <Icon size={16} className="absolute left-3 text-orange-500/70" />}
             <input
                 type={type}
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
                 disabled={disabled}
-                className={`w-full h-10 ${Icon ? 'pl-9' : 'pl-3'} pr-3 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all disabled:bg-zinc-900 disabled:cursor-not-allowed`}
+                className={`w-full h-11 ${Icon ? 'pl-10' : 'pl-4'} pr-4 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed`}
             />
         </div>
     </div>
@@ -41,20 +42,11 @@ const Profile = () => {
     const [workoutPlans, setWorkoutPlans] = useState([]);
     const [dietPlans, setDietPlans] = useState([]);
     const [planProgram, setPlanProgram] = useState(null);
-    const [activeProgramDay, setActiveProgramDay] = useState('Monday');
 
     const [formData, setFormData] = useState({
-        username: '',
-        age: '',
-        weight: '',
-        height: '',
-        goals: '',
-        phoneNumber: '',
-        address: '',
-        medicalNotes: '',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        emergencyContactRelation: ''
+        username: '', age: '', weight: '', height: '', goals: '',
+        phoneNumber: '', address: '', medicalNotes: '',
+        emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: ''
     });
 
     const [previewImage, setPreviewImage] = useState(null);
@@ -135,7 +127,7 @@ const Profile = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        const loadToast = toast.loading("Saving changes...");
+        const loadToast = toast.loading("Syncing profile data...");
         try {
             const goalsArray = formData.goals.split(',').map(g => g.trim()).filter(g => g);
             const formDataPayload = new FormData();
@@ -155,214 +147,227 @@ const Profile = () => {
                 relation: formData.emergencyContactRelation
             }));
             if (selectedFile) formDataPayload.append('profilePhoto', selectedFile);
+            
             const { data } = await api.put('/users/profile', formDataPayload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setProfileData(data);
             setIsEditing(false);
-            toast.success("Profile updated successfully.", { id: loadToast });
+            toast.success("Profile updated successfully", { id: loadToast });
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to update profile", { id: loadToast });
+            toast.error(error.response?.data?.message || "Update failed", { id: loadToast });
         }
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-zinc-500 text-sm font-medium">Synchronizing profile...</p>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-500 rounded-full animate-spin" />
+                <p className="text-gray-400 text-sm font-semibold tracking-widest uppercase">Initializing Profile</p>
             </div>
         </div>
     );
 
     const tabs = [
         { id: 'overview', name: 'Overview', icon: Activity },
-        { id: 'details', name: 'Profile', icon: User },
-        { id: 'attendance', name: 'Attendance', icon: Calendar },
-        { id: 'payments', name: 'Billing', icon: CreditCard },
+        { id: 'details', name: 'Identity', icon: User },
+        { id: 'attendance', name: 'Activity', icon: Calendar },
+        { id: 'payments', name: 'Financials', icon: CreditCard },
     ];
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            <div className="max-w-6xl mx-auto px-4 md:px-6 pt-24 pb-16">
+        <div className="min-h-screen bg-gray-50/50 pb-20 pt-28">
+            <div className="max-w-6xl mx-auto px-6">
+                <Logo className="mb-8" />
 
-                {/* ─── PROFILE HEADER ─── */}
-                <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800 shadow-2xl mb-6 overflow-hidden">
-                    <div className="h-32 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-950 relative">
-                        <div className="absolute inset-0 opacity-30"
-                            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #f9731611 0%, transparent 60%), radial-gradient(circle at 80% 50%, #ffffff05 0%, transparent 60%)' }} />
-                    </div>
-                    <div className="px-6 pb-6 relative z-10">
-                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 -mt-12">
-                            <div className="flex items-end gap-5">
+                {/* ─── PREMIUM HEADER ─── */}
+                <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm mb-10 overflow-hidden relative">
+                    <div className="h-40 bg-orange-gradient opacity-10 absolute top-0 left-0 right-0" />
+                    <div className="px-10 pb-8 pt-10 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8">
+                            <div className="flex flex-col md:flex-row items-center md:items-end gap-8">
                                 {/* Avatar */}
                                 <div className="relative group">
-                                    <div className="w-24 h-24 rounded-2xl border-4 border-zinc-900 shadow-2xl bg-zinc-800 overflow-hidden flex items-center justify-center text-zinc-500">
+                                    <div className="w-36 h-36 rounded-3xl border-8 border-white shadow-2xl bg-gray-50 overflow-hidden flex items-center justify-center">
                                         {previewImage
-                                            ? <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
-                                            : <span className="text-3xl font-bold text-zinc-400">{profileData?.username?.charAt(0)?.toUpperCase() || 'U'}</span>
+                                            ? <img src={previewImage} alt="Profile" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
+                                            : <span className="text-5xl font-black text-orange-500">{profileData?.username?.charAt(0)?.toUpperCase()}</span>
                                         }
                                     </div>
-                                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center justify-center cursor-pointer shadow-lg transition-all transform hover:scale-110 active:scale-95">
-                                        <Camera size={14} />
+                                    <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl flex items-center justify-center cursor-pointer shadow-xl transition-all transform hover:scale-110 active:scale-95 border-4 border-white">
+                                        <Camera size={18} />
                                         <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
                                     </label>
                                 </div>
-                                <div className="mb-2">
-                                    <div className="flex items-center gap-3">
-                                        <h1 className="text-2xl font-bold text-white tracking-tight">{profileData?.username || 'Member'}</h1>
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold ${
+
+                                <div className="text-center md:text-left mb-2">
+                                    <div className="flex flex-col md:flex-row items-center gap-4">
+                                        <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-none">{profileData?.username || 'Member'}</h1>
+                                        <span className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest ${
                                             profileData?.status === 'active'
-                                                ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20'
-                                                : 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20'
+                                                ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                                : 'bg-gray-200 text-gray-500'
                                         }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${profileData?.status === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                                            {profileData?.status === 'active' ? 'Active' : 'Inactive'}
+                                            {profileData?.status === 'active' ? 'Active Status' : 'Inactive'}
                                         </span>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-zinc-400">
-                                        <span className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md"><Mail size={13} className="text-zinc-500" />{profileData?.email}</span>
-                                        {profileData?.memberId && <span className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md"><Shield size={13} className="text-zinc-500" />#{profileData.memberId}</span>}
+                                    <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 mt-4">
+                                        <span className="flex items-center gap-2 text-sm text-gray-500 font-semibold"><Mail size={16} className="text-orange-500" />{profileData?.email}</span>
+                                        <span className="flex items-center gap-2 text-sm text-gray-500 font-semibold"><Shield size={16} className="text-orange-500" />ID: #{profileData?.memberId || 'N/A'}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center gap-4 mb-2 w-full md:w-auto">
                                 <button
                                     onClick={() => { setIsEditing(!isEditing); if (!isEditing) setActiveTab('details'); }}
-                                    className={`inline-flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all ${
+                                    className={`flex-1 md:flex-none h-12 px-6 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                                         isEditing
-                                            ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                                            : 'bg-white text-zinc-950 hover:bg-zinc-200 shadow-lg shadow-white/5'
+                                            ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            : 'bg-orange-50 text-orange-500 hover:bg-orange-100 border border-orange-200/50'
                                     }`}
                                 >
-                                    {isEditing ? <><X size={16} /> Cancel</> : <><Settings size={16} /> Edit Profile</>}
+                                    {isEditing ? <><X size={18} /> Cancel</> : <><Settings size={18} /> Settings</>}
                                 </button>
                                 <button
                                     onClick={logout}
-                                    className="inline-flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                                    className="h-12 w-12 rounded-2xl bg-gray-50 text-gray-400 hover:bg-orange-50 hover:text-orange-500 transition-all border border-gray-100 flex items-center justify-center"
+                                    title="Sign out"
                                 >
-                                    <LogOut size={16} /> Sign out
+                                    <LogOut size={20} />
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ─── MEMBERSHIP BADGE ─── */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    {[
-                        { label: 'Membership', value: profileData?.membershipType || 'Premium', icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-                        { label: 'Expires', value: profileData?.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—', icon: Clock, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-                        { label: 'Sessions', value: attendance.length, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-                    ].map((item, i) => (
-                        <div key={i} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-5 flex items-center gap-4 shadow-xl">
-                            <div className={`w-11 h-11 ${item.bg} rounded-xl flex items-center justify-center shadow-inner`}>
-                                <item.icon size={20} className={item.color} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{item.label}</p>
-                                <p className="text-base font-bold text-white mt-0.5">{item.value}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                {/* ─── DASHBOARD LAYOUT ─── */}
+                <div className="flex flex-col lg:flex-row gap-10">
 
-                {/* ─── TABS + CONTENT ─── */}
-                <div className="flex flex-col lg:flex-row gap-6">
-
-                    {/* Sidebar tabs */}
-                    <div className="lg:w-60 shrink-0">
-                        <nav className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl shadow-xl overflow-hidden sticky top-24">
+                    {/* Navigation Sidebar */}
+                    <aside className="lg:w-72 shrink-0">
+                        <nav className="bg-white p-3 rounded-[2rem] border border-gray-200 shadow-sm space-y-2 sticky top-28">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
+                                const isActive = activeTab === tab.id;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); if (tab.id !== 'details') setIsEditing(false); }}
-                                        className={`w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-all border-b border-zinc-800/50 last:border-0 ${
-                                            activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-orange-500/20 to-transparent text-orange-400 border-r-2 border-r-orange-500'
-                                                : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-200'
+                                        className={`w-full flex items-center gap-4 px-5 py-4 rounded-[1.25rem] text-sm font-bold transition-all ${
+                                            isActive
+                                                ? 'bg-orange-gradient text-white shadow-lg shadow-orange-500/20'
+                                                : 'text-gray-500 hover:bg-gray-50'
                                         }`}
                                     >
-                                        <Icon size={18} className={activeTab === tab.id ? 'text-orange-400' : 'text-zinc-600'} />
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-orange-50 text-orange-500'}`}>
+                                            <Icon size={18} />
+                                        </div>
                                         {tab.name}
                                     </button>
                                 );
                             })}
                         </nav>
-                    </div>
 
-                    {/* Main content */}
+                        {/* Membership Summary Card */}
+                        <div className="mt-8 bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm">
+                            <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Plan Intelligence</h4>
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500"><Zap size={18} /></div>
+                                        <span className="text-sm font-bold text-gray-900">{profileData?.membershipType || 'Standard'}</span>
+                                    </div>
+                                    <ChevronRight size={16} className="text-gray-300" />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500"><Clock size={18} /></div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Expires</p>
+                                            <p className="text-sm font-bold text-gray-900">{profileData?.membershipExpiry ? new Date(profileData.membershipExpiry).toLocaleDateString() : 'Active'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button className="w-full mt-8 py-4 bg-orange-gradient text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                Upgrade Plan
+                            </button>
+                        </div>
+                    </aside>
+
+                    {/* Main Workspace */}
                     <div className="flex-1 min-w-0">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab + isEditing}
-                                initial={{ opacity: 0, y: 8 }}
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -8 }}
-                                transition={{ duration: 0.18, ease: "easeOut" }}
+                                exit={{ opacity: 0, y: -15 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
                             >
                                 {/* ── OVERVIEW ── */}
                                 {activeTab === 'overview' && (
-                                    <div className="space-y-6">
-                                        {/* Stats */}
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="space-y-8">
+                                        {/* Core Biometrics */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                                             {[
-                                                { label: 'Weight', value: profileData?.profile?.weight ? `${profileData.profile.weight} kg` : '—', icon: Weight, color: 'text-orange-400' },
-                                                { label: 'Height', value: profileData?.profile?.height ? `${profileData.profile.height} cm` : '—', icon: Ruler, color: 'text-blue-400' },
-                                                { label: 'Age', value: profileData?.profile?.age || '—', icon: User, color: 'text-purple-400' },
-                                                { label: 'Plans', value: workoutPlans.length, icon: Dumbbell, color: 'text-emerald-400' },
+                                                { label: 'Body Mass', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : '—', icon: Weight },
+                                                { label: 'Stature', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : '—', icon: Ruler },
+                                                { label: 'Life Cycle', value: profileData?.profile?.age ? `${profileData.profile.age} Yrs` : '—', icon: User },
+                                                { label: 'Deployments', value: attendance.length, icon: Activity },
                                             ].map((s, i) => (
-                                                <div key={i} className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 shadow-xl group hover:border-zinc-700 transition-all">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{s.label}</p>
-                                                        <s.icon size={16} className={`${s.color} opacity-80 group-hover:opacity-100 transition-opacity`} />
+                                                <div key={i} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm group hover:border-orange-500 transition-all duration-300">
+                                                    <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                                        <s.icon size={22} />
                                                     </div>
-                                                    <p className="text-3xl font-bold text-white tabular-nums">{s.value}</p>
+                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{s.label}</p>
+                                                    <p className="text-3xl font-black text-gray-900 tracking-tighter">{s.value}</p>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        {/* Goals */}
-                                        {profileData?.profile?.goals?.length > 0 && (
-                                            <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 shadow-xl">
-                                                <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider mb-4">Core Objectives</h3>
-                                                <div className="flex flex-wrap gap-2.5">
-                                                    {profileData.profile.goals.map((g, i) => (
-                                                        <span key={i} className="px-4 py-1.5 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-700/50 shadow-sm">{g}</span>
-                                                    ))}
-                                                </div>
+                                        {/* Objectives */}
+                                        <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
+                                            <div className="flex items-center justify-between mb-8">
+                                                <h3 className="text-base font-black text-gray-900 tracking-tight">Active Objectives</h3>
+                                                <TrendingUp size={20} className="text-orange-500" />
                                             </div>
-                                        )}
+                                            <div className="flex flex-wrap gap-3">
+                                                {profileData?.profile?.goals?.length > 0 ? profileData.profile.goals.map((g, i) => (
+                                                    <span key={i} className="px-6 py-3 bg-orange-50 text-orange-600 text-xs font-bold rounded-2xl border border-orange-100">{g}</span>
+                                                )) : (
+                                                    <p className="text-sm text-gray-400 font-medium italic">No objectives defined. Update profile to add goals.</p>
+                                                )}
+                                            </div>
+                                        </div>
 
-                                        {/* Recent sessions */}
-                                        <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
-                                            <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
-                                                <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Recent Activity</h3>
-                                                <button onClick={() => setActiveTab('attendance')} className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5 transition-colors group">
-                                                    History <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                        {/* Recent Operational Logs */}
+                                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+                                            <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between">
+                                                <h3 className="text-base font-black text-gray-900">Operational History</h3>
+                                                <button onClick={() => setActiveTab('attendance')} className="text-xs font-bold text-orange-500 hover:underline flex items-center gap-1">
+                                                    Full Logs <ChevronRight size={14} />
                                                 </button>
                                             </div>
-                                            <div className="divide-y divide-zinc-800/50">
+                                            <div className="divide-y divide-gray-50">
                                                 {attendance.length > 0 ? attendance.slice(0, 5).map((record, i) => (
-                                                    <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-all">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center ring-1 ring-emerald-500/20">
-                                                                <CheckCircle2 size={18} className="text-emerald-400" />
+                                                    <div key={i} className="px-10 py-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                                        <div className="flex items-center gap-6">
+                                                            <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center font-black">
+                                                                {new Date(record.date).getDate()}
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-bold text-white">{new Date(record.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                                                                <p className="text-xs text-zinc-500 mt-0.5 font-medium">Checked in at {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                                <p className="text-sm font-bold text-gray-900">{new Date(record.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</p>
+                                                                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">Deployment Start: {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                                             </div>
                                                         </div>
-                                                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full uppercase tracking-tighter ring-1 ring-emerald-500/20">Confirmed</span>
+                                                        <div className="px-4 py-1.5 bg-orange-50 text-orange-500 text-[10px] font-black uppercase rounded-full">Success</div>
                                                     </div>
                                                 )) : (
-                                                    <div className="px-6 py-12 text-center">
-                                                        <Activity size={32} className="mx-auto text-zinc-800 mb-3" />
-                                                        <p className="text-sm font-bold text-zinc-600 tracking-tight">No sessions logged yet.</p>
+                                                    <div className="p-20 text-center">
+                                                        <Activity size={48} className="mx-auto text-orange-100 mb-4" />
+                                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No activity records found</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -370,166 +375,129 @@ const Profile = () => {
                                     </div>
                                 )}
 
-                                {/* ── PROFILE / EDIT ── */}
+                                {/* ── PROFILE EDIT ── */}
                                 {activeTab === 'details' && (
-                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
-                                        <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
-                                            <div>
-                                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">{isEditing ? 'Edit Parameters' : 'User Identity'}</h3>
-                                                <p className="text-xs text-zinc-500 mt-1 font-medium">Manage biometric data and contact credentials</p>
-                                            </div>
-                                            {!isEditing && (
-                                                <button onClick={() => setIsEditing(true)} className="inline-flex items-center gap-2 px-4 h-9 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all border border-zinc-700">
-                                                    <Edit3 size={14} /> Update
-                                                </button>
-                                            )}
+                                    <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden">
+                                        <div className="px-10 py-8 border-b border-gray-50">
+                                            <h3 className="text-xl font-black text-gray-900 tracking-tight">{isEditing ? 'Configuration' : 'Identity Profile'}</h3>
+                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Personnel data Management</p>
                                         </div>
 
-                                        <div className="p-6">
+                                        <div className="p-10">
                                             {isEditing ? (
-                                                <form onSubmit={handleUpdate} className="space-y-8">
-                                                    {/* Basic Info */}
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Primary Records</h4>
-                                                        <div className="grid md:grid-cols-2 gap-5">
-                                                            <InputField label="Display Name" icon={User} value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} placeholder="Your name" />
-                                                            <InputField label="Identity Email" icon={Mail} value={profileData?.email || ''} disabled />
-                                                        </div>
-                                                    </section>
+                                                <form onSubmit={handleUpdate} className="space-y-12">
+                                                    <div className="grid md:grid-cols-2 gap-8">
+                                                        <InputField label="Display Identifier" icon={User} value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+                                                        <InputField label="Primary Email" icon={Mail} value={profileData?.email || ''} disabled />
+                                                    </div>
 
-                                                    {/* Biometrics */}
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Biometric Stats</h4>
-                                                        <div className="grid grid-cols-3 gap-5">
+                                                    <div className="space-y-6">
+                                                        <h4 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Biometric Parameters</h4>
+                                                        <div className="grid grid-cols-3 gap-6">
                                                             <InputField label="Age (Y)" icon={Calendar} type="number" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
-                                                            <InputField label="Mass (KG)" icon={Weight} type="number" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: e.target.value })} />
+                                                            <InputField label="Weight (KG)" icon={Weight} type="number" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: e.target.value })} />
                                                             <InputField label="Height (CM)" icon={Ruler} type="number" value={formData.height} onChange={(e) => setFormData({ ...formData, height: e.target.value })} />
                                                         </div>
-                                                    </section>
+                                                    </div>
 
-                                                    {/* Contact */}
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Communications</h4>
-                                                        <div className="grid md:grid-cols-2 gap-5">
-                                                            <InputField label="Signal Number" icon={Phone} type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} placeholder="+1 (000) 000-0000" />
-                                                            <InputField label="Base Location" icon={MapPin} value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} placeholder="City, Country" />
+                                                    <div className="space-y-6">
+                                                        <h4 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Communication Node</h4>
+                                                        <div className="grid md:grid-cols-2 gap-6">
+                                                            <InputField label="Signal Frequency" icon={Phone} type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })} placeholder="+00 0000 0000" />
+                                                            <InputField label="Physical Base" icon={MapPin} value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} placeholder="City, State" />
                                                         </div>
-                                                    </section>
+                                                    </div>
 
-                                                    {/* Health */}
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Strategic Goals</h4>
-                                                        <div className="space-y-5">
-                                                            <InputField label="Target Milestones (comma-separated)" value={formData.goals} onChange={(e) => setFormData({ ...formData, goals: e.target.value })} placeholder="e.g. Hypertrophy, Fat Loss, Powerlifting" />
-                                                            <div className="space-y-2">
-                                                                <label className="text-xs font-bold text-zinc-400">Medical Intelligence</label>
+                                                    <div className="space-y-6">
+                                                        <h4 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Operational Intelligence</h4>
+                                                        <div className="space-y-6">
+                                                            <InputField label="Strategic Goals (comma-delimited)" value={formData.goals} onChange={(e) => setFormData({ ...formData, goals: e.target.value })} placeholder="Power, Agility, Endurance" />
+                                                            <div className="space-y-3">
+                                                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Medical Logs</label>
                                                                 <textarea
                                                                     value={formData.medicalNotes}
                                                                     onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
-                                                                    placeholder="Specify any restrictions, past injuries, or critical health data..."
-                                                                    rows={3}
-                                                                    className="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-xl text-sm text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all resize-none"
+                                                                    placeholder="Enter medical restrictions or critical health intelligence..."
+                                                                    rows={4}
+                                                                    className="w-full px-5 py-4 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all resize-none"
                                                                 />
                                                             </div>
                                                         </div>
-                                                    </section>
+                                                    </div>
 
-                                                    {/* Emergency Contact */}
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-5">Emergency Protocols</h4>
-                                                        <div className="grid md:grid-cols-3 gap-5">
-                                                            <InputField label="Guardian Name" value={formData.emergencyContactName} onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })} placeholder="Full Name" />
-                                                            <InputField label="Relation" value={formData.emergencyContactRelation} onChange={(e) => setFormData({ ...formData, emergencyContactRelation: e.target.value })} placeholder="Kinship" />
-                                                            <InputField label="Contact Signal" icon={Phone} type="tel" value={formData.emergencyContactPhone} onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })} placeholder="Direct line" />
+                                                    <div className="space-y-6">
+                                                        <h4 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Emergency Override</h4>
+                                                        <div className="grid md:grid-cols-3 gap-6">
+                                                            <InputField label="Liaison Name" value={formData.emergencyContactName} onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })} />
+                                                            <InputField label="Kinship" value={formData.emergencyContactRelation} onChange={(e) => setFormData({ ...formData, emergencyContactRelation: e.target.value })} />
+                                                            <InputField label="Signal Node" icon={Phone} value={formData.emergencyContactPhone} onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })} />
                                                         </div>
-                                                    </section>
+                                                    </div>
 
-                                                    <div className="flex gap-4 pt-4">
-                                                        <button type="submit" className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 h-12 bg-orange-500 text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98]">
-                                                            <Save size={18} /> Commit Changes
+                                                    <div className="flex gap-4 pt-6 border-t border-gray-100">
+                                                        <button type="submit" className="flex-1 h-14 bg-orange-gradient text-white text-sm font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                                            Apply Changes
                                                         </button>
-                                                        <button type="button" onClick={() => setIsEditing(false)} className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-8 h-12 bg-zinc-800 text-zinc-300 text-sm font-bold rounded-xl hover:bg-zinc-700 transition-all active:scale-[0.98]">
-                                                            <X size={18} /> Discard
+                                                        <button type="button" onClick={() => setIsEditing(false)} className="px-10 h-14 bg-gray-100 text-gray-500 text-sm font-bold rounded-2xl hover:bg-gray-200 transition-all">
+                                                            Discard
                                                         </button>
                                                     </div>
                                                 </form>
                                             ) : (
-                                                <div className="space-y-10">
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Physiological Stats</h4>
-                                                        <div className="grid md:grid-cols-3 gap-4">
-                                                            {[
-                                                                { label: 'Current Age', value: profileData?.profile?.age ? `${profileData.profile.age} YRS` : 'UNDEFINED', color: 'text-purple-400' },
-                                                                { label: 'Total Mass', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : 'UNDEFINED', color: 'text-orange-400' },
-                                                                { label: 'Verticality', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : 'UNDEFINED', color: 'text-blue-400' },
-                                                            ].map((item, i) => (
-                                                                <div key={i} className="bg-zinc-800/30 rounded-2xl p-5 border border-zinc-800/50 hover:border-zinc-700 transition-all">
-                                                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2">{item.label}</p>
-                                                                    <p className={`text-lg font-bold ${item.color}`}>{item.value}</p>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </section>
-
-                                                    <section>
-                                                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Contact Channels</h4>
-                                                        <div className="grid md:grid-cols-2 gap-4">
-                                                            {[
-                                                                { label: 'Verified Signal', value: profileData?.phoneNumber || 'NOT PROVIDED', icon: Phone },
-                                                                { label: 'Primary Base', value: profileData?.address || 'NOT PROVIDED', icon: MapPin },
-                                                            ].map((item, i) => (
-                                                                <div key={i} className="flex items-start gap-4 p-5 bg-zinc-800/30 rounded-2xl border border-zinc-800/50">
-                                                                    <div className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center shrink-0 border border-zinc-700">
-                                                                        <item.icon size={18} className="text-zinc-500" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-1">{item.label}</p>
-                                                                        <p className="text-sm text-zinc-200 font-bold leading-relaxed">{item.value}</p>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </section>
-
-                                                    {profileData?.profile?.goals?.length > 0 && (
-                                                        <section>
-                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Strategic Focus</h4>
-                                                            <div className="flex flex-wrap gap-2.5">
-                                                                {profileData.profile.goals.map((g, i) => (
-                                                                    <span key={i} className="px-5 py-2 bg-zinc-100 text-zinc-950 text-xs font-bold rounded-xl shadow-lg shadow-white/5">{g}</span>
-                                                                ))}
+                                                <div className="space-y-12">
+                                                    <div className="grid md:grid-cols-3 gap-8">
+                                                        {[
+                                                            { label: 'Chrono Age', value: profileData?.profile?.age ? `${profileData.profile.age} Years` : 'Unknown', color: 'bg-orange-50 text-orange-500' },
+                                                            { label: 'Current Mass', value: profileData?.profile?.weight ? `${profileData.profile.weight} KG` : 'Unknown', color: 'bg-orange-50 text-orange-500' },
+                                                            { label: 'Vertical Stature', value: profileData?.profile?.height ? `${profileData.profile.height} CM` : 'Unknown', color: 'bg-orange-50 text-orange-500' },
+                                                        ].map((item, i) => (
+                                                            <div key={i} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:border-orange-200 transition-all">
+                                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{item.label}</p>
+                                                                <p className="text-2xl font-black text-gray-900">{item.value}</p>
                                                             </div>
-                                                        </section>
-                                                    )}
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="grid md:grid-cols-2 gap-8">
+                                                        {[
+                                                            { label: 'Signal Endpoint', value: profileData?.phoneNumber || 'None Established', icon: Phone },
+                                                            { label: 'Base Deployment', value: profileData?.address || 'None Established', icon: MapPin },
+                                                        ].map((item, i) => (
+                                                            <div key={i} className="flex items-center gap-6 p-6 bg-gray-50/50 rounded-3xl border border-gray-100">
+                                                                <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500">
+                                                                    <item.icon size={24} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{item.label}</p>
+                                                                    <p className="text-base font-bold text-gray-900">{item.value}</p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
 
                                                     {profileData?.medicalNotes && (
-                                                        <section>
-                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Health Intelligence</h4>
-                                                            <div className="flex items-start gap-4 p-5 bg-orange-500/5 border border-orange-500/20 rounded-2xl backdrop-blur-sm">
-                                                                <AlertCircle size={20} className="text-orange-500 mt-0.5 shrink-0" />
-                                                                <p className="text-sm text-orange-200/80 font-medium leading-relaxed">{profileData.medicalNotes}</p>
-                                                            </div>
-                                                        </section>
+                                                        <div className="bg-orange-50 border border-orange-100 rounded-3xl p-8">
+                                                            <h4 className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2"><AlertCircle size={14} /> Medical Intelligence</h4>
+                                                            <p className="text-gray-700 text-sm font-bold leading-relaxed">{profileData.medicalNotes}</p>
+                                                        </div>
                                                     )}
 
                                                     {profileData?.emergencyContact?.name && (
-                                                        <section>
-                                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Emergency Protocols</h4>
-                                                            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl">
-                                                                <div className="flex items-center justify-between gap-4">
-                                                                    <div className="flex items-center gap-4">
-                                                                        <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
-                                                                            <Shield size={22} className="text-red-400" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-base font-bold text-white tracking-tight">{profileData.emergencyContact.name}</p>
-                                                                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">{profileData.emergencyContact.relation}</p>
-                                                                        </div>
+                                                        <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+                                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Emergency Override</h4>
+                                                            <div className="flex items-center justify-between gap-6">
+                                                                <div className="flex items-center gap-6">
+                                                                    <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-500 border border-orange-200">
+                                                                        <Shield size={28} />
                                                                     </div>
-                                                                    <p className="text-sm font-black text-white bg-zinc-800 px-4 py-1.5 rounded-xl border border-zinc-700">{profileData.emergencyContact.phone}</p>
+                                                                    <div>
+                                                                        <p className="text-lg font-black text-gray-900 tracking-tight">{profileData.emergencyContact.name}</p>
+                                                                        <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-1">{profileData.emergencyContact.relation}</p>
+                                                                    </div>
                                                                 </div>
+                                                                <div className="px-6 py-2 bg-gray-900 text-white text-sm font-black rounded-xl tracking-wider">{profileData.emergencyContact.phone}</div>
                                                             </div>
-                                                        </section>
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}
@@ -537,42 +505,40 @@ const Profile = () => {
                                     </div>
                                 )}
 
-
-
                                 {/* ── ATTENDANCE ── */}
                                 {activeTab === 'attendance' && (
-                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
-                                        <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
+                                    <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden">
+                                        <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between">
                                             <div>
-                                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Deployment Logs</h3>
-                                                <p className="text-xs text-zinc-500 mt-1 font-medium">{attendance.length} total operational cycles</p>
+                                                <h3 className="text-xl font-black text-gray-900 tracking-tight">Deployment Logs</h3>
+                                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">{attendance.length} Operational cycles completed</p>
                                             </div>
                                         </div>
                                         {attendance.length > 0 ? (
                                             <div className="overflow-x-auto">
                                                 <table className="w-full text-left">
-                                                    <thead className="bg-zinc-900/60 border-b border-zinc-800">
-                                                        <tr>
-                                                            {['Cycle Date', 'Check-In', 'Check-Out', 'Status'].map(h => (
-                                                                <th key={h} className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-[0.1em]">{h}</th>
+                                                    <thead>
+                                                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                                                            {['Cycle Date', 'Check-In', 'Check-Out', 'Outcome'].map(h => (
+                                                                <th key={h} className="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">{h}</th>
                                                             ))}
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-zinc-800/50">
-                                                        {attendance.map((record, i) => (
-                                                            <tr key={record._id} className="hover:bg-zinc-800/20 transition-all">
-                                                                <td className="px-6 py-4 text-sm font-bold text-white">
-                                                                    {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    <tbody className="divide-y divide-gray-50">
+                                                        {attendance.map((record) => (
+                                                            <tr key={record._id} className="hover:bg-gray-50/50 transition-all">
+                                                                <td className="px-10 py-6 text-sm font-bold text-gray-900">
+                                                                    {new Date(record.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                                                 </td>
-                                                                <td className="px-6 py-4 text-sm text-zinc-400 font-mono tracking-tighter">
+                                                                <td className="px-10 py-6 text-sm text-gray-600 font-black">
                                                                     {new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                                 </td>
-                                                                <td className="px-6 py-4 text-sm text-zinc-400 font-mono tracking-tighter">
-                                                                    {record.checkOut ? new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : <span className="text-orange-500 font-black text-[10px] uppercase animate-pulse">Operational</span>}
+                                                                <td className="px-10 py-6 text-sm text-gray-600 font-black">
+                                                                    {record.checkOut ? new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : <span className="text-orange-500 uppercase animate-pulse">In Progress</span>}
                                                                 </td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-lg border border-emerald-500/20">
-                                                                        <CheckCircle2 size={12} /> Present
+                                                                <td className="px-10 py-6">
+                                                                    <span className="inline-flex items-center gap-1.5 px-4 py-1 bg-orange-50 text-orange-500 text-[10px] font-black uppercase rounded-full border border-orange-100">
+                                                                        Confirmed
                                                                     </span>
                                                                 </td>
                                                             </tr>
@@ -581,12 +547,9 @@ const Profile = () => {
                                                 </table>
                                             </div>
                                         ) : (
-                                            <div className="p-16 text-center">
-                                                <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-700">
-                                                    <Calendar size={28} className="text-zinc-600" />
-                                                </div>
-                                                <p className="text-base font-bold text-zinc-300">No session logs detected</p>
-                                                <p className="text-xs text-zinc-500 mt-2 font-medium">Begin physical deployment at the facility to generate logs.</p>
+                                            <div className="p-24 text-center">
+                                                <Calendar size={64} className="mx-auto text-orange-100 mb-6" />
+                                                <p className="text-gray-400 font-black uppercase tracking-widest text-sm">No operational records</p>
                                             </div>
                                         )}
                                     </div>
@@ -594,46 +557,35 @@ const Profile = () => {
 
                                 {/* ── BILLING ── */}
                                 {activeTab === 'payments' && (
-                                    <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
-                                        <div className="px-6 py-5 border-b border-zinc-800">
-                                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Credit Protocols</h3>
-                                            <p className="text-xs text-zinc-500 mt-1 font-medium">{payments.length} financial transaction{payments.length !== 1 ? 's' : ''} authorized</p>
+                                    <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden">
+                                        <div className="px-10 py-8 border-b border-gray-50">
+                                            <h3 className="text-xl font-black text-gray-900 tracking-tight">Financial Records</h3>
+                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">{payments.length} Validated transactions</p>
                                         </div>
-                                        <div className="divide-y divide-zinc-800/50">
+                                        <div className="divide-y divide-gray-50">
                                             {payments.length > 0 ? payments.map((payment, i) => (
-                                                <motion.div key={payment._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
-                                                    className="px-6 py-5 flex items-center justify-between hover:bg-zinc-800/20 transition-all">
-                                                    <div className="flex items-center gap-5">
-                                                        <div className="w-11 h-11 bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-700">
-                                                            <CreditCard size={20} className="text-zinc-500" />
+                                                <div key={payment._id} className="px-10 py-8 flex items-center justify-between hover:bg-gray-50 transition-all">
+                                                    <div className="flex items-center gap-8">
+                                                        <div className="w-16 h-16 bg-orange-50 rounded-[1.5rem] flex items-center justify-center text-orange-500 border border-orange-100">
+                                                            <CreditCard size={28} />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-bold text-white tracking-tight">{payment.plan?.name || 'Membership Token Renewal'}</p>
-                                                            <p className="text-[10px] text-zinc-500 mt-1 font-bold uppercase tracking-wider">
+                                                            <p className="text-lg font-black text-gray-900 tracking-tight">{payment.plan?.name || 'Protocol Renewal'}</p>
+                                                            <p className="text-[10px] text-gray-400 mt-1 font-black uppercase tracking-widest">
                                                                 {new Date(payment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                                {payment.method && ` · ${payment.method}`}
-                                                                {payment.invoiceNumber && <span className="ml-2 font-mono text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">ID:{payment.invoiceNumber}</span>}
+                                                                {payment.invoiceNumber && <span className="ml-4 text-orange-500">ID: {payment.invoiceNumber}</span>}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-6">
-                                                        <p className="text-lg font-black text-white tabular-nums">${payment.amount}</p>
-                                                        <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${
-                                                            payment.status === 'completed'
-                                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                                                : 'bg-zinc-800 text-zinc-500 border-zinc-700'
-                                                        }`}>
-                                                            {payment.status === 'completed' ? 'Settled' : payment.status}
-                                                        </span>
+                                                    <div className="text-right">
+                                                        <p className="text-3xl font-black text-gray-900 leading-none mb-2">₹{payment.amount}</p>
+                                                        <span className="px-4 py-1 bg-orange-500 text-white text-[10px] font-black uppercase rounded-full shadow-lg shadow-orange-500/20">Success</span>
                                                     </div>
-                                                </motion.div>
+                                                </div>
                                             )) : (
-                                                <div className="p-16 text-center">
-                                                    <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-700">
-                                                        <CreditCard size={28} className="text-zinc-600" />
-                                                    </div>
-                                                    <p className="text-base font-bold text-zinc-300">No transaction history</p>
-                                                    <p className="text-xs text-zinc-500 mt-2 font-medium">Your billing intelligence will populate upon credit deployment.</p>
+                                                <div className="p-24 text-center">
+                                                    <CreditCard size={64} className="mx-auto text-orange-100 mb-6" />
+                                                    <p className="text-gray-400 font-black uppercase tracking-widest text-sm">No transaction history</p>
                                                 </div>
                                             )}
                                         </div>
