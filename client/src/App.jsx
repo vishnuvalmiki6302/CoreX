@@ -38,34 +38,34 @@ const PageLoader = () => (
 // Inner component to access location for kiosk detection
 function AppLayout() {
     const location = useLocation();
-    const isKiosk = location.pathname === '/kiosk';
+    const dashboardRoutes = ['/admin', '/trainer', '/reception', '/analytics', '/kiosk'];
+    const isDashboard = dashboardRoutes.some(route => location.pathname.startsWith(route));
 
     return (
-        <div className="min-h-screen bg-gym-dark text-gym-text flex flex-col">
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col">
             <Toaster
                 position="top-right"
                 containerStyle={{ top: 80, right: 20 }}
                 toastOptions={{
                     duration: 4000,
                     style: {
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        backdropFilter: 'blur(12px)',
+                        background: '#ffffff',
                         color: '#0f172a',
-                        border: '1px solid rgba(0,0,0,0.1)',
+                        border: '1px solid #e2e8f0',
                         padding: '12px 16px',
                         fontSize: '14px',
-                        fontWeight: '500',
+                        fontWeight: '600',
                         borderRadius: '12px',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                     },
                     success: { iconTheme: { primary: '#f97316', secondary: '#fff' } },
                     error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
                 }}
             />
 
-            {!isKiosk && <Navbar />}
+            {!isDashboard && <Navbar />}
 
-            <main className={isKiosk ? '' : 'flex-grow container mx-auto px-4 py-8'}>
+            <main className={isDashboard ? '' : 'flex-grow'}>
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
                         {/* Public */}
@@ -97,10 +97,10 @@ function AppLayout() {
                 </Suspense>
             </main>
 
-            {!isKiosk && <Footer />}
+            {!isDashboard && <Footer />}
 
             {/* Global: AI Chat Coach (appears on all member pages) */}
-            {!isKiosk && <AICoachChat />}
+            {!isDashboard && <AICoachChat />}
         </div>
     );
 }

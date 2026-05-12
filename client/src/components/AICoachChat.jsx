@@ -44,31 +44,34 @@ export default function AICoachChat() {
         <>
             <button onClick={() => setOpen(o => !o)} style={{
                 position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000,
-                width: '56px', height: '56px', borderRadius: '50%',
-                background: 'linear-gradient(135deg,#f97316,#ef4444)',
-                border: 'none', cursor: 'pointer', fontSize: '24px',
-                boxShadow: '0 8px 32px rgba(249,115,22,0.4)',
+                width: '60px', height: '60px', borderRadius: '50%',
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0', cursor: 'pointer', fontSize: '24px',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>{open ? '✕' : '🤖'}</button>
+                overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>{open ? '✕' : <img src="/ai-logo.png" style={{ width: '65%', height: '65%', objectFit: 'contain' }} />}</button>
 
             {open && (
                 <div style={{
-                    position: 'fixed', bottom: '92px', right: '24px', zIndex: 999,
-                    width: '360px', height: '520px',
+                    position: 'fixed', bottom: '100px', right: '24px', zIndex: 999,
+                    width: '380px', height: '560px',
                     background: 'rgba(10,10,20,0.98)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '16px', display: 'flex', flexDirection: 'column',
-                    overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
-                    fontFamily: "'Inter',sans-serif",
+                    borderRadius: '24px', display: 'flex', flexDirection: 'column',
+                    overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+                    fontFamily: "'Inter', sans-serif",
                 }}>
-                    <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '20px' }}>🤖</span>
+                    <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '2px' }}>
+                                <img src="/ai-logo.png" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            </div>
                             <div>
-                                <div style={{ color: '#fff', fontWeight: '700', fontSize: '14px' }}>CoreX Coach</div>
-                                <div style={{ fontSize: '11px', color: '#22c55e' }}>● Online · Gemini AI</div>
+                                <div style={{ color: '#fff', fontWeight: '800', fontSize: '13px', tracking: '0.05em' }}>CoreX Coach</div>
+                                <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: '700', textTransform: 'uppercase', tracking: '0.1em' }}>● System Active</div>
                             </div>
                         </div>
-                        <button onClick={() => { setMessages([]); localStorage.removeItem('corex-chat'); }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '12px' }}>Clear</button>
+                        <button onClick={() => { setMessages([]); localStorage.removeItem('corex-chat'); }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>Reset</button>
                     </div>
 
                     <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
@@ -91,11 +94,11 @@ export default function AICoachChat() {
                         <div ref={bottomRef} />
                     </div>
 
-                    <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '8px' }}>
-                        <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Ask CoreX Coach..."
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '13px', fontFamily: 'inherit', outline: 'none' }} />
+                    <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '8px' }}>
+                        <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Ask tactical query..."
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '13px', outline: 'none' }} />
                         <button onClick={() => sendMessage()} disabled={loading || !input.trim()}
-                            style={{ background: 'linear-gradient(135deg,#f97316,#ef4444)', border: 'none', borderRadius: '10px', padding: '10px 14px', color: '#fff', cursor: 'pointer', fontSize: '18px' }}>↑</button>
+                            style={{ background: 'linear-gradient(135deg, #ff5e00, #ff8c00)', border: 'none', borderRadius: '12px', width: '48px', height: '48px', color: '#fff', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↑</button>
                     </div>
                 </div>
             )}

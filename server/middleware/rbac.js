@@ -12,6 +12,7 @@ const asyncHandler = require('express-async-handler');
 const ROLE_HIERARCHY = {
     super_admin:    10,
     gym_owner:      8,
+    admin:          7,
     receptionist:   6,
     male_trainer:   5,
     female_trainer: 5,
@@ -21,13 +22,13 @@ const ROLE_HIERARCHY = {
 };
 
 // All staff roles (non-member)
-const STAFF_ROLES = ['super_admin', 'gym_owner', 'receptionist', 'male_trainer', 'female_trainer', 'dietician', 'accountant'];
+const STAFF_ROLES = ['super_admin', 'gym_owner', 'admin', 'receptionist', 'male_trainer', 'female_trainer', 'dietician', 'accountant'];
 
 // All trainer roles
-const TRAINER_ROLES = ['male_trainer', 'female_trainer', 'super_admin', 'gym_owner'];
+const TRAINER_ROLES = ['male_trainer', 'female_trainer', 'super_admin', 'gym_owner', 'admin'];
 
 // Admin roles
-const ADMIN_ROLES = ['super_admin', 'gym_owner'];
+const ADMIN_ROLES = ['super_admin', 'gym_owner', 'admin'];
 
 /**
  * Flexible role-check middleware. Pass one or more allowed roles.
