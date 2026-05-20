@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { 
-    Zap, User, Activity, Heart, Target, ChevronRight, 
+import {
+    Zap, User, Activity, Heart, Target, ChevronRight,
     ChevronLeft, Sparkles, Dumbbell, Utensils, Calendar,
     CheckCircle2, Info, Apple, Flame, Scale, Clock,
     ClipboardList, TrendingUp, AlertCircle
@@ -84,7 +84,7 @@ export default function AIFitnessAssessment() {
             const proteinCals = protein * 4;
             const fatCals = fatGrams * 9;
             const carbGrams = Math.round((calories - proteinCals - fatCals) / 4);
-            
+
             setResult({
                 ...assessment,
                 macros: { protein, carbs: carbGrams, fats: fatGrams }
@@ -99,7 +99,7 @@ export default function AIFitnessAssessment() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFDFD] py-16 px-4 md:px-8">
+        <div className="min-h-screen bg-gray-100 pt-32 pb-16 px-4 md:px-8">
             <div className="max-w-4xl mx-auto">
                 {/* HEADER - Tighter */}
                 <header className="text-center mb-12">
@@ -122,15 +122,14 @@ export default function AIFitnessAssessment() {
                 <div className="max-w-xl mx-auto mb-12">
                     <div className="flex justify-between relative">
                         <div className="absolute top-4 left-0 w-full h-[1px] bg-slate-100 z-0" />
-                        <div 
-                            className="absolute top-4 left-0 h-[1px] bg-gym-orange transition-all duration-500 z-0" 
+                        <div
+                            className="absolute top-4 left-0 h-[1px] bg-gym-orange transition-all duration-500 z-0"
                             style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
                         />
                         {STEPS.map((s, i) => (
                             <div key={s.id} className="relative z-10 flex flex-col items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                                    i <= step ? 'bg-white border border-gym-orange text-gym-orange shadow-sm scale-110' : 'bg-slate-50 border border-slate-200 text-slate-300'
-                                }`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${i <= step ? 'bg-white border border-gym-orange text-gym-orange shadow-sm scale-110' : 'bg-slate-50 border border-slate-200 text-slate-300'
+                                    }`}>
                                     {i < step ? <CheckCircle2 size={14} /> : s.icon}
                                 </div>
                                 <span className={`text-[9px] font-bold uppercase tracking-widest mt-2 ${i <= step ? 'text-slate-900' : 'text-slate-300'}`}>
@@ -157,16 +156,15 @@ export default function AIFitnessAssessment() {
                                         <h2 className="text-xl font-bold text-slate-900">Physiological Profile</h2>
                                         <p className="text-xs text-slate-400 mt-1">Foundational biometrics for BMR calculation.</p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Biological Gender</label>
                                             <div className="flex p-1 bg-slate-50 rounded-lg border border-slate-100">
                                                 {['male', 'female'].map(g => (
-                                                    <button key={g} onClick={() => setForm(p => ({ ...p, gender: g }))} 
-                                                        className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                                            form.gender === g ? 'bg-white text-gym-orange shadow-sm border border-slate-200' : 'text-slate-400'
-                                                        }`}>
+                                                    <button key={g} onClick={() => setForm(p => ({ ...p, gender: g }))}
+                                                        className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${form.gender === g ? 'bg-white text-gym-orange shadow-sm border border-slate-200' : 'text-slate-400'
+                                                            }`}>
                                                         {g}
                                                     </button>
                                                 ))}
@@ -178,9 +176,8 @@ export default function AIFitnessAssessment() {
                                             <div className="flex p-1 bg-slate-50 rounded-lg border border-slate-100">
                                                 {['beginner', 'advanced'].map(l => (
                                                     <button key={l} onClick={() => setForm(p => ({ ...p, fitnessLevel: l }))}
-                                                        className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                                            form.fitnessLevel === l ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-400'
-                                                        }`}>
+                                                        className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${form.fitnessLevel === l ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-400'
+                                                            }`}>
                                                         {l}
                                                     </button>
                                                 ))}
@@ -190,7 +187,7 @@ export default function AIFitnessAssessment() {
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="space-y-3">
                                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Age</label>
-                                                <input type="number" value={form.age} onChange={e => setForm(p => ({ ...p, age: e.target.value }))} 
+                                                <input type="number" value={form.age} onChange={e => setForm(p => ({ ...p, age: e.target.value }))}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold text-slate-900 focus:bg-white focus:border-gym-orange outline-none" placeholder="25" />
                                             </div>
                                             <div className="space-y-3">
@@ -244,13 +241,11 @@ export default function AIFitnessAssessment() {
                                             <button
                                                 key={opt.id}
                                                 onClick={() => setForm(p => ({ ...p, dietType: opt.id }))}
-                                                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                                                    form.dietType === opt.id ? 'bg-white border-gym-orange shadow-sm' : 'bg-slate-50 border-transparent hover:border-slate-200'
-                                                }`}
+                                                className={`p-4 rounded-xl border-2 text-left transition-all ${form.dietType === opt.id ? 'bg-white border-gym-orange shadow-sm' : 'bg-slate-50 border-transparent hover:border-slate-200'
+                                                    }`}
                                             >
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${
-                                                    form.dietType === opt.id ? 'bg-gym-orange text-white' : 'bg-white text-slate-400'
-                                                }`}>
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${form.dietType === opt.id ? 'bg-gym-orange text-white' : 'bg-white text-slate-400'
+                                                    }`}>
                                                     {opt.icon}
                                                 </div>
                                                 <h3 className="text-xs font-bold text-slate-900 mb-1">{opt.label}</h3>
@@ -267,9 +262,8 @@ export default function AIFitnessAssessment() {
                                         <div className="flex gap-2">
                                             {[2, 3, 4, 5, 6].map(num => (
                                                 <button key={num} onClick={() => setForm(p => ({ ...p, mealsPerDay: num }))}
-                                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${
-                                                        form.mealsPerDay === num ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-400 border border-slate-200'
-                                                    }`}>
+                                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${form.mealsPerDay === num ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-400 border border-slate-200'
+                                                        }`}>
                                                     {num}
                                                 </button>
                                             ))}
@@ -292,9 +286,8 @@ export default function AIFitnessAssessment() {
                                                 <button
                                                     key={opt.id}
                                                     onClick={() => toggleGoal(opt.label)}
-                                                    className={`p-6 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
-                                                        form.goals.includes(opt.label) ? 'bg-white border-gym-orange shadow-sm' : 'bg-slate-50 border-transparent'
-                                                    }`}
+                                                    className={`p-6 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${form.goals.includes(opt.label) ? 'bg-white border-gym-orange shadow-sm' : 'bg-slate-50 border-transparent'
+                                                        }`}
                                                 >
                                                     <div className={form.goals.includes(opt.label) ? 'text-gym-orange' : 'text-slate-300'}>{opt.icon}</div>
                                                     <span className={`text-[10px] font-bold uppercase tracking-widest ${form.goals.includes(opt.label) ? 'text-slate-900' : 'text-slate-400'}`}>
@@ -310,9 +303,8 @@ export default function AIFitnessAssessment() {
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                                             {['sedentary', 'light', 'moderate', 'active', 'elite'].map(lvl => (
                                                 <button key={lvl} onClick={() => setForm(p => ({ ...p, activityLevel: lvl }))}
-                                                    className={`p-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
-                                                        form.activityLevel === lvl ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-slate-50 border-transparent text-slate-400'
-                                                    }`}>
+                                                    className={`p-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${form.activityLevel === lvl ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-slate-50 border-transparent text-slate-400'
+                                                        }`}>
                                                     {lvl}
                                                 </button>
                                             ))}
@@ -364,7 +356,7 @@ export default function AIFitnessAssessment() {
                                     <div className="space-y-6">
                                         <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest border-l-2 border-gym-orange pl-3">4-Week Timeline</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {result.weeklySchedule?.map((day, i) => (
+                                            {result.weeklySchedule?.slice(0, 6).map((day, i) => (
                                                 <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between group hover:bg-white hover:border-slate-200 transition-all">
                                                     <div>
                                                         <div className="text-[10px] font-bold text-gym-orange uppercase mb-1">{day.day}</div>
@@ -375,14 +367,14 @@ export default function AIFitnessAssessment() {
                                             ))}
                                         </div>
                                     </div>
-                                    
+
                                     <div className="p-6 rounded-xl bg-emerald-50 border border-emerald-100">
                                         <div className="flex items-center gap-2 mb-4">
                                             <Sparkles size={14} className="text-emerald-600" />
                                             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Key Insights</span>
                                         </div>
                                         <div className="space-y-3">
-                                            {result.keyRecommendations?.map((rec, i) => (
+                                            {result.keyRecommendations?.slice(0, 3).map((rec, i) => (
                                                 <div key={i} className="flex gap-2 text-[11px] font-medium text-slate-600 leading-relaxed italic">
                                                     <span className="text-emerald-400 mt-0.5">•</span> {rec}
                                                 </div>
@@ -398,9 +390,8 @@ export default function AIFitnessAssessment() {
                     {step < 3 && (
                         <div className="flex gap-3 mt-10 pt-8 border-t border-slate-50">
                             <button onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}
-                                className={`flex-1 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
-                                    step === 0 ? 'bg-slate-50 text-slate-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                                }`}>
+                                className={`flex-1 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${step === 0 ? 'bg-slate-50 text-slate-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                                    }`}>
                                 <ChevronLeft size={14} /> Back
                             </button>
                             {step < 2 ? (
@@ -419,7 +410,7 @@ export default function AIFitnessAssessment() {
 
                     {step === 3 && (
                         <div className="mt-8 flex justify-center border-t border-slate-50 pt-8">
-                            <button onClick={() => { setStep(0); setResult(null); }} 
+                            <button onClick={() => { setStep(0); setResult(null); }}
                                 className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-all">
                                 <Zap size={14} /> Reset Assessment
                             </button>

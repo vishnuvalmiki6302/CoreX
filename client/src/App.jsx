@@ -39,7 +39,9 @@ const PageLoader = () => (
 function AppLayout() {
     const location = useLocation();
     const dashboardRoutes = ['/admin', '/trainer', '/reception', '/analytics', '/kiosk'];
+    const authRoutes = ['/login', '/register'];
     const isDashboard = dashboardRoutes.some(route => location.pathname.startsWith(route));
+    const isAuth = authRoutes.some(route => location.pathname === route);
 
     return (
         <div className="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -63,9 +65,9 @@ function AppLayout() {
                 }}
             />
 
-            {!isDashboard && <Navbar />}
+            {!isDashboard && !isAuth && <Navbar />}
 
-            <main className={isDashboard ? '' : 'flex-grow'}>
+            <main className={isDashboard || isAuth ? '' : 'flex-grow'}>
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
                         {/* Public */}
@@ -97,10 +99,10 @@ function AppLayout() {
                 </Suspense>
             </main>
 
-            {!isDashboard && <Footer />}
+            {!isDashboard && !isAuth && <Footer />}
 
             {/* Global: AI Chat Coach (appears on all member pages) */}
-            {!isDashboard && <AICoachChat />}
+            {!isDashboard && !isAuth && <AICoachChat />}
         </div>
     );
 }

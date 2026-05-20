@@ -12,20 +12,20 @@ const Home = () => {
     return (
         <>
             <Hero />
-            
+
             {/* Promotional Lock Section for Guests */}
             {!user && (
-                <section className="py-12 bg-gym-accent/10 border-y border-gym-accent/20">
+                <section className="py-12 bg-gray-100 border-y border-gym-accent/20">
                     <div className="container mx-auto px-4 max-w-4xl text-center">
                         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gym-accent/20 text-gym-accent mb-4">
                             <Lock size={24} />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">Members Only Features</h2>
                         <p className="text-sm text-gray-700 mb-6 max-w-2xl mx-auto">
-                            Join CoreX today to unlock our full suite of tools! Gym members get exclusive access to our 
-                            <span className="text-gym-accent font-semibold"> Exercise Library</span>, 
-                            <span className="text-gym-accent font-semibold"> Custom Diet Plans</span>, 
-                            <span className="text-gym-accent font-semibold"> Personalized AI Fitness Assessment</span>, and our 
+                            Join CoreX today to unlock our full suite of tools! Gym members get exclusive access to our
+                            <span className="text-gym-accent font-semibold"> Exercise Library</span>,
+                            <span className="text-gym-accent font-semibold"> Custom Diet Plans</span>,
+                            <span className="text-gym-accent font-semibold"> Personalized AI Fitness Assessment</span>, and our
                             <span className="text-gym-accent font-semibold"> Premium Gear Store</span>.
                         </p>
                         <div className="flex justify-center gap-4">

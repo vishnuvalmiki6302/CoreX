@@ -2,18 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
     const [formData, setFormData] = useState({ username: '', email: '', password: '', phone: '' });
     const { register, googleLogin, user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [showPass, setShowPass] = useState(false);
 
     useEffect(() => {
-        if (user) {
-            navigate('/');
-            return;
-        }
+        if (user) { navigate('/'); return; }
         /* global google */
         if (window.google && !document.getElementById('signUpDiv').hasChildNodes()) {
             google.accounts.id.initialize({
@@ -29,9 +28,7 @@ const Register = () => {
 
     const handleCredentialResponse = async (response) => {
         const result = await googleLogin(response.credential);
-        if (result?.success) {
-            navigate('/');
-        }
+        if (result?.success) navigate('/');
     };
 
     const handleSubmit = async (e) => {
@@ -39,116 +36,137 @@ const Register = () => {
         setLoading(true);
         try {
             await register(formData.username, formData.email, formData.password);
-            toast.success('Registration successful!');
+            toast.success('Account created! Welcome to CoreX.');
             navigate('/');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Registration failed');
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    return (
-        <div className="min-h-[85vh] flex items-center justify-center p-4 mt-10">
-            <div className="w-full max-w-[850px] min-h-[600px] flex flex-col md:flex-row-reverse bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+    const strength = formData.password.length === 0 ? 0
+        : formData.password.length < 6 ? 1
+        : formData.password.length < 10 ? 2
+        : 3;
 
-                {/* Right Side: Clean Visual */}
-                <div className="md:w-[45%] relative hidden md:block border-l border-gray-200">
-                    <img
-                        src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop"
-                        alt="Gym Equipment"
-                        className="absolute inset-0 w-full h-full object-cover"
+    const strengthLabel = ['', 'Weak', 'Fair', 'Strong'];
+    const strengthColor = ['', 'bg-red-400', 'bg-amber-400', 'bg-green-500'];
+
+    const Field = ({ icon: Icon, label, type, placeholder, name, required, hint }) => (
+        <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                {label} {hint && <span className="text-gray-400 font-normal">{hint}</span>}
+            </label>
+            <div className="flex items-center border border-gray-300 rounded-lg focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all bg-white">
+                <Icon size={15} className="ml-3.5 text-gray-400 shrink-0" />
+                {name === 'password' ? (
+                    <>
+                        <input
+                            type={showPass ? 'text' : 'password'} required={required} placeholder={placeholder}
+                            className="flex-1 px-3 py-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent outline-none"
+                            value={formData[name]}
+                            onChange={e => setFormData({ ...formData, [name]: e.target.value })}
+                        />
+                        <button type="button" onClick={() => setShowPass(s => !s)} className="mr-3 text-gray-400 hover:text-gray-600 transition-colors">
+                            {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                    </>
+                ) : (
+                    <input
+                        type={type || 'text'} required={required} placeholder={placeholder}
+                        className="flex-1 px-3 py-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent outline-none"
+                        value={formData[name]}
+                        onChange={e => setFormData({ ...formData, [name]: e.target.value })}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
-                        <div className="w-8 h-8 flex items-center justify-center">
-                            <img src="/logo.png" alt="CoreX Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-white mb-2">Join CoreX!</h2>
-                            <p className="text-gray-200 text-xs leading-relaxed max-w-sm mb-2">
-                                Create an account to access premium classes, diet plans, and our exclusive gear store.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                )}
+            </div>
+        </div>
+    );
 
-                {/* Left Side: Clean Form */}
-                <div className="md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-gray-50">
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">Create Account</h1>
-                        <p className="text-xs text-gray-600">Join our community and transform your life.</p>
+    return (
+        <div className="min-h-screen flex">
+            {/* Left – photo panel */}
+            <div className="hidden lg:block lg:w-5/12 relative overflow-hidden">
+                <img
+                    src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop"
+                    alt="Gym"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                {/* Quote bottom-left */}
+                <div className="absolute bottom-10 left-10">
+                    <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">CoreX Fitness</p>
+                    <h2 className="text-white text-3xl font-bold leading-snug">
+                        Begin your<br />best chapter.
+                    </h2>
+                </div>
+            </div>
+
+            {/* Right – form */}
+            <div className="flex-1 flex items-center justify-center bg-white px-8 py-16 overflow-y-auto">
+                <div className="w-full max-w-[400px]">
+
+                    {/* Brand */}
+                    <div className="mb-10">
+                        <span className="text-orange-500 font-black text-2xl tracking-tight">CoreX</span>
+                        <p className="text-gray-400 text-sm mt-0.5 font-medium">Fitness Intelligence Platform</p>
                     </div>
+
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h1>
+                    <p className="text-sm text-gray-500 mb-8">Takes less than a minute. No credit card required.</p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">Username</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                    placeholder="JohnDoe"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1.5">Phone <span className="text-gray-500">(Optional)</span></label>
-                                <input
-                                    type="tel"
-                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="+1 234 567"
-                                />
-                            </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Field icon={User} label="Name" placeholder="John Doe" name="username" required />
+                            <Field icon={Phone} label="Phone" hint="(optional)" type="tel" placeholder="+91 XXXXX" name="phone" />
                         </div>
+
+                        <Field icon={Mail} label="Email" type="email" placeholder="you@email.com" name="email" required />
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Email</label>
-                            <input
-                                type="email"
-                                required
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                placeholder="john@example.com"
-                            />
+                            <Field icon={Lock} label="Password" placeholder="Min 8 characters" name="password" required />
+                            {formData.password.length > 0 && (
+                                <div className="mt-2 flex items-center gap-2">
+                                    <div className="flex gap-1 flex-1">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : 'bg-gray-200'}`} />
+                                        ))}
+                                    </div>
+                                    <span className={`text-[11px] font-semibold ${strength === 1 ? 'text-red-400' : strength === 2 ? 'text-amber-500' : 'text-green-600'}`}>
+                                        {strengthLabel[strength]}
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Password</label>
-                            <input
-                                type="password"
-                                required
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        <button type="submit" disabled={loading} className="w-full py-2.5 mt-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors">
-                            {loading ? 'Creating...' : 'Sign Up'}
+                        <button
+                            type="submit" disabled={loading}
+                            className="w-full py-3 mt-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold tracking-wide transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+                        >
+                            {loading ? 'Creating account…' : 'Create account'}
                         </button>
                     </form>
 
-                    <div className="mt-6">
-                        <div className="relative flex py-2 items-center mb-4">
-                            <div className="flex-grow border-t border-gray-200"></div>
-                            <span className="flex-shrink-0 mx-4 text-gray-500 text-[10px] uppercase tracking-wider font-semibold">Or join with</span>
-                            <div className="flex-grow border-t border-gray-200"></div>
-                        </div>
-
-                        <div className="flex justify-center w-full">
-                            <div id="signUpDiv" className="w-full flex justify-center overflow-hidden rounded-lg"></div>
-                        </div>
+                    {/* Divider */}
+                    <div className="flex items-center gap-3 my-6">
+                        <div className="flex-1 h-px bg-gray-200" />
+                        <span className="text-xs text-gray-400">or</span>
+                        <div className="flex-1 h-px bg-gray-200" />
                     </div>
 
-                    <div className="mt-6 text-center text-xs text-gray-600">
-                        Already have an account? <Link to="/login" className="text-gray-900 font-bold hover:underline">Sign in</Link>
-                    </div>
+                    {/* Google */}
+                    <div id="signUpDiv" className="w-full flex justify-center" />
+
+                    <p className="mt-8 text-center text-sm text-gray-500">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-orange-500 font-semibold hover:underline">Sign in</Link>
+                    </p>
+
+                    <p className="mt-5 text-center text-xs text-gray-400 leading-relaxed">
+                        By signing up you agree to our{' '}
+                        <span className="underline cursor-pointer hover:text-gray-600 transition-colors">Terms</span> and{' '}
+                        <span className="underline cursor-pointer hover:text-gray-600 transition-colors">Privacy Policy</span>.
+                    </p>
                 </div>
             </div>
         </div>

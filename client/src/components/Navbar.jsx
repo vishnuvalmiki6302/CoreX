@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import Logo from './Logo';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,14 +12,12 @@ const Navbar = () => {
     const { user, logout } = useAuth();
     const { cart } = useCart();
 
-    // Base links visible to everyone
     const publicLinks = [
         { name: 'Home', path: '/' },
         { name: 'Classes', path: '/classes' },
         { name: 'Store', path: '/products' },
     ];
 
-    // Member-only links
     const memberLinks = [
         { name: 'Exercises', path: '/exercises' },
         { name: 'Diet', path: '/diets' },
@@ -32,7 +30,7 @@ const Navbar = () => {
     ];
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 10);
+        const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
@@ -41,7 +39,7 @@ const Navbar = () => {
 
     const getDashboardLink = () => {
         if (!user) return null;
-        if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'gym_owner') return '/admin';
+        if (['super_admin', 'admin', 'gym_owner'].includes(user.role)) return '/admin';
         if (user.role === 'receptionist') return '/reception';
         if (user.role?.includes('trainer')) return '/trainer';
         return '/profile';
@@ -49,182 +47,145 @@ const Navbar = () => {
 
     const isStaff = user && ['super_admin', 'admin', 'gym_owner', 'receptionist', 'male_trainer', 'female_trainer', 'dietician'].includes(user.role);
 
-    const isHomePage = location.pathname === '/';
-    const isScrolled = scrolled || !isHomePage;
-
     return (
-        <nav
-            className={`fixed top-0 w-full z-[100] transition-all duration-300 ${
-                isScrolled 
-                ? 'bg-white/95 backdrop-blur-[12px] border-b border-gray-100 py-3 shadow-sm' 
-                : 'bg-transparent py-4'
-            }`}
-        >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
+        <div className="fixed top-5 left-0 right-0 z-[100] px-4 flex justify-center pointer-events-none">
+            <motion.nav
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className={`pointer-events-auto flex items-center gap-2 md:gap-6 rounded-full p-1.5 md:p-2 transition-all duration-500 ${
+                    scrolled
+                        ? 'bg-white/95 border border-gray-200 shadow-xl shadow-gray-200/60 scale-95'
+                        : 'bg-white/80 border border-gray-200/80 shadow-lg shadow-gray-100/60'
+                }`}
+                style={{ backdropFilter: 'blur(16px)' }}
+            >
                 {/* Logo */}
-                <Link to="/" className="group">
-                    <Logo className="transition-transform group-hover:scale-105" />
+                <Link to="/" className="flex items-center justify-center bg-gray-900 rounded-full w-10 h-10 md:w-11 md:h-11 overflow-hidden hover:bg-gray-800 transition-all flex-shrink-0">
+                    <img src="/logo.png" alt="Logo" className="w-6 h-6 md:w-7 md:h-7 object-contain" />
                 </Link>
 
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center space-x-8">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            to={link.path}
-                            className={`text-[15px] font-semibold transition-all relative group py-2 tracking-tight ${
-                                location.pathname === link.path ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                            }`}
-                        >
-                            {link.name}
-                            <span className={`absolute -bottom-0.5 left-0 h-[2.5px] bg-gym-orange rounded-full transition-all duration-300 ${
-                                location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'
-                            }`} />
-                        </Link>
-                    ))}
+                {/* Desktop Nav */}
+                <div className="hidden md:flex items-center space-x-0.5">
+                    {navLinks.map((link) => {
+                        const active = location.pathname === link.path;
+                        return (
+                            <Link key={link.name} to={link.path}
+                                className={`px-4 py-2 rounded-full text-[13px] font-semibold transition-all relative ${
+                                    active ? 'text-orange-600 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                            >
+                                {link.name}
+                                {active && (
+                                    <motion.span layoutId="nav-active"
+                                        className="absolute inset-0 bg-orange-50 rounded-full -z-10" />
+                                )}
+                            </Link>
+                        );
+                    })}
                 </div>
 
-                {/* Desktop Right Actions */}
-                <div className="hidden md:flex items-center gap-5">
-                    <Link to="/cart" className="relative text-gray-600 hover:text-gray-900 transition-colors group">
-                        <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
+                {/* Right Actions */}
+                <div className="flex items-center gap-1.5 md:gap-2">
+                    {/* Cart */}
+                    <Link to="/cart" className="relative p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all">
+                        <ShoppingCart size={18} />
                         {cart.length > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-gym-accent text-gray-900 text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-gym-accent/50">
+                            <span className="absolute top-1 right-1 w-4 h-4 bg-orange-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-md">
                                 {cart.length}
                             </span>
                         )}
                     </Link>
 
                     {user ? (
-                        <div className="flex items-center gap-3 pl-5 border-l border-gray-200">
-                            <Link
-                                to="/profile"
-                                className="flex items-center gap-2.5 p-1 pr-4 rounded-full bg-gray-50 border border-gray-100 hover:border-gym-accent/30 hover:bg-gray-100 transition-all group"
-                            >
-                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
-                                    {user.profilePhoto ? (
-                                        <img 
-                                            src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL || ''}${user.profilePhoto}`} 
-                                            alt="Profile" 
-                                            className="w-full h-full object-cover" 
-                                        />
-                                    ) : (
-                                        <User size={16} className="text-gym-accent" />
-                                    )}
+                        <div className="flex items-center gap-1.5">
+                            <Link to="/profile"
+                                className="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded-full hover:bg-gray-800 transition-all">
+                                <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[10px] font-black text-white flex-shrink-0">
+                                    {(user.username || user.email || 'U').charAt(0).toUpperCase()}
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xs font-black text-gray-900 leading-none uppercase tracking-tighter">
-                                        {user.username}
-                                    </span>
-                                    <span className="text-[9px] font-bold text-gym-accent leading-none uppercase tracking-widest mt-0.5">
-                                        {user.role}
-                                    </span>
-                                </div>
+                                <span className="text-[12px] font-bold text-white max-w-[100px] truncate hidden md:block">
+                                    {user.username || user.email}
+                                </span>
                             </Link>
 
                             {isStaff && (
-                                <Link
-                                    to={getDashboardLink()}
-                                    className="flex items-center gap-2 p-2 px-3 bg-gym-accent/10 hover:bg-gym-accent/20 text-gym-accent rounded-xl transition-all border border-gym-accent/20"
-                                    title="Dashboard"
-                                >
-                                    <LayoutDashboard size={18} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Dashboard</span>
+                                <Link to={getDashboardLink()}
+                                    className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-all"
+                                    title="Dashboard">
+                                    <LayoutDashboard size={17} />
                                 </Link>
                             )}
 
-                            <button
-                                onClick={logout}
-                                className="p-2 bg-gray-50 hover:bg-red-500/10 text-gray-600 hover:text-red-500 rounded-xl transition-all border border-gray-100"
-                                title="Logout"
-                            >
-                                <LogOut size={18} />
+                            <button onClick={logout}
+                                className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                title="Logout">
+                                <LogOut size={17} />
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4 pl-5 border-l border-gray-200">
-                            <Link to="/login" className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                        <div className="flex items-center gap-1.5">
+                            <Link to="/login"
+                                className="px-4 py-2 text-[13px] font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all">
                                 Log in
                             </Link>
-                            <Link to="/register" className="btn-primary text-sm px-4 py-1.5 rounded-lg">
+                            <Link to="/register"
+                                className="px-5 py-2 text-[13px] font-black text-white bg-orange-500 hover:bg-orange-600 rounded-full transition-all shadow-md shadow-orange-200">
                                 Join
                             </Link>
                         </div>
                     )}
+
+                    {/* Mobile Menu */}
+                    <button className="md:hidden p-2.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-all"
+                        onClick={() => setIsOpen(!isOpen)}>
+                        {isOpen ? <X size={18} /> : <Menu size={18} />}
+                    </button>
                 </div>
+            </motion.nav>
 
-                {/* Mobile Menu Button */}
-                <button
-                    className="md:hidden text-gray-700 hover:text-gray-900 p-1"
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    {isOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            </div>
-
-            {/* Mobile Menu */}
-            {isOpen && (
-                <div className="absolute top-full left-0 w-full bg-gym-dark border-b border-gray-200 shadow-2xl md:hidden">
-                    <div className="px-4 py-4 flex flex-col gap-2">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                to={link.path}
-                                className={`text-base font-semibold px-4 py-3 rounded-lg transition-colors ${
-                                    location.pathname === link.path
-                                        ? 'bg-gym-accent/10 text-gym-accent'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-
-                        <div className="h-px bg-gray-50 my-2" />
-
-                        <Link
-                            to="/cart"
-                            className="flex items-center justify-between text-base font-semibold px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg"
-                        >
-                            <div className="flex items-center gap-3">
-                                <ShoppingCart size={18} /> Cart
-                            </div>
-                            {cart.length > 0 && (
-                                <span className="bg-gym-accent text-gray-900 text-xs px-2 py-0.5 rounded-full">
-                                    {cart.length}
-                                </span>
-                            )}
-                        </Link>
-
-                        {user ? (
-                            <>
-                                <Link
-                                    to={getDashboardLink()}
-                                    className="flex items-center gap-3 text-base font-semibold px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg"
-                                >
-                                    {isStaff ? (
-                                        <><LayoutDashboard size={18} /> Dashboard</>
-                                    ) : (
-                                        <><User size={18} /> Profile</>
-                                    )}
+            {/* Mobile Dropdown */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                        className="absolute top-full left-4 right-4 mt-3 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xl md:hidden pointer-events-auto"
+                    >
+                        <div className="p-3 flex flex-col gap-1">
+                            {navLinks.map((link) => (
+                                <Link key={link.name} to={link.path}
+                                    className={`px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${
+                                        location.pathname === link.path
+                                            ? 'bg-orange-50 text-orange-600'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}>
+                                    {link.name}
                                 </Link>
-                                <button
-                                    onClick={logout}
-                                    className="flex items-center gap-3 text-base font-semibold px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-lg text-left"
-                                >
-                                    <LogOut size={18} /> Logout
-                                </button>
-                            </>
-                        ) : (
-                            <div className="flex gap-3 px-4 mt-2 mb-2">
-                                <Link to="/login" className="btn-outline flex-1 text-center py-2 text-sm rounded-lg">Log in</Link>
-                                <Link to="/register" className="btn-primary flex-1 text-center py-2 text-sm rounded-lg">Join</Link>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-        </nav>
+                            ))}
+
+                            <div className="h-px bg-gray-100 my-1" />
+
+                            {user ? (
+                                <>
+                                    <Link to="/profile" className="flex items-center gap-3 px-4 py-3.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm font-bold">
+                                        <User size={16} className="text-orange-500" /> Profile
+                                    </Link>
+                                    <button onClick={logout} className="flex items-center gap-3 px-4 py-3.5 text-red-500 hover:bg-red-50 rounded-xl text-left text-sm font-bold">
+                                        <LogOut size={16} /> Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-2 p-2">
+                                    <Link to="/login" className="py-3 text-center text-sm font-bold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">Log in</Link>
+                                    <Link to="/register" className="py-3 text-center text-sm font-black text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Join</Link>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 

@@ -73,7 +73,7 @@ const Products = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f3f4f6] pt-20 pb-12 font-sans">
+        <div className="min-h-screen bg-[#f3f4f6] pt-28 pb-12 font-sans">
             <div className="max-w-[1500px] mx-auto px-4">
                 
                 {/* ── TOP PROMOTIONAL BANNER ── */}

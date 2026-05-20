@@ -1,24 +1,26 @@
 import { Link } from "react-router-dom";
-import { Instagram, Twitter, Facebook, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, Twitter, Facebook, MapPin, Phone, Mail, Zap } from "lucide-react";
 import Logo from "./Logo";
 
 const Footer = () => {
     return (
-        <footer className="bg-gym-dark border-t border-gray-100 pt-12 pb-6">
-            <div className="container mx-auto px-4 max-w-6xl">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <footer className="bg-gray-900 pt-16 pb-8">
+            <div className="container mx-auto px-6 max-w-6xl">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     {/* Brand */}
-                    <div className="md:col-span-1 space-y-4">
+                    <div className="md:col-span-1 space-y-6">
                         <Link to="/">
-                            <Logo iconSize={14} className="scale-75 origin-left" />
+                            <Logo iconSize={14} />
                         </Link>
-                        <p className="text-xs text-gray-600 leading-relaxed">
-                            A clean, modern platform for fitness intelligence and management.
+                        <p className="text-sm leading-relaxed text-gray-400">
+                            A premium, AI-driven platform for elite fitness management and peak performance.
                         </p>
                         <div className="flex gap-2">
                             {[Instagram, Twitter, Facebook].map((Icon, i) => (
-                                <a key={i} href="#" className="p-1.5 rounded bg-gray-50 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">
-                                    <Icon size={14} />
+                                <a key={i} href="#"
+                                    className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-800 text-gray-400 border border-gray-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all"
+                                >
+                                    <Icon size={15} />
                                 </a>
                             ))}
                         </div>
@@ -26,41 +28,65 @@ const Footer = () => {
 
                     {/* Links */}
                     <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-4">Explore</h4>
-                        <ul className="space-y-2 text-xs text-gray-600">
-                            <li><Link to="/classes" className="hover:text-gym-accent transition-colors">Classes</Link></li>
-                            <li><Link to="/products" className="hover:text-gym-accent transition-colors">Store</Link></li>
-                            <li><Link to="/exercises" className="hover:text-gym-accent transition-colors">Exercises</Link></li>
-                            <li><Link to="/diets" className="hover:text-gym-accent transition-colors">Diet Plans</Link></li>
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white mb-6">Explore</h4>
+                        <ul className="space-y-3">
+                            {[
+                                { label: 'Classes', path: '/classes' },
+                                { label: 'Store', path: '/products' },
+                                { label: 'Exercises', path: '/exercises' },
+                                { label: 'Diet Plans', path: '/diets' },
+                            ].map(l => (
+                                <li key={l.path}>
+                                    <Link to={l.path} className="text-sm text-gray-400 hover:text-orange-400 transition-colors font-medium">{l.label}</Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
                     {/* Contact */}
                     <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-4">Contact</h4>
-                        <ul className="space-y-2 text-xs text-gray-600">
-                            <li className="flex items-center gap-2"><MapPin size={12} /> 123 Iron St, CA</li>
-                            <li className="flex items-center gap-2"><Phone size={12} /> +1 (555) 123-4567</li>
-                            <li className="flex items-center gap-2"><Mail size={12} /> support@corex.fitness</li>
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white mb-6">Contact</h4>
+                        <ul className="space-y-3">
+                            <li className="flex items-center gap-3 text-sm text-gray-400">
+                                <MapPin size={13} className="text-orange-500 flex-shrink-0" /> 123 Iron Street, CA
+                            </li>
+                            <li className="flex items-center gap-3 text-sm text-gray-400">
+                                <Phone size={13} className="text-orange-500 flex-shrink-0" /> +1 (555) 123-4567
+                            </li>
+                            <li className="flex items-center gap-3 text-sm text-gray-400">
+                                <Mail size={13} className="text-orange-500 flex-shrink-0" /> support@corex.fitness
+                            </li>
                         </ul>
                     </div>
 
                     {/* Newsletter */}
                     <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-4">Newsletter</h4>
-                        <p className="text-xs text-gray-600 mb-2">Subscribe for updates.</p>
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white mb-6">Newsletter</h4>
+                        <p className="text-sm text-gray-400 mb-4">Subscribe for training intel and product launches.</p>
                         <div className="flex gap-2">
-                            <input type="email" placeholder="Email" className="input-clean text-xs py-1.5" />
-                            <button className="btn-primary py-1.5 px-3 text-xs">Join</button>
+                            <input
+                                type="email"
+                                placeholder="Enter email"
+                                className="flex-1 px-4 py-2.5 text-sm rounded-xl outline-none bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-orange-500 transition-colors"
+                            />
+                            <button className="px-4 py-2.5 rounded-xl text-white text-xs font-bold uppercase btn-primary">
+                                Join
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} CoreX Fitness. All rights reserved.</p>
-                    <div className="flex gap-4">
-                        <a href="#" className="hover:text-gray-900">Privacy</a>
-                        <a href="#" className="hover:text-gray-900">Terms</a>
+                <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-800">
+                    <div className="flex items-center gap-2">
+                        <Zap size={12} className="text-orange-500" />
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600">
+                            © {new Date().getFullYear()} CoreX Fitness. All rights reserved.
+                        </p>
+                    </div>
+                    <div className="flex gap-6">
+                        {['Privacy', 'Terms', 'Cookies'].map(t => (
+                            <a key={t} href="#" className="text-[11px] font-bold uppercase tracking-widest text-gray-600 hover:text-orange-500 transition-colors">{t}</a>
+                        ))}
                     </div>
                 </div>
             </div>
