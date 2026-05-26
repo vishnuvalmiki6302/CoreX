@@ -14,18 +14,17 @@ const ROLE_HIERARCHY = {
     gym_owner:      8,
     admin:          7,
     receptionist:   6,
-    male_trainer:   5,
-    female_trainer: 5,
+    trainer:        5,
     dietician:      4,
     accountant:     4,
     member:         1,
 };
 
 // All staff roles (non-member)
-const STAFF_ROLES = ['super_admin', 'gym_owner', 'admin', 'receptionist', 'male_trainer', 'female_trainer', 'dietician', 'accountant'];
+const STAFF_ROLES = ['super_admin', 'gym_owner', 'admin', 'receptionist', 'trainer', 'dietician', 'accountant'];
 
 // All trainer roles
-const TRAINER_ROLES = ['male_trainer', 'female_trainer', 'super_admin', 'gym_owner', 'admin'];
+const TRAINER_ROLES = ['trainer', 'super_admin', 'gym_owner', 'admin'];
 
 // Admin roles
 const ADMIN_ROLES = ['super_admin', 'gym_owner', 'admin'];

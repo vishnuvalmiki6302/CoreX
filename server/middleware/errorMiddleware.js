@@ -14,6 +14,12 @@ const errorHandler = (err, req, res, next) => {
         message = 'Resource not found';
     }
 
+    // If Mongoose validation error, set to 400
+    if (err.name === 'ValidationError') {
+        statusCode = 400;
+        message = Object.values(err.errors).map(val => val.message).join(', ') || err.message;
+    }
+
     res.status(statusCode).json({
         message: message,
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,

@@ -61,28 +61,9 @@ exports.loginUser = async (req, res, next) => {
 
         const { email, password } = req.body;
 
-        const devEmails = ['admin@gmail.com', 'receptionist@gmail.com', 'trainer@gmail.com', 'user@gmail.com'];
-        const isDevLogin = devEmails.includes(email) && password === '123456';
-
-        if (isDevLogin) {
-            let user = await User.findOne({ email });
-            if (!user) {
-                const salt = await bcrypt.genSalt(10);
-                const hashedPassword = await bcrypt.hash('123456', salt);
-                let role = 'member';
-                let username = 'Dev Member';
-                if (email === 'admin@gmail.com') { role = 'super_admin'; username = 'Dev Admin'; }
-                if (email === 'receptionist@gmail.com') { role = 'receptionist'; username = 'Dev Reception'; }
-                if (email === 'trainer@gmail.com') { role = 'male_trainer'; username = 'Dev Trainer'; }
-                
-                await User.create({ username, email, password: hashedPassword, role });
-            }
-        }
-
         const user = await User.findOne({ email });
 
-        // Bypass bcrypt for dev logins, otherwise check normally
-        const isValidPassword = isDevLogin ? true : (user && (await bcrypt.compare(password, user.password)));
+        const isValidPassword = user && (await bcrypt.compare(password, user.password));
 
         if (user && isValidPassword) {
             // Generate access token (short-lived, stored in cookie)

@@ -752,7 +752,7 @@ const AdminDashboard = () => {
                                                             <p className="text-gray-400 text-xs">{u.phoneNumber || '—'}</p>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'male_trainer' || u.role === 'female_trainer' || u.role === 'trainer' ? 'bg-blue-100 text-blue-700' : u.role === 'receptionist' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                            <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'trainer' ? 'bg-blue-100 text-blue-700' : u.role === 'receptionist' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>
                                                                 {u.role}
                                                             </span>
                                                         </td>
@@ -1197,7 +1197,7 @@ const AdminDashboard = () => {
                                     <div>
                                         <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Role</label>
                                         <select className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all bg-white" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
-                                            {['member', 'male_trainer', 'female_trainer', 'receptionist', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
+                                            {['member', 'trainer', 'receptionist', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
                                         </select>
                                     </div>
                                     <div>

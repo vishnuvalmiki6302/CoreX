@@ -89,29 +89,6 @@ const Login = () => {
                         </button>
                     </form>
 
-                    {/* Developer Quick Login Panel */}
-                    {/* <div className="w-full max-w-sm mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center mb-2">Developer Quick Login</p>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { role: 'Admin', email: 'admin@gmail.com', pass: '123456', color: 'bg-indigo-100 text-indigo-700' },
-                                { role: 'Reception', email: 'receptionist@gmail.com', pass: '123456', color: 'bg-teal-100 text-teal-700' },
-                                { role: 'Trainer', email: 'trainer@gmail.com', pass: '123456', color: 'bg-blue-100 text-blue-700' },
-                                { role: 'Member', email: 'user@gmail.com', pass: '123456', color: 'bg-emerald-100 text-emerald-700' }
-                            ].map(btn => (
-                                <button
-                                    key={btn.role}
-                                    type="button"
-                                    onClick={() => handleQuickLogin(btn.email, btn.pass)}
-                                    disabled={loading}
-                                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${btn.color} hover:opacity-80 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                    {btn.role}
-                                </button>
-                            ))}
-                        </div>
-                    </div> */}
-
                     <div className="flex items-center gap-3 w-full max-w-sm my-4">
                         <div className="flex-1 h-px bg-gray-200" />
                         <span className="text-xs text-gray-400 uppercase tracking-wider">or continue with</span>
