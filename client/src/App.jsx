@@ -14,6 +14,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
 import TrainerDashboard from './pages/TrainerDashboard';
+import ReceptionDashboard from './pages/ReceptionDashboard';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
@@ -22,12 +23,9 @@ import ClickSpark from './components/ClickSpark';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 
-// Lazy-loaded Phase 1–3 pages (code-split for performance)
+// Lazy-loaded pages
 import { lazy, Suspense } from 'react';
-const ReceptionDashboard = lazy(() => import('./pages/ReceptionDashboard'));
 const AIFitnessAssessment = lazy(() => import('./pages/AIFitnessAssessment'));
-const QRKiosk = lazy(() => import('./pages/QRKiosk'));
-const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
 
 const PageLoader = () => (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', fontSize: '14px' }}>
@@ -38,7 +36,7 @@ const PageLoader = () => (
 // Inner component to access location for kiosk detection
 function AppLayout() {
     const location = useLocation();
-    const dashboardRoutes = ['/admin', '/trainer', '/reception', '/analytics', '/kiosk'];
+    const dashboardRoutes = ['/admin', '/trainer', '/reception'];
     const authRoutes = ['/login', '/register'];
     const isDashboard = dashboardRoutes.some(route => location.pathname.startsWith(route));
     const isAuth = authRoutes.some(route => location.pathname === route);
@@ -65,7 +63,7 @@ function AppLayout() {
                 }}
             />
 
-            {!isDashboard && !isAuth && <Navbar />}
+            {!isDashboard && <Navbar />}
 
             <main className={isDashboard || isAuth ? '' : 'flex-grow'}>
                 <Suspense fallback={<PageLoader />}>
@@ -74,7 +72,6 @@ function AppLayout() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
-                        <Route path="/kiosk" element={<QRKiosk />} />
 
                         {/* Protected Member Routes */}
                         <Route path="/exercises" element={<ProtectedRoute><Exercises /></ProtectedRoute>} />
@@ -85,16 +82,13 @@ function AppLayout() {
                         <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
-                        {/* Phase 1: Dashboards */}
+                        {/* Dashboards */}
                         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
                         <Route path="/trainer" element={<ProtectedRoute><TrainerDashboard /></ProtectedRoute>} />
-                        <Route path="/reception" element={<ProtectedRoute><ReceptionDashboard /></ProtectedRoute>} />
+                        <Route path="/reception" element={<ProtectedRoute allowedRoles={['receptionist', 'admin', 'super_admin', 'gym_owner']}><ReceptionDashboard /></ProtectedRoute>} />
 
-                        {/* Phase 2: AI Features */}
+                        {/* AI Features */}
                         <Route path="/ai/assessment" element={<ProtectedRoute><AIFitnessAssessment /></ProtectedRoute>} />
-
-                        {/* Phase 3: Analytics */}
-                        <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
                     </Routes>
                 </Suspense>
             </main>
@@ -102,7 +96,7 @@ function AppLayout() {
             {!isDashboard && !isAuth && <Footer />}
 
             {/* Global: AI Chat Coach (appears on all member pages) */}
-            {!isDashboard && !isAuth && <AICoachChat />}
+            {!isDashboard && <AICoachChat />}
         </div>
     );
 }

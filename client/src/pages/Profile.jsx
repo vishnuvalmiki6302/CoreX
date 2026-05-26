@@ -39,6 +39,7 @@ const Profile = () => {
     });
     const [previewImage, setPreviewImage] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [markingAttendance, setMarkingAttendance] = useState(false);
 
     useEffect(() => {
         if (!user) { navigate('/login'); return; }
@@ -107,6 +108,25 @@ const Profile = () => {
         }
     };
 
+    const handleMarkAttendance = async () => {
+        setMarkingAttendance(true);
+        try {
+            const res = await api.post('/attendance/self-check-in');
+            if (res.data?.alreadyCheckedIn) {
+                toast('Already checked in today! ✅', { icon: '📋' });
+            } else {
+                toast.success(res.data?.message || 'Attendance marked! 💪');
+            }
+            // Refresh attendance list
+            const attRes = await api.get('/attendance/me');
+            setAttendance(attRes.data);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to mark attendance');
+        } finally {
+            setMarkingAttendance(false);
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -130,6 +150,12 @@ const Profile = () => {
     };
 
     const bmiInfo = getBmiCategory(bmi);
+
+    const todayCheckedIn = attendance.some(a => {
+        const d = new Date(a.checkIn || a.date);
+        const today = new Date();
+        return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    });
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -207,6 +233,24 @@ const Profile = () => {
 
                         {/* Top Right Action Tools */}
                         <div className="flex gap-3">
+                            {/* Mark Attendance */}
+                            <button
+                                onClick={handleMarkAttendance}
+                                disabled={markingAttendance}
+                                className={`h-12 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-md active:translate-y-0 flex items-center gap-2 ${
+                                    todayCheckedIn
+                                        ? 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-600'
+                                        : 'bg-orange-500 text-white shadow-orange-500/20 hover:bg-orange-600 hover:translate-y-[-1px]'
+                                }`}
+                            >
+                                {markingAttendance ? (
+                                    <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Marking...</>
+                                ) : todayCheckedIn ? (
+                                    <><CheckCircle2 size={15} /> Checked In ✓</>
+                                ) : (
+                                    <><Activity size={15} /> Mark Attendance</>
+                                )}
+                            </button>
                             <button
                                 onClick={() => { setIsEditing(!isEditing); setActiveTab('account'); }}
                                 className="h-12 px-6 rounded-2xl bg-gray-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md shadow-gray-900/10 hover:translate-y-[-1px] active:translate-y-0"

@@ -116,3 +116,62 @@ exports.getAttendanceStats = async (req, res, next) => {
         next(error);
     }
 };
+
+// @desc    Member self check-in (member marks their own attendance)
+// @route   POST /api/attendance/self-check-in
+// @access  Private (any authenticated user)
+exports.selfCheckIn = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+
+        // Check if already checked in with no open session
+        const openSession = await Attendance.findOne({ user: userId, checkOut: null });
+        if (openSession) {
+            return res.status(200).json({
+                alreadyCheckedIn: true,
+                message: 'You are already checked in today!',
+                session: openSession
+            });
+        }
+
+        const attendance = await Attendance.create({
+            user: userId,
+            date: new Date().setHours(0, 0, 0, 0),
+            checkIn: new Date(),
+            status: 'checked-in'
+        });
+
+        res.status(201).json({
+            message: 'Attendance marked successfully! Welcome to CoreX 💪',
+            session: attendance
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Member self check-out
+// @route   POST /api/attendance/self-check-out
+// @access  Private (any authenticated user)
+exports.selfCheckOut = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+
+        const openSession = await Attendance.findOne({ user: userId, checkOut: null });
+        if (!openSession) {
+            return res.status(400).json({ message: 'You are not currently checked in.' });
+        }
+
+        openSession.checkOut = new Date();
+        openSession.status = 'checked-out';
+        await openSession.save();
+
+        const duration = Math.round((openSession.checkOut - openSession.checkIn) / 60000);
+        res.json({
+            message: `Great workout! You trained for ${duration} minutes 🔥`,
+            session: openSession
+        });
+    } catch (error) {
+        next(error);
+    }
+};

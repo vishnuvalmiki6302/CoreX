@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const { login, googleLogin, user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [showPass, setShowPass] = useState(false);
 
     useEffect(() => {
         if (user) { navigate('/'); return; }
@@ -21,7 +19,7 @@ const Login = () => {
             });
             google.accounts.id.renderButton(
                 document.getElementById('signInDiv'),
-                { theme: 'outline', size: 'large', width: '100%' }
+                { theme: 'outline', size: 'large', type: 'standard', text: 'continue_with', width: '280' }
             );
         }
     }, [user, navigate]);
@@ -33,13 +31,22 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        await performLogin(formData.email, formData.password);
+    };
+
+    const handleQuickLogin = async (email, password) => {
+        setFormData({ email, password });
+        await performLogin(email, password);
+    };
+
+    const performLogin = async (email, password) => {
         setLoading(true);
         try {
-            const userData = await login(formData.email, formData.password);
+            const userData = await login(email, password);
             toast.success('Welcome back!');
             if (['super_admin', 'admin', 'gym_owner'].includes(userData.role)) navigate('/admin');
             else if (userData.role === 'receptionist') navigate('/reception');
-            else if (userData.role?.includes('trainer')) navigate('/trainer');
+            else if (userData.role?.includes('trainer') || userData.role === 'male_trainer' || userData.role === 'female_trainer') navigate('/trainer');
             else navigate('/');
         } catch (error) {
             toast.error(error.response?.data?.message || 'Login failed');
@@ -47,97 +54,97 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex">
-            {/* Left – warm photo side */}
-            <div className="hidden lg:block lg:w-5/12 relative overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1200&auto=format&fit=crop"
-                    alt="Gym"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-                {/* Simple dark-to-transparent overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="fixed inset-0 z-40 pt-16 flex items-center justify-center bg-[#f0f2f5] px-4 overflow-hidden">
+            <div className="bg-white rounded-[30px] shadow-2xl flex max-w-[800px] w-full relative overflow-hidden">
 
-                {/* Brand name bottom-left */}
-                <div className="absolute bottom-10 left-10">
-                    <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">CoreX Fitness</p>
-                    <h2 className="text-white text-3xl font-bold leading-snug">
-                        Every rep<br />counts.
-                    </h2>
-                </div>
-            </div>
+                {/* Left Side - Form (Login) */}
+                <div className="w-full md:w-3/5 p-6 md:p-8 flex flex-col items-center justify-center bg-white z-10">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-5 tracking-tight">Sign in</h2>
 
-            {/* Right – form */}
-            <div className="flex-1 flex items-center justify-center bg-white px-8 py-16">
-                <div className="w-full max-w-[380px]">
+                    <form className="w-full max-w-sm flex flex-col gap-2.5" onSubmit={handleSubmit}>
+                        <input
+                            type="email" required placeholder="Email"
+                            className="bg-gray-100 px-4 py-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-200 transition-all border-none"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        />
+                        <input
+                            type="password" required placeholder="Password"
+                            className="bg-gray-100 px-4 py-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-200 transition-all border-none"
+                            value={formData.password}
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                        />
 
-                    {/* Logo mark */}
-                    <div className="mb-10">
-                        <span className="text-orange-500 font-black text-2xl tracking-tight">CoreX</span>
-                        <p className="text-gray-400 text-sm mt-0.5 font-medium">Fitness Intelligence Platform</p>
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Sign in</h1>
-                    <p className="text-sm text-gray-500 mb-8">Good to have you back. Enter your details below.</p>
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Email */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
-                            <div className="flex items-center border border-gray-300 rounded-lg focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all bg-white">
-                                <Mail size={15} className="ml-3.5 text-gray-400 shrink-0" />
-                                <input
-                                    type="email" required placeholder="you@email.com"
-                                    className="flex-1 px-3 py-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent outline-none"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                />
-                            </div>
+                        <div className="flex justify-center mt-1 mb-2">
+                            <Link to="/forgot-password" className="text-[13px] text-gray-500 hover:text-gray-800 border-b border-transparent hover:border-gray-800 transition-colors">
+                                Forgot your password?
+                            </Link>
                         </div>
 
-                        {/* Password */}
-                        <div>
-                            <div className="flex justify-between items-center mb-1.5">
-                                <label className="text-xs font-semibold text-gray-600">Password</label>
-                                <Link to="/forgot-password" className="text-xs text-orange-500 hover:underline">Forgot password?</Link>
-                            </div>
-                            <div className="flex items-center border border-gray-300 rounded-lg focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all bg-white">
-                                <Lock size={15} className="ml-3.5 text-gray-400 shrink-0" />
-                                <input
-                                    type={showPass ? 'text' : 'password'} required placeholder="••••••••"
-                                    className="flex-1 px-3 py-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent outline-none"
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                />
-                                <button type="button" onClick={() => setShowPass(s => !s)} className="mr-3 text-gray-400 hover:text-gray-600 transition-colors">
-                                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Submit */}
                         <button
                             type="submit" disabled={loading}
-                            className="w-full py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold tracking-wide transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+                            className="bg-orange-500 text-white rounded-full py-3 mt-1 font-bold tracking-widest text-[12px] uppercase hover:bg-orange-600 transition-all shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] mx-auto px-12 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Signing in…' : 'Sign in'}
+                            {loading ? 'Signing in...' : 'Sign In'}
                         </button>
                     </form>
 
-                    {/* Divider */}
-                    <div className="flex items-center gap-3 my-6">
+                    {/* Developer Quick Login Panel */}
+                    {/* <div className="w-full max-w-sm mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center mb-2">Developer Quick Login</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { role: 'Admin', email: 'admin@gmail.com', pass: '123456', color: 'bg-indigo-100 text-indigo-700' },
+                                { role: 'Reception', email: 'receptionist@gmail.com', pass: '123456', color: 'bg-teal-100 text-teal-700' },
+                                { role: 'Trainer', email: 'trainer@gmail.com', pass: '123456', color: 'bg-blue-100 text-blue-700' },
+                                { role: 'Member', email: 'user@gmail.com', pass: '123456', color: 'bg-emerald-100 text-emerald-700' }
+                            ].map(btn => (
+                                <button
+                                    key={btn.role}
+                                    type="button"
+                                    onClick={() => handleQuickLogin(btn.email, btn.pass)}
+                                    disabled={loading}
+                                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${btn.color} hover:opacity-80 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {btn.role}
+                                </button>
+                            ))}
+                        </div>
+                    </div> */}
+
+                    <div className="flex items-center gap-3 w-full max-w-sm my-4">
                         <div className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs text-gray-400">or</span>
+                        <span className="text-xs text-gray-400 uppercase tracking-wider">or continue with</span>
                         <div className="flex-1 h-px bg-gray-200" />
                     </div>
 
-                    {/* Google */}
-                    <div id="signInDiv" className="w-full flex justify-center" />
+                    {/* Google Auth */}
+                    <div className="flex justify-center w-full max-w-sm mb-4">
+                        <div id="signInDiv" />
+                    </div>
 
-                    <p className="mt-8 text-center text-sm text-gray-500">
-                        Don't have an account?{' '}
-                        <Link to="/register" className="text-orange-500 font-semibold hover:underline">Create one</Link>
+                    {/* Mobile only toggle link */}
+                    <div className="md:hidden mt-6">
+                        <span className="text-xs text-gray-500">Don't have an account? </span>
+                        <Link to="/register" className="text-xs text-orange-500 font-bold hover:underline">Sign Up</Link>
+                    </div>
+                </div>
+
+                {/* Right Side - Colored Panel */}
+                <div
+                    className="hidden md:flex w-2/5 bg-gradient-to-br from-orange-400 to-orange-600 text-white flex-col items-center justify-center px-6 text-center relative z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.1)]"
+                    style={{ borderTopLeftRadius: '100px', borderBottomLeftRadius: '100px' }}
+                >
+                    <h2 className="text-2xl font-bold mb-3">Hello, Friend!</h2>
+                    <p className="text-[12px] mb-6 text-orange-50 font-medium leading-relaxed px-2">
+                        Enter your personal details and start journey with us
                     </p>
+                    <Link
+                        to="/register"
+                        className="px-10 py-2.5 rounded-full border border-white text-white font-bold tracking-widest text-[11px] uppercase hover:bg-white hover:text-orange-600 transition-all"
+                    >
+                        Sign Up
+                    </Link>
                 </div>
             </div>
         </div>

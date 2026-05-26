@@ -59,11 +59,10 @@ export default function AICoachChat() {
                 {/* Primary Button */}
                 <button
                     onClick={() => setOpen(o => !o)}
-                    className={`relative w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 active:scale-95 ${
-                        open
-                            ? 'bg-gray-900 text-white hover:bg-gray-800'
-                            : 'bg-gradient-to-tr from-orange-500 to-amber-500 text-white shadow-orange-500/30'
-                    }`}
+                    className={`relative w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 active:scale-95 ${open
+                        ? 'bg-gray-900 text-white hover:bg-gray-800'
+                        : 'bg-gradient-to-tr from-orange-900 to-amber-500 text-white shadow-orange-500/30'
+                        }`}
                 >
                     {open ? (
                         <X size={20} className="transition-transform duration-300 rotate-0 hover:rotate-90" />
@@ -77,8 +76,8 @@ export default function AICoachChat() {
                     {/* Blinking Indicator Dot */}
                     {!open && (
                         <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white shadow-sm"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-900 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-900 border-2 border-white shadow-sm"></span>
                         </span>
                     )}
                 </button>
@@ -137,11 +136,10 @@ export default function AICoachChat() {
 
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] px-4 py-3.5 rounded-2xl text-xs leading-relaxed font-semibold shadow-sm ${
-                                    m.role === 'user'
-                                        ? 'bg-gradient-to-tr from-orange-500 to-amber-500 text-white rounded-br-none shadow-orange-500/10'
-                                        : 'bg-gray-100 border border-gray-200/50 text-gray-800 rounded-bl-none'
-                                }`}>
+                                <div className={`max-w-[85%] px-4 py-3.5 rounded-2xl text-xs leading-relaxed font-semibold shadow-sm ${m.role === 'user'
+                                    ? 'bg-gradient-to-tr from-orange-500 to-amber-500 text-white rounded-br-none shadow-orange-500/10'
+                                    : 'bg-gray-100 border border-gray-200/50 text-gray-800 rounded-bl-none'
+                                    }`}>
                                     {m.content}
                                 </div>
                             </div>
