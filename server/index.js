@@ -37,7 +37,7 @@ if (!process.env.VERCEL) {
     });
 } else {
     // Provide a dummy io object for Vercel so controllers don't crash when calling io.emit
-    app.set('io', { emit: () => {}, to: () => ({ emit: () => {} }) });
+    app.set('io', { emit: () => { }, to: () => ({ emit: () => { } }) });
 }
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
-// Rate limit all API routes
+// Rate limit all API routes !!
 app.use('/api/', generalLimiter);
 
 // Database middleware - ensures DB is connected before handling requests (Serverless robust pattern)
