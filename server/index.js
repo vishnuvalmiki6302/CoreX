@@ -11,28 +11,35 @@ const connectDB = require('./db');
 dotenv.config({ override: true });
 
 // Connect Database
-connectDB();
+connectDB().catch(err => console.error('MongoDB connection failed on startup:', err.message));
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // ─── SOCKET.IO ────────────────────────────────────────────────────────────────
-const io = new Server(server, {
-    cors: {
-        origin: (origin, cb) => cb(null, true),
-        credentials: true,
-    },
-});
+let io;
+// Vercel serverless functions don't support WebSockets well, so we only initialize Socket.io locally or on traditional servers
+if (!process.env.VERCEL) {
+    io = new Server(server, {
+        cors: {
+            origin: (origin, cb) => cb(null, true),
+            credentials: true,
+        },
+    });
 
-// Store io instance on app so controllers can emit events
-app.set('io', io);
+    // Store io instance on app so controllers can emit events
+    app.set('io', io);
 
-io.on('connection', (socket) => {
-    console.log(`[Socket.io] Client connected: ${socket.id}`);
-    socket.on('join:room', (userId) => socket.join(userId));
-    socket.on('disconnect', () => console.log(`[Socket.io] Client disconnected: ${socket.id}`));
-});
+    io.on('connection', (socket) => {
+        console.log(`[Socket.io] Client connected: ${socket.id}`);
+        socket.on('join:room', (userId) => socket.join(userId));
+        socket.on('disconnect', () => console.log(`[Socket.io] Client disconnected: ${socket.id}`));
+    });
+} else {
+    // Provide a dummy io object for Vercel so controllers don't crash when calling io.emit
+    app.set('io', { emit: () => {}, to: () => ({ emit: () => {} }) });
+}
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(cors({
@@ -80,7 +87,7 @@ app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/leads', require('./routes/leads'));
 
 // ─── SCHEDULER ────────────────────────────────────────────────────────────────
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SCHEDULER === 'true') {
+if (!process.env.VERCEL && (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SCHEDULER === 'true')) {
     const runScheduler = require('./utils/scheduler');
     runScheduler();
 }
