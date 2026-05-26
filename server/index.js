@@ -10,8 +10,7 @@ const connectDB = require('./db');
 
 dotenv.config({ override: true });
 
-// Connect Database
-connectDB().catch(err => console.error('MongoDB connection failed on startup:', err.message));
+// Database connection is handled in middleware for Serverless compatibility
 
 const app = express();
 const server = http.createServer(app);
@@ -53,6 +52,16 @@ app.use('/uploads', express.static('uploads'));
 
 // Rate limit all API routes
 app.use('/api/', generalLimiter);
+
+// Database middleware - ensures DB is connected before handling requests (Serverless robust pattern)
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        res.status(503).json({ message: 'Database connection failed', error: error.message });
+    }
+});
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.send('CoreX Gym API is running ✅'));
