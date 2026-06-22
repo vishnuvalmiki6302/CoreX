@@ -9,8 +9,6 @@
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
-    "concurrently": "^8.2.0",
-    "tailwindcss": "^4.1.18"
+    "concurrently": "^8.2.0"
   }
 }
