@@ -66,7 +66,7 @@ GYM/
 │   │   ├── pages/          # View components (Dashboard, Home, etc.)
 │   │   └── App.jsx         # Main routing and entry
 ├── server/                 # Express Backend
-│   ├── controllers/        # Request handlers
+│   ├── controllers/        # Request handler  sdfgs dsfxfgsdxgf
 │   ├── models/             # Mongoose schemas (MongoDB)
 │   ├── routes/             # API endpoint definitions
 │   ├── middleware/         # Auth & Error handling
