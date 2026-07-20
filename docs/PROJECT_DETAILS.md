@@ -58,7 +58,7 @@ Gym Genix is a comprehensive, modern management solution for gyms and fitness ce
 
 ```text
 GYM/
-├── client/                 # React Frontend
+├── client/                 # React Frontend   !!!!!!!!!!!1
 │   ├── src/
 │   │   ├── api/            # API call logic (Axios)
 │   │   ├── components/     # Reusable UI components
@@ -66,7 +66,7 @@ GYM/
 │   │   ├── pages/          # View components (Dashboard, Home, etc.)
 │   │   └── App.jsx         # Main routing and entry
 ├── server/                 # Express Backend
-│   ├── controllers/        # Request handler  sdfgs dsfxfgsdxgf
+│   ├── controllers/        # Request handler
 │   ├── models/             # Mongoose schemas (MongoDB)
 │   ├── routes/             # API endpoint definitions
 │   ├── middleware/         # Auth & Error handling
