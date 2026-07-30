@@ -53,15 +53,7 @@ app.use('/uploads', express.static('uploads'));
 // Rate limit all API routes !!
 app.use('/api/', generalLimiter);
 
-// Database middleware - ensures DB is connected before handling requests (Serverless robust pattern)
-app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-        next();
-    } catch (error) {
-        res.status(503).json({ message: 'Database connection failed', error: error.message });
-    }
-});
+// NOTE: DB connection is done at startup below (not per-request) to prevent "Too many open files" errors
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.send('CoreX Gym API is running ✅'));
@@ -107,10 +99,17 @@ app.use(errorHandler);
 
 // ─── START ────────────────────────────────────────────────────────────────────
 if (require.main === module) {
-    server.listen(PORT, () => {
-        console.log(`🚀 CoreX Server running on port ${PORT}`);
-        console.log(`🔌 Socket.io enabled`);
-    });
+    connectDB()
+        .then(() => {
+            server.listen(PORT, () => {
+                console.log(`🚀 CoreX Server running on port ${PORT}`);
+                console.log(`🔌 Socket.io enabled`);
+            });
+        })
+        .catch((err) => {
+            console.error('❌ Failed to connect to MongoDB. Server not started.', err.message);
+            process.exit(1);
+        });
 }
 
 module.exports = app;

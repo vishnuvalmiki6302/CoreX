@@ -11,6 +11,10 @@ services:
       - client
       - server
     restart: always
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
   server:
     image: ${DOCKER_HUB_USERNAME}/gym-server:latest
@@ -19,9 +23,17 @@ services:
     env_file:
       - .env
     restart: always
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
   client:
     image: ${DOCKER_HUB_USERNAME}/gym-client:latest
     expose:
       - "3000"
     restart: always
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
