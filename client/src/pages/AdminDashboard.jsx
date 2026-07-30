@@ -270,8 +270,13 @@ const AdminDashboard = () => {
             formData.append('category', productForm.category);
             formData.append('stock', productForm.stock);
             formData.append('description', productForm.description);
+
             if (productForm.imageFile) {
+                // New image selected — upload it
                 formData.append('image', productForm.imageFile);
+            } else if (productForm.image) {
+                // No new image — pass existing image URL as text so server keeps it
+                formData.append('image', productForm.image);
             }
 
             if (editingProduct) {
@@ -284,8 +289,12 @@ const AdminDashboard = () => {
                 toast.success('Product created');
             }
             setShowProductModal(false); setEditingProduct(null);
-            setProductForm({ name: '', price: '', category: '', stock: 0, description: '', imageFile: null });
-        } catch { toast.error('Failed to save product'); }
+            setProductForm({ name: '', price: '', category: '', stock: 0, description: '', imageFile: null, image: '' });
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Failed to save product';
+            toast.error(msg);
+            console.error('Product save error:', err.response?.data);
+        }
     };
     const handleDeleteProduct = async (id) => {
         if (!window.confirm('Delete this product?')) return;
@@ -1290,9 +1299,20 @@ const AdminDashboard = () => {
                                     <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Price (₹)</label><input required type="number" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} /></div>
                                     <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Stock</label><input required type="number" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: e.target.value })} /></div>
                                 </div>
-                                <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Category</label><input type="text" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} placeholder="e.g. Supplements" /></div>
+                                <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Category</label>
+                                    <select required className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all bg-white" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })}>
+                                        <option value="">Select category...</option>
+                                        {['Supplements', 'Gear', 'Apparel', 'Equipment', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
                                 <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Description</label><textarea rows={2} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all resize-none" value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} /></div>
-                                <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Product Image</label><input type="file" accept="image/*" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all bg-white" onChange={e => setProductForm({ ...productForm, imageFile: e.target.files[0] })} /></div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Product Image {editingProduct && productForm.image ? '(leave blank to keep current)' : !editingProduct ? '(required)' : ''}</label>
+                                    {editingProduct && productForm.image && !productForm.imageFile && (
+                                        <img src={productForm.image} alt="current" className="w-16 h-16 object-cover rounded-xl mb-2 border border-gray-200" />
+                                    )}
+                                    <input type="file" accept="image/*" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all bg-white" onChange={e => setProductForm({ ...productForm, imageFile: e.target.files[0] || null })} />
+                                </div>
                                 <div className="flex gap-3 pt-2">
                                     <button type="button" onClick={() => setShowProductModal(false)} className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">Cancel</button>
                                     <button type="submit" className="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-md">{editingProduct ? 'Update Product' : 'Add Product'}</button>
