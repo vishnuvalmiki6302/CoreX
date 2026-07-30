@@ -78,10 +78,11 @@ exports.loginUser = async (req, res, next) => {
             user.refreshToken = refreshToken;
             await user.save({ validateModifiedOnly: true });
 
+            const isSecure = process.env.DISABLE_SECURE_COOKIES === 'true' ? false : process.env.NODE_ENV === 'production';
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                secure: isSecure,
+                sameSite: 'lax',
                 maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             });
 
