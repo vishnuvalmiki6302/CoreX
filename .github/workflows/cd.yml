@@ -46,6 +46,19 @@ jobs:
             echo "DISABLE_SECURE_COOKIES=true" >> .env
             echo "CLIENT_URL=http://${{ secrets.AWS_PUBLIC_IP }}" >> .env
             echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            
+            # AWS S3 and other environment variables
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+            echo "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}" >> .env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+
+            # Additional environment variables
+            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+            echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
+            echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+            echo "ENABLE_SCHEDULER=true" >> .env
 
             # Export Docker Hub username so docker-compose can use it
             export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}

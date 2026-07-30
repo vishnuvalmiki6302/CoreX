@@ -1,4 +1,8 @@
 const Product = require('../models/Product');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const s3 = require('../config/s3');
+const crypto = require('crypto');
+const path = require('path');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -33,7 +37,21 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
     try {
-        const { name, price, description, category, image, stock } = req.body;
+        let { name, price, description, category, image, stock } = req.body;
+
+        if (req.file) {
+            const imageName = crypto.randomBytes(16).toString('hex') + path.extname(req.file.originalname);
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `products/${imageName}`,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype,
+            };
+            const command = new PutObjectCommand(params);
+            await s3.send(command);
+            image = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/products/${imageName}`;
+        }
+
         const product = new Product({
             name,
             price,
@@ -45,6 +63,7 @@ const createProduct = async (req, res) => {
         const createdProduct = await product.save();
         res.status(201).json(createdProduct);
     } catch (error) {
+        console.error('Error in createProduct:', error);
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(e => e.message);
             return res.status(400).json({ message: messages.join(', ') });
@@ -58,10 +77,22 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const { name, price, description, category, image, stock } = req.body;
+        let { name, price, description, category, image, stock } = req.body;
         const product = await Product.findById(req.params.id);
 
         if (product) {
+            if (req.file) {
+                const imageName = crypto.randomBytes(16).toString('hex') + path.extname(req.file.originalname);
+                const params = {
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: `products/${imageName}`,
+                    Body: req.file.buffer,
+                    ContentType: req.file.mimetype,
+                };
+                const command = new PutObjectCommand(params);
+                await s3.send(command);
+                image = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/products/${imageName}`;
+            }
             product.name = name || product.name;
             product.price = price || product.price;
             product.description = description || product.description;

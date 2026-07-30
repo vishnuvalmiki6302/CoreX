@@ -124,7 +124,7 @@ const AdminDashboard = () => {
 
     const [showProductModal, setShowProductModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
-    const [productForm, setProductForm] = useState({ name: '', price: '', category: '', stock: 0, description: '' });
+    const [productForm, setProductForm] = useState({ name: '', price: '', category: '', stock: 0, description: '', imageFile: null });
 
     useEffect(() => {
         if (!user || user.role !== 'admin') { navigate('/'); return; }
@@ -264,17 +264,27 @@ const AdminDashboard = () => {
     const handleSaveProduct = async (e) => {
         e.preventDefault();
         try {
+            const formData = new FormData();
+            formData.append('name', productForm.name);
+            formData.append('price', productForm.price);
+            formData.append('category', productForm.category);
+            formData.append('stock', productForm.stock);
+            formData.append('description', productForm.description);
+            if (productForm.imageFile) {
+                formData.append('image', productForm.imageFile);
+            }
+
             if (editingProduct) {
-                const { data } = await api.put(`/products/${editingProduct._id}`, productForm);
+                const { data } = await api.put(`/products/${editingProduct._id}`, formData);
                 setProducts(products.map(p => p._id === editingProduct._id ? data : p));
                 toast.success('Product updated');
             } else {
-                const { data } = await api.post('/products', productForm);
+                const { data } = await api.post('/products', formData);
                 setProducts([data, ...products]);
                 toast.success('Product created');
             }
             setShowProductModal(false); setEditingProduct(null);
-            setProductForm({ name: '', price: '', category: '', stock: 0, description: '' });
+            setProductForm({ name: '', price: '', category: '', stock: 0, description: '', imageFile: null });
         } catch { toast.error('Failed to save product'); }
     };
     const handleDeleteProduct = async (id) => {
@@ -917,7 +927,7 @@ const AdminDashboard = () => {
                                                 <Search size={15} className="text-gray-400" />
                                                 <input type="text" placeholder="Search products..." className="outline-none text-sm w-full bg-transparent" value={searchProducts} onChange={e => setSearchProducts(e.target.value)} />
                                             </div>
-                                            <button onClick={() => { setEditingProduct(null); setProductForm({ name: '', price: '', category: '', stock: 0, description: '' }); setShowProductModal(true); }}
+                                            <button onClick={() => { setEditingProduct(null); setProductForm({ name: '', price: '', category: '', stock: 0, description: '', imageFile: null }); setShowProductModal(true); }}
                                                 className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors whitespace-nowrap shadow-md">
                                                 <Plus size={16} /> Add Product
                                             </button>
@@ -978,7 +988,7 @@ const AdminDashboard = () => {
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button onClick={() => { setEditingProduct(p); setProductForm(p); setShowProductModal(true); }} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit size={15} /></button>
+                                                                <button onClick={() => { setEditingProduct(p); setProductForm({ ...p, imageFile: null }); setShowProductModal(true); }} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit size={15} /></button>
                                                                 <button onClick={() => handleDeleteProduct(p._id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={15} /></button>
                                                             </div>
                                                         </td>
@@ -1282,6 +1292,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Category</label><input type="text" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} placeholder="e.g. Supplements" /></div>
                                 <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Description</label><textarea rows={2} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all resize-none" value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} /></div>
+                                <div><label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Product Image</label><input type="file" accept="image/*" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm focus:border-orange-400 transition-all bg-white" onChange={e => setProductForm({ ...productForm, imageFile: e.target.files[0] })} /></div>
                                 <div className="flex gap-3 pt-2">
                                     <button type="button" onClick={() => setShowProductModal(false)} className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">Cancel</button>
                                     <button type="submit" className="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-md">{editingProduct ? 'Update Product' : 'Add Product'}</button>
