@@ -22,7 +22,8 @@ const ProductSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-        required: true
+        required: false,
+        default: 'https://placehold.co/400x400/1a1a2e/ffffff?text=No+Image'
     },
     stock: {
         type: Number,
